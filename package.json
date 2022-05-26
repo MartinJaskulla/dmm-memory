@@ -22,7 +22,9 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "format": "prettier --write .",
-    "format:staged": "prettier --write $(git diff-index --cached --name-only HEAD --diff-filter=d)"
+    "format:staged": "prettier --write $(git diff-index --cached --name-only HEAD --diff-filter=d)",
+    "lint": "eslint . --ext .js,.ts,.tsx --cache --max-warnings 0",
+    "lint:staged": "eslint $(git diff-index --cached --name-only HEAD --diff-filter=d | grep -e .js$ -e .ts$ -e .tsx$) --cache --max-warnings 0"
   },
   "eslintConfig": {
     "extends": [
@@ -43,6 +45,11 @@
     ]
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "5.26.0",
+    "@typescript-eslint/parser": "5.26.0",
+    "eslint": "8.16.0",
+    "eslint-plugin-react": "7.30.0",
+    "eslint-plugin-react-hooks": "4.5.0",
     "prettier": "2.6.2"
   }
 }
