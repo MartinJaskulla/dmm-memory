@@ -6,14 +6,20 @@ import { MatchedCard, MatchedCardProps } from './Cards/MatchedCard';
 import styled from 'styled-components';
 
 const StyledMain = styled.main`
+  --card-width: 100px;
+  --card-height: calc(var(--card-width) * 1.5);
+  --grid-gap: calc(var(--card-width) / 4);
+  --columns: 4;
+  --gutters: calc(var(--columns) - 1);
+
   margin: 0 auto;
   padding: 32px;
+  max-width: calc(var(--grid-gap) * var(--gutters) + var(--card-width) * var(--columns));
   display: grid;
-  grid-template-columns: repeat(auto-fit, 150px);
-  grid-auto-rows: 200px;
+  grid-template-columns: repeat(auto-fit, var(--card-width));
+  grid-auto-rows: var(--card-height);
+  grid-gap: var(--grid-gap);
   justify-content: center;
-  grid-gap: 25px;
-  max-width: calc(25px * 3 + 150px * 4);
 `;
 
 type BoardCard = HiddenCardProps | RevealedCardProps | MatchedCardProps | EffectCardProps;
