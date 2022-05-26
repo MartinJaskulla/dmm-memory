@@ -1,0 +1,20 @@
+.header {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  color: white;
+  padding: 12px 16px;
+}
+
+.header .heading-1 {
+  color: var(--color-text);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.header .logo {
+  height: 1.2em;
+  object-fit: contain;
+  vertical-align: middle;
+  width: auto;
+}
