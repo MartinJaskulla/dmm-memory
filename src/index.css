@@ -18,3 +18,8 @@
 [lang='ja'] {
   font-family: var(--font-stack-ja);
 }
+
+html {
+  /* Starts shrinking for screens < 1280px */
+  font-size: clamp(0.75rem, 1vw + 0.2rem, 1rem);
+}
