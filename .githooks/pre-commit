@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+# Exit with non-zero status if any of the following scripts fail
+set -e
+
+npm run pre-commit

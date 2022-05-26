@@ -17,14 +17,18 @@
     "web-vitals": "2.1.4"
   },
   "scripts": {
+    "preinstall": "git config core.hooksPath .githooks",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "format": "prettier --write .",
-    "format:staged": "prettier --write $(git diff-index --cached --name-only HEAD --diff-filter=d)",
+    "format": "prettier --write --ignore-unknown .",
+    "format:staged": "prettier --write --ignore-unknown $(git diff-index --cached --name-only HEAD --diff-filter=d)",
+    "format:staged:check": "prettier --check --ignore-unknown $(git diff-index --cached --name-only HEAD --diff-filter=d)",
     "lint": "eslint . --ext .js,.ts,.tsx --cache --max-warnings 0",
-    "lint:staged": "eslint $(git diff-index --cached --name-only HEAD --diff-filter=d | grep -e .js$ -e .ts$ -e .tsx$) --cache --max-warnings 0"
+    "lint:staged": "eslint $(git diff-index --cached --name-only HEAD --diff-filter=d | grep -e .js$ -e .ts$ -e .tsx$) --cache --max-warnings 0",
+    "typescript": "tsc --noEmit",
+    "pre-commit": " npm-run-all --parallel format:staged:check lint:staged typescript"
   },
   "eslintConfig": {
     "extends": [
@@ -50,6 +54,7 @@
     "eslint": "8.16.0",
     "eslint-plugin-react": "7.30.0",
     "eslint-plugin-react-hooks": "4.5.0",
+    "npm-run-all": "4.1.5",
     "prettier": "2.6.2"
   }
 }
