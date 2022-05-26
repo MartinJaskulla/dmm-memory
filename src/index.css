@@ -1,0 +1,20 @@
+:root {
+  /* CSS variabless for styles used in the example asset. */
+  --color-focus-ring: #029af7;
+  --color-flipped: var(--color-primary-orange);
+  --color-matched: #a9d948;
+  --color-primary-orange: #f36d00;
+  --color-text: #404040;
+  --color-trick: #8c8c8c;
+  --color-white: #ffffff;
+  --font-stack-en: 'Open Sans', sans-serif;
+  --font-stack-ja: 'Noto Sans JP', 'Open Sans', sans-serif;
+}
+
+[lang='en'] {
+  font-family: var(--font-stack-en);
+}
+
+[lang='ja'] {
+  font-family: var(--font-stack-ja);
+}
