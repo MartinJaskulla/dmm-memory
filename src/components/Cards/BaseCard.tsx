@@ -11,13 +11,7 @@ const StyledButton = styled.button`
   align-items: center;
   padding: 0;
   background: none;
-  cursor: pointer;
   border: 5px solid var(--color-text);
-
-  &:focus {
-    outline: none;
-    transform: scale(1.05);
-  }
 `;
 
 export type BaseCardProps = React.HTMLAttributes<HTMLButtonElement>;

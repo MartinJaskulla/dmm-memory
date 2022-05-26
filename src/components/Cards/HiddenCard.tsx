@@ -7,6 +7,13 @@ const StyledBaseCard = styled(BaseCard)`
   border-color: var(--color-flipped);
   background: var(--color-flipped);
   box-shadow: 0 14px 18px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+
+  &:focus,
+  &:hover {
+    outline: none;
+    transform: scale(1.05);
+  }
 
   div {
     width: 50%;

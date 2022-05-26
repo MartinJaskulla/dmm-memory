@@ -13,5 +13,9 @@ export interface RevealedCardProps {
 }
 
 export function RevealedCard(props: RevealedCardProps) {
-  return <StyledBaseCard lang={props.language}>{props.text}</StyledBaseCard>;
+  return (
+    <StyledBaseCard tabIndex={-1} lang={props.language}>
+      {props.text}
+    </StyledBaseCard>
+  );
 }
