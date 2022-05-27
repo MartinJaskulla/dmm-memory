@@ -1,3 +1,7 @@
+import React, { useEffect, useState } from 'react';
+import { goalToCards } from './goalToCards';
+import { GameContextValue } from '../contexts/gameContext';
+
 export interface Transliterations {
   Hira?: string;
   Hrkt?: string;
@@ -87,6 +91,28 @@ export interface GETGoal {
   }[];
 }
 
-export function getGoal(): Promise<GETGoal> {
-  return fetch('./goal.json').then((response) => response.json());
+type Cards = GameContextValue['cards'];
+
+export function useCards(defaultValue: Cards): [Cards, React.Dispatch<React.SetStateAction<Cards>>] {
+  const [cards, setCards] = useState<Cards>(defaultValue);
+  useEffect(() => {
+    const abortController = new AbortController();
+
+    fetch('./goal.json', {
+      signal: abortController.signal,
+    })
+      .then((response) => response.json())
+      .then((json: GETGoal) => setCards(goalToCards(json)))
+      .catch((error) => {
+        // Ignore aborted requests, but rethrow real errors
+        if (!abortController.signal.aborted) throw error;
+      });
+
+    // React 18 is rendering useEffect twice: https://www.youtube.com/watch?v=j8s01ThR7bQ
+    // Instead of using a ref or global variable to check if a request was already made, use a proper cleanup function
+    return function cancel() {
+      abortController.abort();
+    };
+  }, []);
+  return [cards, setCards];
 }

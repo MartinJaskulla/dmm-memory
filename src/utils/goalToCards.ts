@@ -1,19 +1,6 @@
-import { GETGoal } from './getGoal';
 import { shuffle } from './shuffle';
-import { EffectCardProps } from '../components/Cards/EffectCard';
-
-// TODO Maybe we change <BoardProps["cards"]> to just two types and add state revealed?
-// For now put it in context with one property being boardsCards and one property gameCards
-interface GameCardMatchable {
-  type: 'matchable';
-  id: number;
-  text: string;
-  language: 'en' | 'ja';
-}
-
-type GameCardEffect = EffectCardProps;
-
-export type GameCard = GameCardMatchable | GameCardEffect;
+import { GameCard } from '../contexts/gameContext';
+import { GETGoal } from './useCards';
 
 export function goalToCards(goal: GETGoal): GameCard[] {
   const cards: GameCard[] = [
@@ -42,6 +29,3 @@ export function goalToCards(goal: GETGoal): GameCard[] {
   shuffle(cards);
   return cards;
 }
-
-// Another function that maps cards to game state of hidden
-// each effect once. get 12 cards

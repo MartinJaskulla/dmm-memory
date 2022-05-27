@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useCards } from '../utils/useCards';
 
 export interface GameCardMatchable {
   type: 'matchable';
@@ -37,7 +38,7 @@ interface GameProviderProps {
 }
 
 const GameProvider = ({ children }: GameProviderProps) => {
-  const [cards] = useState<GameContextValue['cards']>(defaultValue.cards);
+  const [cards] = useCards(defaultValue.cards);
   const [revealedIndex1, setRevealedIndex1] = useState<GameContextValue['revealedIndex1']>(defaultValue.revealedIndex1);
   const [revealedIndex2, setRevealedIndex2] = useState<GameContextValue['revealedIndex2']>(defaultValue.revealedIndex2);
   const [matchedIds] = useState<GameContextValue['matchedIds']>(defaultValue.matchedIds);
@@ -50,15 +51,6 @@ const GameProvider = ({ children }: GameProviderProps) => {
     }
     // Check here if it is a match or better in a new useEffect, with dependencies of revealed1 and 2
   }
-
-  // const [loading, setLoading] = useState<GameContextValue['loading']>(false);
-  //
-  // async function loadProduct(ean: string) {
-  //   setLoading(true);
-  //   const response = await api.get<Product>(endpoints.loadProduct(ean));
-  //   setProduct(response.data);
-  //   setLoading(false);
-  // }
 
   const providerValue: GameContextValue = {
     cards: cards,
