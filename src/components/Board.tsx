@@ -26,7 +26,7 @@ type BoardCard = HiddenCardProps | RevealedCardProps | MatchedCardProps | Effect
 function getBoardCards(game: GameContextValue): BoardCard[] {
   return game.cards.map((card, index): BoardCard => {
     if (card.type === 'matchable') {
-      if (game.matches.has(index)) {
+      if (game.matches.has(card.id)) {
         return {
           ...card,
           type: 'matched',
