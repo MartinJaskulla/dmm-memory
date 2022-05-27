@@ -4,6 +4,7 @@ import { RevealedCard, RevealedCardProps } from './Cards/RevealedCard';
 import { EffectCard, EffectCardProps } from './Cards/EffectCard';
 import { MatchedCard, MatchedCardProps } from './Cards/MatchedCard';
 import styled from 'styled-components';
+import { GameContextValue, useGame } from '../contexts/gameContext';
 
 const StyledMain = styled.main`
   margin: 0 auto;
@@ -22,14 +23,39 @@ const StyledMain = styled.main`
 
 type BoardCard = HiddenCardProps | RevealedCardProps | MatchedCardProps | EffectCardProps;
 
-export interface BoardProps {
-  cards: BoardCard[];
+function getBoardCards(game: GameContextValue): BoardCard[] {
+  return game.cards.map((card, index): BoardCard => {
+    if (card.type === 'effect') {
+      return {
+        ...card,
+        type: 'effect',
+      };
+    }
+    if (game.matchedIds.has(index)) {
+      return {
+        ...card,
+        type: 'matched',
+      };
+    }
+    if ([game.revealedIndex1, game.revealedIndex2].includes(index)) {
+      return {
+        ...card,
+        type: 'revealed',
+      };
+    }
+    return {
+      type: 'hidden',
+      onClick: () => game.revealCard(index),
+    };
+  });
 }
 
-export function Board(props: BoardProps) {
+export function Board() {
+  const boardsCards: BoardCard[] = getBoardCards(useGame());
+
   return (
     <StyledMain>
-      {props.cards.map((card, index) => {
+      {boardsCards.map((card, index) => {
         switch (card.type) {
           case 'matched':
             return <MatchedCard key={index} {...card} />;

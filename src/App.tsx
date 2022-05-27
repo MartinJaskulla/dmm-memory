@@ -1,78 +1,14 @@
 import React from 'react';
 import { Header } from './components/Header';
-import { Board, BoardProps } from './components/Board';
-
-const cards: BoardProps['cards'] = [
-  {
-    type: 'hidden',
-  },
-  {
-    type: 'matched',
-    text: 'Hello',
-    language: 'en',
-  },
-  {
-    type: 'revealed',
-    text: '英会',
-    language: 'ja',
-  },
-  {
-    type: 'effect',
-    effect: 'trick',
-  },
-  {
-    type: 'hidden',
-  },
-  {
-    type: 'matched',
-    text: 'Dog',
-    language: 'en',
-  },
-  {
-    type: 'hidden',
-  },
-  {
-    type: 'effect',
-    effect: 'trick',
-  },
-  {
-    type: 'hidden',
-  },
-  {
-    type: 'effect',
-    effect: 'trick',
-  },
-  {
-    type: 'matched',
-    text: '英会',
-    language: 'ja',
-  },
-  {
-    type: 'matched',
-    text: '会',
-    language: 'ja',
-  },
-  {
-    type: 'hidden',
-  },
-  {
-    type: 'hidden',
-  },
-  {
-    type: 'hidden',
-  },
-  {
-    type: 'effect',
-    effect: 'trick',
-  },
-];
+import { Board } from './components/Board';
+import { GameProvider } from './contexts/gameContext';
 
 function App() {
   return (
-    <>
+    <GameProvider>
       <Header></Header>
-      <Board cards={cards}></Board>
-    </>
+      <Board></Board>
+    </GameProvider>
   );
 }
 

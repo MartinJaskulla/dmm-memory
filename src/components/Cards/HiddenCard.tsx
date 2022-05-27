@@ -31,12 +31,12 @@ const StyledBaseCard = styled(BaseCard)`
 
 export interface HiddenCardProps {
   type: 'hidden';
+  onClick: () => void;
 }
 
 export function HiddenCard(props: HiddenCardProps) {
-  console.log(props);
   return (
-    <StyledBaseCard>
+    <StyledBaseCard onClick={props.onClick}>
       <div>
         <img alt="Memory Game Logo" src={owlImgSrc} />
       </div>
