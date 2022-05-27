@@ -1,25 +1,13 @@
-import { Id, Index, Snapshot } from '../contexts/gameContext';
 import { useState } from 'react';
 
-type Save = (snapshot: Snapshot) => void;
+export function useHistory<Snapshot>(initialState: Snapshot): [Snapshot, (snapshot: Snapshot) => void] {
+  const [history, setHistory] = useState<Snapshot[]>([initialState]);
+  const [step, setStep] = useState(0);
 
-export function useHistory(): [Snapshot, Save] {
-  // History should not fetch cards
-  const [history, setHistory] = useState<Snapshot[]>([]);
-  const [step, setStep] = useState(-1);
-
-  const save: Save = (snapshot: Snapshot) => {
+  const save = (snapshot: Snapshot) => {
     setHistory([...history, snapshot]);
     setStep(step + 1);
   };
 
-  const fallback: Snapshot = {
-    cards: [],
-    choice1: null,
-    choice2: null,
-    foundEffects: new Set<Index>(),
-    matches: new Set<Id>(),
-  };
-
-  return [history[step] || fallback, save];
+  return [history[step], save];
 }

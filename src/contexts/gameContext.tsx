@@ -27,45 +27,47 @@ export interface Snapshot {
   cards: GameCard[];
 }
 
-export type GameContextValue = Snapshot & {
-  revealCard: (index: Index) => void;
-};
-
-const defaultValue: GameContextValue = {
+const defaultSnapshot: Snapshot = {
   cards: [],
   choice1: null,
   choice2: null,
   matches: new Set(),
   foundEffects: new Set(),
+};
+
+export type GameContextValue = Snapshot & {
+  revealCard: (index: Index) => void;
+};
+
+const defaultGameContextValue: GameContextValue = {
+  ...defaultSnapshot,
   revealCard: () => null,
 };
 
-const GameContext = React.createContext<GameContextValue>(defaultValue);
+const GameContext = React.createContext<GameContextValue>(defaultGameContextValue);
 
 interface GameProviderProps {
   children: React.ReactNode;
 }
 
 const GameProvider = ({ children }: GameProviderProps) => {
-  const [snapshot, save] = useHistory();
-  const { choice1, choice2, matches, foundEffects, cards } = snapshot;
-  // TODO How to start new game?
-  const [apiCards] = useFetchCards(defaultValue.cards);
+  const [snapshot, save] = useHistory(defaultSnapshot);
+  const [apiCards] = useFetchCards(defaultGameContextValue.cards);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => save({ ...snapshot, cards: apiCards }), [apiCards]);
 
   function revealCard(index: number) {
-    const type = cards[index].type;
+    const type = snapshot.cards[index].type;
     const nextSnapshot: Snapshot = {
-      cards: structuredClone(cards),
-      choice1,
-      choice2,
-      foundEffects: new Set(foundEffects),
-      matches: new Set(matches),
+      cards: structuredClone(snapshot.cards),
+      choice1: snapshot.choice1,
+      choice2: snapshot.choice2,
+      foundEffects: new Set(snapshot.foundEffects),
+      matches: new Set(snapshot.matches),
     };
 
     // Get new choices
-    if (typeof choice1 === 'number' && typeof choice2 === 'number') {
+    if (typeof snapshot.choice1 === 'number' && typeof snapshot.choice2 === 'number') {
       nextSnapshot.choice1 = null;
       nextSnapshot.choice2 = null;
     }
@@ -86,8 +88,8 @@ const GameProvider = ({ children }: GameProviderProps) => {
 
     // Check for matches
     if (typeof nextSnapshot.choice1 === 'number' && typeof nextSnapshot.choice2 === 'number') {
-      const card1 = cards[nextSnapshot.choice1];
-      const card2 = cards[nextSnapshot.choice2];
+      const card1 = snapshot.cards[nextSnapshot.choice1];
+      const card2 = snapshot.cards[nextSnapshot.choice2];
       if (card1.type !== 'matchable' || card2.type !== 'matchable')
         throw new Error('Only matchable cards should be choices');
       if (card1.id === card2.id) {
@@ -100,11 +102,7 @@ const GameProvider = ({ children }: GameProviderProps) => {
   }
 
   const providerValue: GameContextValue = {
-    cards,
-    choice1,
-    choice2,
-    matches,
-    foundEffects,
+    ...snapshot,
     revealCard,
   };
 
