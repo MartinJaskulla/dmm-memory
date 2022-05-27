@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { goalToCards } from './goalToCards';
 import { GameContextValue } from '../contexts/gameContext';
 
@@ -93,7 +93,7 @@ export interface GETGoal {
 
 type Cards = GameContextValue['cards'];
 
-export function useCards(defaultValue: Cards): [Cards, React.Dispatch<React.SetStateAction<Cards>>] {
+export function useFetchCards(defaultValue: Cards): [Cards] {
   const [cards, setCards] = useState<Cards>(defaultValue);
   useEffect(() => {
     const abortController = new AbortController();
@@ -114,5 +114,5 @@ export function useCards(defaultValue: Cards): [Cards, React.Dispatch<React.SetS
       abortController.abort();
     };
   }, []);
-  return [cards, setCards];
+  return [cards];
 }

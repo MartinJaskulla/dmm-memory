@@ -1,6 +1,6 @@
 import { shuffle } from './shuffle';
 import { GameCard } from '../contexts/gameContext';
-import { GETGoal } from './useCards';
+import { GETGoal } from './useFetchCards';
 
 export function goalToCards(goal: GETGoal): GameCard[] {
   const cards: GameCard[] = [
