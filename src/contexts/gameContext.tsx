@@ -16,8 +16,8 @@ export interface GameCardEffect {
 export type GameCard = GameCardMatchable | GameCardEffect;
 
 export interface GameContextValue {
-  revealedIndex1: number | null;
-  revealedIndex2: number | null;
+  choiceIndex1: number | null;
+  choiceIndex2: number | null;
   matchedIds: Set<number>;
   cards: GameCard[];
   revealCard: (index: number) => void;
@@ -25,8 +25,8 @@ export interface GameContextValue {
 
 const defaultValue: GameContextValue = {
   cards: [],
-  revealedIndex1: null,
-  revealedIndex2: null,
+  choiceIndex1: null,
+  choiceIndex2: null,
   matchedIds: new Set(),
   revealCard: () => null,
 };
@@ -39,23 +39,23 @@ interface GameProviderProps {
 
 const GameProvider = ({ children }: GameProviderProps) => {
   const [cards] = useCards(defaultValue.cards);
-  const [revealedIndex1, setRevealedIndex1] = useState<GameContextValue['revealedIndex1']>(defaultValue.revealedIndex1);
-  const [revealedIndex2, setRevealedIndex2] = useState<GameContextValue['revealedIndex2']>(defaultValue.revealedIndex2);
+  const [choiceIndex1, setChoiceIndex1] = useState<GameContextValue['choiceIndex1']>(defaultValue.choiceIndex1);
+  const [choiceIndex2, setChoiceIndex2] = useState<GameContextValue['choiceIndex2']>(defaultValue.choiceIndex2);
   const [matchedIds] = useState<GameContextValue['matchedIds']>(defaultValue.matchedIds);
   function revealCard(index: number) {
-    if (revealedIndex1 === null) {
-      return setRevealedIndex1(index);
+    if (choiceIndex1 === null) {
+      return setChoiceIndex1(index);
     }
-    if (revealedIndex2 === null) {
-      return setRevealedIndex2(index);
+    if (choiceIndex2 === null) {
+      return setChoiceIndex2(index);
     }
     // Check here if it is a match or better in a new useEffect, with dependencies of revealed1 and 2
   }
 
   const providerValue: GameContextValue = {
     cards: cards,
-    revealedIndex1,
-    revealedIndex2,
+    choiceIndex1,
+    choiceIndex2,
     matchedIds,
     revealCard,
   };
