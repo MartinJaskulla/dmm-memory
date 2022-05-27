@@ -25,24 +25,28 @@ type BoardCard = HiddenCardProps | RevealedCardProps | MatchedCardProps | Effect
 
 function getBoardCards(game: GameContextValue): BoardCard[] {
   return game.cards.map((card, index): BoardCard => {
-    if (card.type === 'effect') {
+    if (card.type === 'matchable') {
+      if (game.matches.has(index)) {
+        return {
+          ...card,
+          type: 'matched',
+        };
+      }
+      if ([game.choice1, game.choice2].includes(index)) {
+        return {
+          ...card,
+          type: 'revealed',
+        };
+      }
+    }
+
+    if (card.type === 'effect' && game.foundEffects.has(index)) {
       return {
         ...card,
         type: 'effect',
       };
     }
-    if (game.matchedIds.has(index)) {
-      return {
-        ...card,
-        type: 'matched',
-      };
-    }
-    if ([game.choiceIndex1, game.choiceIndex2].includes(index)) {
-      return {
-        ...card,
-        type: 'revealed',
-      };
-    }
+
     return {
       type: 'hidden',
       onClick: () => game.revealCard(index),

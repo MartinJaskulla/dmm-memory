@@ -15,19 +15,24 @@ export interface GameCardEffect {
 
 export type GameCard = GameCardMatchable | GameCardEffect;
 
+type Index = number;
+type Id = number;
+
 export interface GameContextValue {
-  choiceIndex1: number | null;
-  choiceIndex2: number | null;
-  matchedIds: Set<number>;
+  choice1: Index | null;
+  choice2: Index | null;
+  matches: Set<Id>;
+  foundEffects: Set<Index>;
   cards: GameCard[];
-  revealCard: (index: number) => void;
+  revealCard: (index: Index) => void;
 }
 
 const defaultValue: GameContextValue = {
   cards: [],
-  choiceIndex1: null,
-  choiceIndex2: null,
-  matchedIds: new Set(),
+  choice1: null,
+  choice2: null,
+  matches: new Set(),
+  foundEffects: new Set(),
   revealCard: () => null,
 };
 
@@ -39,24 +44,47 @@ interface GameProviderProps {
 
 const GameProvider = ({ children }: GameProviderProps) => {
   const [cards] = useCards(defaultValue.cards);
-  const [choiceIndex1, setChoiceIndex1] = useState<GameContextValue['choiceIndex1']>(defaultValue.choiceIndex1);
-  const [choiceIndex2, setChoiceIndex2] = useState<GameContextValue['choiceIndex2']>(defaultValue.choiceIndex2);
-  const [matchedIds] = useState<GameContextValue['matchedIds']>(defaultValue.matchedIds);
+  const [choice1, setChoice1] = useState<GameContextValue['choice1']>(defaultValue.choice1);
+  const [choice2, setChoice2] = useState<GameContextValue['choice2']>(defaultValue.choice2);
+  const [matches] = useState<GameContextValue['matches']>(defaultValue.matches);
+  const [foundEffects, setFoundEffects] = useState<GameContextValue['foundEffects']>(defaultValue.foundEffects);
+
   function revealCard(index: number) {
-    if (choiceIndex1 === null) {
-      return setChoiceIndex1(index);
+    const type = cards[index].type;
+    let newChoice1 = choice1;
+    let newChoice2 = choice2;
+
+    if (Number.isInteger(choice1) && Number.isInteger(choice2)) {
+      newChoice1 = null;
+      newChoice2 = null;
     }
-    if (choiceIndex2 === null) {
-      return setChoiceIndex2(index);
+
+    switch (type) {
+      case 'matchable':
+        if (newChoice1 === null) {
+          newChoice1 = index;
+        } else if (newChoice2 === null) {
+          newChoice2 = index;
+        }
+        break;
+      case 'effect': {
+        const newFoundEffects = new Set(foundEffects);
+        newFoundEffects.add(index);
+        setFoundEffects(newFoundEffects);
+        break;
+      }
     }
-    // Check here if it is a match or better in a new useEffect, with dependencies of revealed1 and 2
+    setChoice1(newChoice1);
+    setChoice2(newChoice2);
+    // Check here if it is a match or in a new useEffect, with dependencies of revealed1 and 2
   }
 
   const providerValue: GameContextValue = {
     cards: cards,
-    choiceIndex1,
-    choiceIndex2,
-    matchedIds,
+    choice1: choice1,
+    choice2: choice2,
+    matches: matches,
+    foundEffects,
     revealCard,
   };
 
