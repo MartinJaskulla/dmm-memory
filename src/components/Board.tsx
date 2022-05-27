@@ -36,6 +36,7 @@ function getBoardCards(game: GameContextValue): BoardCard[] {
         return {
           ...card,
           type: 'revealed',
+          onClick: () => game.revealCard(index),
         };
       }
     }

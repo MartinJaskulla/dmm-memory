@@ -1,7 +1,7 @@
 import React from 'react';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
-const StyledButton = styled.button`
+const StyledButton = styled.button<BaseCardProps>`
   border-radius: 10px;
   width: 100%;
   height: 100%;
@@ -12,6 +12,19 @@ const StyledButton = styled.button`
   padding: 0;
   background: none;
   border: 5px solid var(--color-text);
+
+  ${(props) =>
+    props.onClick
+      ? css`
+          cursor: pointer;
+
+          &:focus,
+          &:hover {
+            outline: none;
+            transform: scale(1.05);
+          }
+        `
+      : null}
 `;
 
 export type BaseCardProps = React.HTMLAttributes<HTMLButtonElement>;

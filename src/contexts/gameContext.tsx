@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useCards } from '../utils/useCards';
 
 export interface GameCardMatchable {
@@ -46,7 +46,7 @@ const GameProvider = ({ children }: GameProviderProps) => {
   const [cards] = useCards(defaultValue.cards);
   const [choice1, setChoice1] = useState<GameContextValue['choice1']>(defaultValue.choice1);
   const [choice2, setChoice2] = useState<GameContextValue['choice2']>(defaultValue.choice2);
-  const [matches] = useState<GameContextValue['matches']>(defaultValue.matches);
+  const [matches, setMatches] = useState<GameContextValue['matches']>(defaultValue.matches);
   const [foundEffects, setFoundEffects] = useState<GameContextValue['foundEffects']>(defaultValue.foundEffects);
 
   function revealCard(index: number) {
@@ -54,7 +54,7 @@ const GameProvider = ({ children }: GameProviderProps) => {
     let newChoice1 = choice1;
     let newChoice2 = choice2;
 
-    if (Number.isInteger(choice1) && Number.isInteger(choice2)) {
+    if (typeof choice1 === 'number' && typeof choice2 === 'number') {
       newChoice1 = null;
       newChoice2 = null;
     }
@@ -78,6 +78,21 @@ const GameProvider = ({ children }: GameProviderProps) => {
     setChoice2(newChoice2);
     // Check here if it is a match or in a new useEffect, with dependencies of revealed1 and 2
   }
+
+  useEffect(() => {
+    if (typeof choice1 !== 'number' || typeof choice2 !== 'number') return;
+    const card1 = cards[choice1];
+    const card2 = cards[choice2];
+    if (card1.type !== 'matchable' || card2.type !== 'matchable')
+      throw new Error('Only matchable cards should be choices');
+    if (card1.id === card2.id) {
+      const newMatches = new Set(matches);
+      newMatches.add(card1.id);
+      setMatches(newMatches);
+      setChoice1(null);
+      setChoice2(null);
+    }
+  }, [choice1, choice2, matches, cards]);
 
   const providerValue: GameContextValue = {
     cards: cards,
