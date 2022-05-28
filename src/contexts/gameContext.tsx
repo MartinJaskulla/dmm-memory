@@ -117,6 +117,7 @@ const GameProvider = ({ children }: GameProviderProps) => {
         }
         break;
       case 'effect': {
+        countdown.stop();
         nextSnapshot.foundEffects.add(index);
         break;
       }
