@@ -4,6 +4,29 @@ import { useHistory } from '../utils/useHistory';
 import { goalToCards } from '../utils/goalToCards';
 import { useCountdown } from '../utils/useCountdown';
 import { useGameClock } from '../utils/useGameClock';
+import { flipCards } from './flipCards';
+import { setCountdown } from './setCountdown';
+
+/*
+ TODO Each effect can
+ - Register sth to run each second
+ - middleware nextSnapshot
+ - middleware contextValue
+ - register an effect card (just the card, for its functionality use the middleware)
+
+ addEffect((registry) => {
+  registry.addEffectCard()
+ })
+
+ Maybe regular rules like flipCard should not be an effect. Countdown should be? The countdown could still call a function?
+ Maybe countdown should not be an effect. Game clock as well
+
+ addEffectCard({
+    middleware1,
+    middleware2,
+    card: {text, type}
+ })
+ */
 
 export interface GameCardMatchable {
   type: 'matchable';
@@ -69,6 +92,8 @@ interface GameProviderProps {
 const GameProvider = ({ children }: GameProviderProps) => {
   const history = useHistory(defaultSnapshot);
   const { snapshot } = history;
+  // Maybe there is just a single call to timer.ts and effects can register to do sth each second?
+  // e.g. history tracks secondsPlayed and countdown could just calculated secondsPlayed - secondsSinceCountdownStarted
   const gameClock = useGameClock(0);
   const countdown = useCountdown(() => {
     alert('Time is up!');
@@ -92,60 +117,21 @@ const GameProvider = ({ children }: GameProviderProps) => {
     history.reset({ ...defaultSnapshot, cards });
   }
 
-  function revealCard(index: number) {
-    const nextSnapshot: Snapshot = {
-      ...structuredClone(snapshot),
-      secondsPlayed: gameClock.seconds,
-    };
-
-    // Get new choices
-    if (typeof snapshot.choice1 === 'number' && typeof snapshot.choice2 === 'number') {
-      nextSnapshot.choice1 = null;
-      nextSnapshot.choice2 = null;
-    }
-
-    const revealedCardType = snapshot.cards[index].type;
-    switch (revealedCardType) {
-      case 'matchable':
-        countdown.stop();
-        if (nextSnapshot.choice1 === null) {
-          nextSnapshot.choice1 = index;
-          if (nextSnapshot.countdown) countdown.start(nextSnapshot.countdown);
-        } else if (nextSnapshot.choice2 === null) {
-          nextSnapshot.choice2 = index;
-        }
-        break;
-      case 'effect': {
-        countdown.stop();
-        nextSnapshot.foundEffects.add(index);
-        break;
-      }
-    }
-
-    // Check for matches
-    if (typeof nextSnapshot.choice1 === 'number' && typeof nextSnapshot.choice2 === 'number') {
-      const card1 = snapshot.cards[nextSnapshot.choice1];
-      const card2 = snapshot.cards[nextSnapshot.choice2];
-      if (card1.type !== 'matchable' || card2.type !== 'matchable')
-        throw new Error('Only matchable cards should be choices');
-      if (card1.id === card2.id) {
-        nextSnapshot.matches.add(card1.id);
-        nextSnapshot.choice1 = null;
-        nextSnapshot.choice2 = null;
-      }
-    }
+  function revealCard(revealedCardIndex: number) {
+    let nextSnapshot: Snapshot = structuredClone(snapshot);
+    nextSnapshot.secondsPlayed = gameClock.seconds;
+    nextSnapshot = flipCards(nextSnapshot, revealedCardIndex);
+    setCountdown(nextSnapshot, countdown);
     history.push(nextSnapshot);
   }
-  // Trick cards as middleware. Called on this value object?
-  // How to access countdown 0 though? Then the callback to lose game must be in middleware
+
   const providerValue: GameContextValue = {
     ...snapshot,
-    // Overwriting snapshot.secondsPlayed, which is only updated per move
-    secondsPlayed: gameClock.seconds,
     revealCard,
     newGame,
     moves: history.history.length - 1,
     countdown: countdown.seconds,
+    secondsPlayed: gameClock.seconds,
   };
 
   return <GameContext.Provider value={providerValue}>{children}</GameContext.Provider>;
