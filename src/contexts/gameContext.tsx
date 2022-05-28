@@ -3,6 +3,7 @@ import { fetchGoal } from '../utils/fetchGoal';
 import { useHistory } from '../utils/useHistory';
 import { goalToCards } from '../utils/goalToCards';
 import { useAnimationInterval } from '../utils/timer';
+import { useCountdown } from '../utils/useCountdown';
 
 export interface GameCardMatchable {
   type: 'matchable';
@@ -68,6 +69,11 @@ const GameProvider = ({ children }: GameProviderProps) => {
   const [seconds, setSeconds] = useState(0);
   useAnimationInterval(1000, () => setSeconds((seconds) => seconds + 1));
 
+  const countdown = useCountdown(() => {
+    alert('Time is up!');
+    newGame();
+  });
+
   // React 18 calls useEffect twice in StrictMode, which means we call newGame() twice on mount.
   // Using a ref or a global or local variable to check if the call was already made is not pleasing to the eye.
   // AbortController could also be used to cancel the first request, but in this small project I don't mind fetching goal.json twice.
@@ -104,8 +110,10 @@ const GameProvider = ({ children }: GameProviderProps) => {
 
     switch (type) {
       case 'matchable':
+        countdown.stop();
         if (nextSnapshot.choice1 === null) {
           nextSnapshot.choice1 = index;
+          countdown.start();
         } else if (nextSnapshot.choice2 === null) {
           nextSnapshot.choice2 = index;
         }

@@ -4,7 +4,7 @@
 import { useEffect, useRef } from 'react';
 
 // The timer pauses when switching to a different browser tab
-function animationInterval(ms: number, signal: AbortSignal, callback: (time: number) => void) {
+export function animationInterval(ms: number, signal: AbortSignal, callback: (time: number) => void) {
   const start = document?.timeline?.currentTime || performance.now();
 
   function frame(time: number) {
