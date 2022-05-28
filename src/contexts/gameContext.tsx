@@ -90,7 +90,6 @@ const GameProvider = ({ children }: GameProviderProps) => {
   }
 
   function revealCard(index: number) {
-    const type = snapshot.cards[index].type;
     const nextSnapshot: Snapshot = {
       cards: structuredClone(snapshot.cards),
       choice1: snapshot.choice1,
@@ -106,7 +105,8 @@ const GameProvider = ({ children }: GameProviderProps) => {
       nextSnapshot.choice2 = null;
     }
 
-    switch (type) {
+    const revealedCardType = snapshot.cards[index].type;
+    switch (revealedCardType) {
       case 'matchable':
         countdown.stop();
         if (nextSnapshot.choice1 === null) {
@@ -136,7 +136,8 @@ const GameProvider = ({ children }: GameProviderProps) => {
     }
     history.push(nextSnapshot);
   }
-
+  // Trick cards as middleware. Called on this value object?
+  // How to access countdown 0 though? Then the callback to lose game must be in middleware
   const providerValue: GameContextValue = {
     ...snapshot,
     // Overwriting snapshot.secondsPlayed, which is only updated per move
