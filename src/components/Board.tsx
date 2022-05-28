@@ -32,11 +32,11 @@ function getBoardCards(game: GameContextValue): BoardCard[] {
           type: 'matched',
         };
       }
-      if ([game.choice1, game.choice2].includes(index)) {
+      if (index === game.choice1 || index === game.choice2) {
         return {
           ...card,
           type: 'revealed',
-          onClick: () => game.revealCard(index),
+          ...(game.choice1 && game.choice2 && { onClick: () => game.revealCard(index) }),
         };
       }
     }
