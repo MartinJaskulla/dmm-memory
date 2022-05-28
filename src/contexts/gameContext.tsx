@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { fetchGoal } from '../utils/fetchGoal';
 import { useHistory } from '../utils/useHistory';
 import { goalToCards } from '../utils/goalToCards';
-import { useAnimationInterval } from '../utils/timer';
 import { useCountdown } from '../utils/useCountdown';
+import { useGameClock } from '../utils/useGameClock';
 
 export interface GameCardMatchable {
   type: 'matchable';
@@ -62,13 +62,9 @@ interface GameProviderProps {
 }
 
 const GameProvider = ({ children }: GameProviderProps) => {
-  // For time travel, destructure history and slice out the first snapshot (defaultSnapshot)
   const history = useHistory(defaultSnapshot);
   const { snapshot } = history;
-
-  const [seconds, setSeconds] = useState(0);
-  useAnimationInterval(1000, () => setSeconds((seconds) => seconds + 1));
-
+  const gameClock = useGameClock(0);
   const countdown = useCountdown(() => {
     alert('Time is up!');
     newGame();
@@ -87,7 +83,7 @@ const GameProvider = ({ children }: GameProviderProps) => {
   async function newGame() {
     const goal = await fetchGoal();
     const cards = goalToCards(goal);
-    setSeconds(0);
+    gameClock.setSeconds(0);
     history.reset({ ...defaultSnapshot, cards });
   }
 
@@ -99,7 +95,7 @@ const GameProvider = ({ children }: GameProviderProps) => {
       choice2: snapshot.choice2,
       foundEffects: new Set(snapshot.foundEffects),
       matches: new Set(snapshot.matches),
-      seconds,
+      seconds: gameClock.seconds,
     };
 
     // Get new choices
@@ -144,7 +140,7 @@ const GameProvider = ({ children }: GameProviderProps) => {
     revealCard,
     newGame,
     moves: history.history.length - 1,
-    seconds,
+    seconds: gameClock.seconds,
   };
 
   return <GameContext.Provider value={providerValue}>{children}</GameContext.Provider>;
