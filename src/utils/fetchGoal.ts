@@ -1,8 +1,3 @@
-import { GameContextValue } from '../contexts/gameContext';
-import { useFetchOnce } from './useFetchOnce';
-import { goalToCards } from './goalToCards';
-import { useMemo } from 'react';
-
 export interface Transliterations {
   Hira?: string;
   Hrkt?: string;
@@ -92,11 +87,8 @@ export interface GETGoal {
   }[];
 }
 
-type Cards = GameContextValue['cards'];
-
-export function useFetchCards(): Cards | undefined {
-  const response = useFetchOnce<GETGoal>('./goal.json');
-  // TODO Ugly
-  const cards = useMemo(() => (response ? goalToCards(response) : undefined), [response]);
-  return cards;
+export async function fetchGoal(): Promise<GETGoal> {
+  const response = await fetch('./goal.json');
+  const json: GETGoal = await response.json();
+  return json;
 }

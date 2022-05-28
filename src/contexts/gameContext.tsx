@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
-import { useFetchCards } from '../utils/useFetchCards';
+import { fetchGoal } from '../utils/fetchGoal';
 import { useHistory } from '../utils/useHistory';
+import { goalToCards } from '../utils/goalToCards';
 
 export interface GameCardMatchable {
   type: 'matchable';
@@ -37,11 +38,13 @@ const defaultSnapshot: Snapshot = {
 
 export type GameContextValue = Snapshot & {
   revealCard: (index: Index) => void;
+  newGame: () => void;
 };
 
 const defaultGameContextValue: GameContextValue = {
   ...defaultSnapshot,
   revealCard: () => null,
+  newGame: () => null,
 };
 
 const GameContext = React.createContext<GameContextValue>(defaultGameContextValue);
@@ -51,11 +54,25 @@ interface GameProviderProps {
 }
 
 const GameProvider = ({ children }: GameProviderProps) => {
-  const [snapshot, save] = useHistory(defaultSnapshot);
-  const apiCards = useFetchCards();
-  // TODO Ugly, move save to useFetchCards?
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => (apiCards ? save({ ...snapshot, cards: apiCards }) : void 0), [apiCards]);
+  // For time travel, destructure history and slice out the first snapshot (defaultSnapshot)
+  const history = useHistory(defaultSnapshot);
+  const { snapshot } = history;
+
+  // React 18 calls useEffect twice in StrictMode, which means we call newGame() twice on mount.
+  // Using a ref or a global or local variable to check if the call was already made is not pleasing to the eye.
+  // AbortController could also be used to cancel the first request, but in this small project I don't mind fetching goal.json twice.
+  // In a bigger project I would use a state management library or, like Dan Abramov recommends, a fetching library:
+  // https://github.com/facebook/react/issues/24502#issuecomment-1118867879
+  useEffect(() => {
+    newGame();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function newGame() {
+    const goal = await fetchGoal();
+    const cards = goalToCards(goal);
+    history.reset({ ...defaultSnapshot, cards });
+  }
 
   function revealCard(index: number) {
     const type = snapshot.cards[index].type;
@@ -99,12 +116,13 @@ const GameProvider = ({ children }: GameProviderProps) => {
         nextSnapshot.choice2 = null;
       }
     }
-    save(nextSnapshot);
+    history.push(nextSnapshot);
   }
 
   const providerValue: GameContextValue = {
     ...snapshot,
     revealCard,
+    newGame,
   };
 
   return <GameContext.Provider value={providerValue}>{children}</GameContext.Provider>;
