@@ -36,7 +36,8 @@ function getBoardCards(game: GameContextValue): BoardCard[] {
         return {
           ...card,
           type: 'revealed',
-          ...(game.choice1 && game.choice2 && { onClick: () => game.revealCard(index) }),
+          ...(typeof game.choice1 === 'number' &&
+            typeof game.choice2 === 'number' && { onClick: () => game.revealCard(index) }),
         };
       }
     }
