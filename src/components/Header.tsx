@@ -28,8 +28,8 @@ const StyledHeader = styled.header`
 `;
 
 export function Header() {
-  const { moves, seconds } = useGame();
-  const formattedSeconds = new Date(seconds * 1000).toISOString().slice(14, 19);
+  const { moves, secondsPlayed, countdown } = useGame();
+  const formattedSeconds = new Date(secondsPlayed * 1000).toISOString().slice(14, 19);
 
   return (
     <StyledHeader>
@@ -37,6 +37,7 @@ export function Header() {
         <img alt="Memory Game Logo" src={owlImgSrc} />
         Memory Game
       </h1>
+      {typeof countdown === 'number' && <div>Countdown: {countdown}</div>}
       <div>
         <span>Moves: {moves}</span>|<span>Time: {formattedSeconds}</span>
       </div>

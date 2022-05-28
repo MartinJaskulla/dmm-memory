@@ -5,6 +5,8 @@ import { goalToCards } from '../utils/goalToCards';
 import { useCountdown } from '../utils/useCountdown';
 import { useGameClock } from '../utils/useGameClock';
 
+const COUNTDOWN_SECONDS = 10; // Trick will probably make this dynamic
+
 export interface GameCardMatchable {
   type: 'matchable';
   id: number;
@@ -28,7 +30,7 @@ export interface Snapshot {
   matches: Set<Id>;
   foundEffects: Set<Index>;
   cards: GameCard[];
-  seconds: number;
+  secondsPlayed: number;
 }
 
 const defaultSnapshot: Snapshot = {
@@ -37,14 +39,14 @@ const defaultSnapshot: Snapshot = {
   choice2: null,
   matches: new Set(),
   foundEffects: new Set(),
-  seconds: 0,
+  secondsPlayed: 0,
 };
 
 export type GameContextValue = Snapshot & {
   revealCard: (index: Index) => void;
   newGame: () => void;
   moves: number;
-  seconds: number;
+  countdown: number | null;
 };
 
 const defaultGameContextValue: GameContextValue = {
@@ -52,7 +54,7 @@ const defaultGameContextValue: GameContextValue = {
   revealCard: () => null,
   newGame: () => null,
   moves: 0,
-  seconds: 0,
+  countdown: null,
 };
 
 const GameContext = React.createContext<GameContextValue>(defaultGameContextValue);
@@ -95,7 +97,7 @@ const GameProvider = ({ children }: GameProviderProps) => {
       choice2: snapshot.choice2,
       foundEffects: new Set(snapshot.foundEffects),
       matches: new Set(snapshot.matches),
-      seconds: gameClock.seconds,
+      secondsPlayed: gameClock.seconds,
     };
 
     // Get new choices
@@ -109,7 +111,7 @@ const GameProvider = ({ children }: GameProviderProps) => {
         countdown.stop();
         if (nextSnapshot.choice1 === null) {
           nextSnapshot.choice1 = index;
-          countdown.start();
+          countdown.start(COUNTDOWN_SECONDS);
         } else if (nextSnapshot.choice2 === null) {
           nextSnapshot.choice2 = index;
         }
@@ -137,10 +139,12 @@ const GameProvider = ({ children }: GameProviderProps) => {
 
   const providerValue: GameContextValue = {
     ...snapshot,
+    // Overwriting snapshot.secondsPlayed, which is only updated per move
+    secondsPlayed: gameClock.seconds,
     revealCard,
     newGame,
     moves: history.history.length - 1,
-    seconds: gameClock.seconds,
+    countdown: countdown.seconds,
   };
 
   return <GameContext.Provider value={providerValue}>{children}</GameContext.Provider>;
