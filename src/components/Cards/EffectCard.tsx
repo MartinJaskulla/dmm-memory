@@ -17,7 +17,7 @@ export type EffectCardProps = GameCardEffect;
 export function EffectCard(props: EffectCardProps) {
   const text = props.effect.charAt(0).toUpperCase() + props.effect.slice(1);
   return (
-    <StyledBaseCard tabIndex={-1}>
+    <StyledBaseCard>
       <img alt="Memory Game Logo" src={rocketImgSrc} />
       {text}
     </StyledBaseCard>

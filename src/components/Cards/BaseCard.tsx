@@ -30,7 +30,11 @@ const StyledButton = styled.button<BaseCardProps>`
 export type BaseCardProps = React.HTMLAttributes<HTMLButtonElement>;
 
 export function BaseCard(props: BaseCardProps) {
-  return <StyledButton {...props}>{props.children}</StyledButton>;
+  return (
+    <StyledButton {...props} tabIndex={props.onClick ? 0 : -1}>
+      {props.children}
+    </StyledButton>
+  );
 }
 
 /*

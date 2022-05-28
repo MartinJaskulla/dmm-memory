@@ -13,9 +13,5 @@ export interface MatchedCardProps {
 }
 
 export function MatchedCard(props: MatchedCardProps) {
-  return (
-    <StyledBaseCard tabIndex={-1} lang={props.language}>
-      {props.text}
-    </StyledBaseCard>
-  );
+  return <StyledBaseCard lang={props.language}>{props.text}</StyledBaseCard>;
 }
