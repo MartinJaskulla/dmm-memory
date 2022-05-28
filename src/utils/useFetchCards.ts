@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
-import { goalToCards } from './goalToCards';
 import { GameContextValue } from '../contexts/gameContext';
+import { useFetchOnce } from './useFetchOnce';
+import { goalToCards } from './goalToCards';
+import { useMemo } from 'react';
 
 export interface Transliterations {
   Hira?: string;
@@ -93,26 +94,9 @@ export interface GETGoal {
 
 type Cards = GameContextValue['cards'];
 
-export function useFetchCards(defaultValue: Cards): [Cards] {
-  const [cards, setCards] = useState<Cards>(defaultValue);
-  useEffect(() => {
-    const abortController = new AbortController();
-
-    fetch('./goal.json', {
-      signal: abortController.signal,
-    })
-      .then((response) => response.json())
-      .then((json: GETGoal) => setCards(goalToCards(json)))
-      .catch((error) => {
-        // Ignore aborted requests, but rethrow real errors
-        if (!abortController.signal.aborted) throw error;
-      });
-
-    // React 18 is rendering useEffect twice: https://www.youtube.com/watch?v=j8s01ThR7bQ
-    // Instead of using a ref or global variable to check if a request was already made, use a proper cleanup function
-    return function cancel() {
-      abortController.abort();
-    };
-  }, []);
-  return [cards];
+export function useFetchCards(): Cards | undefined {
+  const response = useFetchOnce<GETGoal>('./goal.json');
+  // TODO Ugly
+  const cards = useMemo(() => (response ? goalToCards(response) : undefined), [response]);
+  return cards;
 }

@@ -52,9 +52,10 @@ interface GameProviderProps {
 
 const GameProvider = ({ children }: GameProviderProps) => {
   const [snapshot, save] = useHistory(defaultSnapshot);
-  const [apiCards] = useFetchCards(defaultGameContextValue.cards);
+  const apiCards = useFetchCards();
+  // TODO Ugly, move save to useFetchCards?
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => save({ ...snapshot, cards: apiCards }), [apiCards]);
+  useEffect(() => (apiCards ? save({ ...snapshot, cards: apiCards }) : void 0), [apiCards]);
 
   function revealCard(index: number) {
     const type = snapshot.cards[index].type;
