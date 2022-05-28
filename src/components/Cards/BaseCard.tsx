@@ -13,6 +13,11 @@ const StyledButton = styled.button<BaseCardProps>`
   background: none;
   border: 5px solid var(--color-text);
 
+  &:focus-visible {
+    outline: none;
+    transform: scale(1.05);
+  }
+
   ${(props) =>
     props.onClick
       ? css`
