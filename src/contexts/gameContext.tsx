@@ -5,7 +5,6 @@ import { goalToCards } from '../utils/goalToCards';
 import { useCountdown } from '../utils/useCountdown';
 import { useGameClock } from '../utils/useGameClock';
 import { flipCards } from './flipCards';
-import { setCountdown } from './setCountdown';
 import { useEverySecond } from '../utils/timer';
 
 /*
@@ -123,10 +122,16 @@ const GameProvider = ({ children }: GameProviderProps) => {
   }
 
   function revealCard(revealedCardIndex: number) {
-    let nextSnapshot: Snapshot = structuredClone(snapshot);
+    const nextSnapshot = flipCards(snapshot, revealedCardIndex);
     nextSnapshot.secondsPlayed = gameClock.seconds;
-    nextSnapshot = flipCards(nextSnapshot, revealedCardIndex);
-    setCountdown(nextSnapshot, countdown);
+    countdown.stop();
+    if (
+      typeof nextSnapshot.choice1 === 'number' &&
+      typeof nextSnapshot.choice2 !== 'number' &&
+      nextSnapshot.countdown
+    ) {
+      countdown.start(nextSnapshot.countdown);
+    }
     history.push(nextSnapshot);
   }
 
