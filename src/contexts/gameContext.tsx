@@ -5,8 +5,6 @@ import { goalToCards } from '../utils/goalToCards';
 import { useCountdown } from '../utils/useCountdown';
 import { useGameClock } from '../utils/useGameClock';
 
-const COUNTDOWN_SECONDS = 10; // Trick will probably make this dynamic
-
 export interface GameCardMatchable {
   type: 'matchable';
   id: number;
@@ -31,6 +29,10 @@ export interface Snapshot {
   foundEffects: Set<Index>;
   cards: GameCard[];
   secondsPlayed: number;
+  countdown: number | null;
+  effects: {
+    [key: string]: unknown;
+  };
 }
 
 const defaultSnapshot: Snapshot = {
@@ -40,13 +42,14 @@ const defaultSnapshot: Snapshot = {
   matches: new Set(),
   foundEffects: new Set(),
   secondsPlayed: 0,
+  countdown: 10,
+  effects: {},
 };
 
 export type GameContextValue = Snapshot & {
   revealCard: (index: Index) => void;
   newGame: () => void;
   moves: number;
-  countdown: number | null;
 };
 
 const defaultGameContextValue: GameContextValue = {
@@ -91,11 +94,7 @@ const GameProvider = ({ children }: GameProviderProps) => {
 
   function revealCard(index: number) {
     const nextSnapshot: Snapshot = {
-      cards: structuredClone(snapshot.cards),
-      choice1: snapshot.choice1,
-      choice2: snapshot.choice2,
-      foundEffects: new Set(snapshot.foundEffects),
-      matches: new Set(snapshot.matches),
+      ...structuredClone(snapshot),
       secondsPlayed: gameClock.seconds,
     };
 
@@ -111,7 +110,7 @@ const GameProvider = ({ children }: GameProviderProps) => {
         countdown.stop();
         if (nextSnapshot.choice1 === null) {
           nextSnapshot.choice1 = index;
-          countdown.start(COUNTDOWN_SECONDS);
+          if (nextSnapshot.countdown) countdown.start(nextSnapshot.countdown);
         } else if (nextSnapshot.choice2 === null) {
           nextSnapshot.choice2 = index;
         }
