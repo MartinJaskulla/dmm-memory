@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { fetchGoal } from '../utils/fetchGoal';
 import { useHistory } from '../utils/useHistory';
 import { goalToCards } from '../utils/goalToCards';
+import { useAnimationInterval } from '../utils/timer';
 
 export interface GameCardMatchable {
   type: 'matchable';
@@ -26,6 +27,7 @@ export interface Snapshot {
   matches: Set<Id>;
   foundEffects: Set<Index>;
   cards: GameCard[];
+  seconds: number;
 }
 
 const defaultSnapshot: Snapshot = {
@@ -34,12 +36,14 @@ const defaultSnapshot: Snapshot = {
   choice2: null,
   matches: new Set(),
   foundEffects: new Set(),
+  seconds: 0,
 };
 
 export type GameContextValue = Snapshot & {
   revealCard: (index: Index) => void;
   newGame: () => void;
   moves: number;
+  seconds: number;
 };
 
 const defaultGameContextValue: GameContextValue = {
@@ -47,6 +51,7 @@ const defaultGameContextValue: GameContextValue = {
   revealCard: () => null,
   newGame: () => null,
   moves: 0,
+  seconds: 0,
 };
 
 const GameContext = React.createContext<GameContextValue>(defaultGameContextValue);
@@ -59,6 +64,9 @@ const GameProvider = ({ children }: GameProviderProps) => {
   // For time travel, destructure history and slice out the first snapshot (defaultSnapshot)
   const history = useHistory(defaultSnapshot);
   const { snapshot } = history;
+
+  const [seconds, setSeconds] = useState(0);
+  useAnimationInterval(1000, () => setSeconds((seconds) => seconds + 1));
 
   // React 18 calls useEffect twice in StrictMode, which means we call newGame() twice on mount.
   // Using a ref or a global or local variable to check if the call was already made is not pleasing to the eye.
@@ -73,6 +81,7 @@ const GameProvider = ({ children }: GameProviderProps) => {
   async function newGame() {
     const goal = await fetchGoal();
     const cards = goalToCards(goal);
+    setSeconds(0);
     history.reset({ ...defaultSnapshot, cards });
   }
 
@@ -84,6 +93,7 @@ const GameProvider = ({ children }: GameProviderProps) => {
       choice2: snapshot.choice2,
       foundEffects: new Set(snapshot.foundEffects),
       matches: new Set(snapshot.matches),
+      seconds,
     };
 
     // Get new choices
@@ -126,6 +136,7 @@ const GameProvider = ({ children }: GameProviderProps) => {
     revealCard,
     newGame,
     moves: history.history.length - 1,
+    seconds,
   };
 
   return <GameContext.Provider value={providerValue}>{children}</GameContext.Provider>;
