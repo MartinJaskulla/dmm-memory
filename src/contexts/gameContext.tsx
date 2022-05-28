@@ -39,12 +39,14 @@ const defaultSnapshot: Snapshot = {
 export type GameContextValue = Snapshot & {
   revealCard: (index: Index) => void;
   newGame: () => void;
+  moves: number;
 };
 
 const defaultGameContextValue: GameContextValue = {
   ...defaultSnapshot,
   revealCard: () => null,
   newGame: () => null,
+  moves: 0,
 };
 
 const GameContext = React.createContext<GameContextValue>(defaultGameContextValue);
@@ -123,6 +125,7 @@ const GameProvider = ({ children }: GameProviderProps) => {
     ...snapshot,
     revealCard,
     newGame,
+    moves: history.history.length - 1,
   };
 
   return <GameContext.Provider value={providerValue}>{children}</GameContext.Provider>;

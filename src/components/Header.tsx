@@ -1,14 +1,17 @@
 import React from 'react';
 import owlImgSrc from '../images/owl.svg';
 import styled from 'styled-components';
+import { useGame } from '../contexts/gameContext';
 
 const StyledHeader = styled.header`
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
-  color: white;
+  color: var(--color-text);
   padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 
   h1 {
-    color: var(--color-text);
     font-size: 24px;
     font-weight: 700;
     line-height: 1.5;
@@ -20,16 +23,22 @@ const StyledHeader = styled.header`
     object-fit: contain;
     vertical-align: middle;
     width: auto;
+    margin-right: 8px;
   }
 `;
 
 export function Header() {
+  const { moves } = useGame();
+
   return (
     <StyledHeader>
       <h1>
         <img alt="Memory Game Logo" src={owlImgSrc} />
         Memory Game
       </h1>
+      <div>
+        <span>Moves: {moves}</span>
+      </div>
     </StyledHeader>
   );
 }
