@@ -37,3 +37,7 @@ export function useAnimationInterval(ms: number, callback: (time: number) => voi
     return () => controller.abort();
   }, [ms]);
 }
+
+export function useEverySecond(callback: () => void) {
+  useAnimationInterval(1000, callback);
+}

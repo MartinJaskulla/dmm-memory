@@ -6,6 +6,7 @@ import { useCountdown } from '../utils/useCountdown';
 import { useGameClock } from '../utils/useGameClock';
 import { flipCards } from './flipCards';
 import { setCountdown } from './setCountdown';
+import { useEverySecond } from '../utils/timer';
 
 /*
  TODO Each effect can
@@ -92,12 +93,16 @@ interface GameProviderProps {
 const GameProvider = ({ children }: GameProviderProps) => {
   const history = useHistory(defaultSnapshot);
   const { snapshot } = history;
-  // Maybe there is just a single call to timer.ts and effects can register to do sth each second?
-  // e.g. history tracks secondsPlayed and countdown could just calculated secondsPlayed - secondsSinceCountdownStarted
-  const gameClock = useGameClock(0);
+  const gameClock = useGameClock();
   const countdown = useCountdown(() => {
     alert('Time is up!');
     newGame();
+  });
+
+  // Batched together so that both timers update at the same time visually
+  useEverySecond(() => {
+    gameClock.increment();
+    countdown.decrement();
   });
 
   // React 18 calls useEffect twice in StrictMode, which means we call newGame() twice on mount.
