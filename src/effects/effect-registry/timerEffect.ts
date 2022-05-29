@@ -7,8 +7,6 @@ import { isObject } from '../../utils/isObject';
 const EFFECT = 'timer';
 const INCREASE_TIME_LIMIT_BY = 30;
 
-let originalTimeLimit: number | null | undefined;
-
 export const timerEffect: Effect = {
   effect: EFFECT,
   card: {
@@ -16,9 +14,6 @@ export const timerEffect: Effect = {
   },
   middleware: {
     history: (snapshot: Snapshot) => {
-      // Save original time limit
-      if (typeof originalTimeLimit === 'undefined') originalTimeLimit = snapshot.timeLimit;
-
       // Change time limit
       if (EFFECT in snapshot.effects && isCounter(snapshot.effects[EFFECT])) {
         const onlyOneCardChosen = typeof snapshot.choice1 === 'string' && typeof snapshot.choice2 !== 'string';
@@ -26,12 +21,18 @@ export const timerEffect: Effect = {
           snapshot.effects[EFFECT].counter--;
           if (snapshot.effects[EFFECT].counter === 0) {
             delete snapshot.effects[EFFECT];
-            snapshot.timeLimit = originalTimeLimit;
+            if (typeof snapshot.timeLimit === 'number') {
+              const revertedTimeLimit = snapshot.timeLimit - INCREASE_TIME_LIMIT_BY;
+              snapshot.timeLimit = revertedTimeLimit < 0 ? 0 : revertedTimeLimit;
+            }
           }
         }
       } else {
-        snapshot.effects[EFFECT] = { counter: 3 };
-        snapshot.timeLimit = (snapshot.timeLimit || 0) + INCREASE_TIME_LIMIT_BY;
+        const timerEffect: Timer = { counter: 3 };
+        snapshot.effects[EFFECT] = timerEffect;
+        const increasedTimeLimit =
+          typeof snapshot.timeLimit === 'number' ? snapshot.timeLimit + INCREASE_TIME_LIMIT_BY : snapshot.timeLimit;
+        snapshot.timeLimit = increasedTimeLimit;
       }
 
       return snapshot;
@@ -39,10 +40,10 @@ export const timerEffect: Effect = {
   },
 };
 
-interface Counter {
+interface Timer {
   counter: number;
 }
 
-function isCounter(effect: unknown): effect is Counter {
+function isCounter(effect: unknown): effect is Timer {
   return isObject(effect) && typeof effect['counter'] === 'number';
 }
