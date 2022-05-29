@@ -140,16 +140,16 @@ function useGame(): GameContextValue {
 }
 
 export function flipCards(snapshot: Snapshot, revealedCardIndex: number): void {
-  // Hide both cards, if two choices were already made
-  if (typeof snapshot.choice1 === 'string' && typeof snapshot.choice2 === 'string') {
-    snapshot.choice1 = null;
-    snapshot.choice2 = null;
-  }
-
-  // Flip one card
   const card = snapshot.cards[revealedCardIndex];
+
   switch (card.type) {
     case 'matchable':
+      // Hide both cards, if two choices were already made
+      if (typeof snapshot.choice1 === 'string' && typeof snapshot.choice2 === 'string') {
+        snapshot.choice1 = null;
+        snapshot.choice2 = null;
+      }
+      // Flip one card
       if (snapshot.choice1 === null) {
         snapshot.choice1 = card.id;
       } else if (snapshot.choice2 === null) {
