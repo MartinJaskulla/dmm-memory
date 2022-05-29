@@ -115,7 +115,7 @@ const GameProvider = ({ children }: GameProviderProps) => {
     nextSnapshot.secondsPlayed = gameClock.seconds;
 
     // Add effects
-    effects.middleware.history(nextSnapshot, revealedCardIndex);
+    effects.middleware.history(nextSnapshot);
 
     // Save history
     history.push(nextSnapshot);
