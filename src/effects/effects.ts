@@ -1,7 +1,7 @@
-import { GameCardEffect, GameContextValue, Snapshot } from '../features/useGame';
+import { GameContextValue, Snapshot } from '../features/useGame';
 import { effectRegistry } from './effect-registry/effectRegistry';
 
-type HistoryMiddleware = (snapshot: Snapshot) => Snapshot;
+type HistoryMiddleware = (snapshot: Snapshot, revealedCardIndex: number) => Snapshot;
 type GameMiddleware = (game: GameContextValue) => GameContextValue;
 
 export interface Effect {
@@ -15,22 +15,22 @@ export interface Effect {
   };
 }
 
-const cards: GameCardEffect[] = [];
-const historyMiddlewares: HistoryMiddleware[] = [];
-const gameMiddlewares: GameMiddleware[] = [];
-
-effectRegistry.forEach((effect) => {
-  cards.push({ type: 'effect', effect: effect.effect, text: effect.card.text });
-  if (effect.middleware.history) historyMiddlewares.push(effect.middleware.history);
-  if (effect.middleware.game) gameMiddlewares.push(effect.middleware.game);
-});
-
-export const effects = {
+interface Effects {
+  effects: Effect[];
   middleware: {
-    history: (snapshot: Snapshot): Snapshot =>
-      historyMiddlewares.reduce((finalSnapshot, middleware) => middleware(finalSnapshot), snapshot),
-    game: (game: GameContextValue): GameContextValue =>
-      gameMiddlewares.reduce((finalGame, middleware) => middleware(finalGame), game),
+    history: HistoryMiddleware;
+    game: GameMiddleware;
+  };
+}
+export const effects: Effects = {
+  effects: effectRegistry,
+  middleware: {
+    history: (snapshot, revealedCardIndex) =>
+      effectRegistry.reduce(
+        (finalSnapshot, effect) => effect.middleware.history?.(finalSnapshot, revealedCardIndex) || finalSnapshot,
+        snapshot,
+      ),
+    game: (game) =>
+      effectRegistry.reduce((finalGame, effect) => effect.middleware.game?.(finalGame) || finalGame, game),
   },
-  cards,
 };

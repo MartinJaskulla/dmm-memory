@@ -15,7 +15,7 @@ export const timerEffect: Effect = {
     text: 'Timer',
   },
   middleware: {
-    history: (snapshot: Snapshot) => {
+    history: (snapshot: Snapshot, revealedCardIndex) => {
       if (snapshot.latestCard === null) return snapshot;
 
       // Save original time limit
@@ -23,7 +23,7 @@ export const timerEffect: Effect = {
 
       // Change time limit
       if (EFFECT in snapshot.effects && isCounter(snapshot.effects[EFFECT])) {
-        const onlyOneCardChosen = typeof snapshot.choice1 === 'number' && typeof snapshot.choice2 !== 'number';
+        const onlyOneCardChosen = typeof snapshot.choice1 === 'string' && typeof snapshot.choice2 !== 'string';
         if (onlyOneCardChosen) {
           snapshot.effects[EFFECT].counter--;
           if (snapshot.effects[EFFECT].counter === 0) {
@@ -32,7 +32,7 @@ export const timerEffect: Effect = {
           }
         }
       } else {
-        const card = snapshot.cards[snapshot.latestCard];
+        const card = snapshot.cards[revealedCardIndex];
         const isTimerEffect = card.type === 'effect' && card.effect === EFFECT;
         if (isTimerEffect) {
           snapshot.effects[EFFECT] = { counter: 3 };

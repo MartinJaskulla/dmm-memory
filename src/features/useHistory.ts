@@ -1,9 +1,6 @@
 import { useState } from 'react';
 
-export function useHistory<Snapshot>(
-  initialState: Snapshot,
-  pushMiddleware: (snapshot: Snapshot) => Snapshot = (snapshot) => snapshot,
-): {
+export function useHistory<Snapshot>(initialState: Snapshot): {
   snapshot: Snapshot;
   history: Snapshot[];
   push: (snapshot: Snapshot) => void;
@@ -13,7 +10,6 @@ export function useHistory<Snapshot>(
   const [step, setStep] = useState(0);
 
   function push(snapshot: Snapshot) {
-    snapshot = pushMiddleware(snapshot);
     setHistory([...history, snapshot]);
     setStep(step + 1);
   }

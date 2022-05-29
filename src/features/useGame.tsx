@@ -6,30 +6,31 @@ import { useCountdown } from './useCountdown';
 import { useGameClock } from './useGameClock';
 import { effects } from '../effects/effects';
 
+export type Id = string;
+export type MatchId = number;
+
 export interface GameCardMatchable {
   type: 'matchable';
-  id: number;
+  id: Id;
+  matchId: MatchId;
   text: string;
   language: 'en' | 'ja';
 }
 
 export interface GameCardEffect {
   type: 'effect';
+  id: Id;
   effect: string;
   text: string;
 }
-
 export type GameCard = GameCardMatchable | GameCardEffect;
 
-export type Index = number;
-export type Id = number;
-
 export interface Snapshot {
-  choice1: Index | null;
-  choice2: Index | null;
-  latestCard: number | null;
-  matches: Set<Id>;
-  foundEffects: Set<Index>;
+  choice1: Id | null;
+  choice2: Id | null;
+  latestCard: Id | null;
+  matches: Set<MatchId>;
+  foundEffects: Set<Id>;
   cards: GameCard[];
   secondsPlayed: number;
   timeLimit: number | null;
@@ -51,7 +52,7 @@ const defaultSnapshot: Snapshot = {
 };
 
 export type GameContextValue = Snapshot & {
-  revealCard: (index: Index) => void;
+  revealCard: (index: number) => void;
   newGame: () => void;
   moves: number;
 };
@@ -71,7 +72,7 @@ interface GameProviderProps {
 }
 
 const GameProvider = ({ children }: GameProviderProps) => {
-  const history = useHistory(defaultSnapshot, effects.middleware.history);
+  const history = useHistory(defaultSnapshot);
   const { snapshot } = history;
   const gameClock = useGameClock();
   const countdown = useCountdown(() => {
@@ -91,26 +92,32 @@ const GameProvider = ({ children }: GameProviderProps) => {
 
   async function newGame() {
     const goal = await fetchGoal();
-    const cards = goalToCards(goal, effects.cards);
+    const cards = goalToCards(goal, effects.effects);
     gameClock.setSeconds(0);
     history.reset({ ...defaultSnapshot, cards });
   }
 
   function revealCard(revealedCardIndex: number) {
+    const nextSnapshot: Snapshot = structuredClone(snapshot);
+
     // Flip cards
-    const nextSnapshot = flipCards(snapshot, revealedCardIndex);
+    flipCards(nextSnapshot, revealedCardIndex);
 
     // Save revealed card
-    nextSnapshot.latestCard = revealedCardIndex;
+    nextSnapshot.latestCard = nextSnapshot.cards[revealedCardIndex].id;
 
-    // Countdown
+    // Set countdown
     countdown.stop();
-    const oneCardFlipped = typeof nextSnapshot.choice1 === 'number' && typeof nextSnapshot.choice2 !== 'number';
+    const oneCardFlipped = typeof nextSnapshot.choice1 === 'string' && typeof nextSnapshot.choice2 !== 'string';
     if (oneCardFlipped) countdown.start(nextSnapshot.timeLimit);
 
-    // Game clock
+    // Save current game time
     nextSnapshot.secondsPlayed = gameClock.seconds;
 
+    // Add effects
+    effects.middleware.history(nextSnapshot, revealedCardIndex);
+
+    // Save history
     history.push(nextSnapshot);
   }
 
@@ -132,44 +139,42 @@ function useGame(): GameContextValue {
   return React.useContext(GameContext);
 }
 
-export function flipCards(snapshot: Snapshot, revealedCardIndex: number): Snapshot {
-  const nextSnapshot = structuredClone(snapshot);
-
-  // Update choices
-  if (typeof nextSnapshot.choice1 === 'number' && typeof nextSnapshot.choice2 === 'number') {
-    nextSnapshot.choice1 = null;
-    nextSnapshot.choice2 = null;
+export function flipCards(snapshot: Snapshot, revealedCardIndex: number): void {
+  // Hide both cards, if two choices were already made
+  if (typeof snapshot.choice1 === 'string' && typeof snapshot.choice2 === 'string') {
+    snapshot.choice1 = null;
+    snapshot.choice2 = null;
   }
 
-  const revealedCardType = nextSnapshot.cards[revealedCardIndex].type;
-  switch (revealedCardType) {
+  // Flip one card
+  const card = snapshot.cards[revealedCardIndex];
+  switch (card.type) {
     case 'matchable':
-      if (nextSnapshot.choice1 === null) {
-        nextSnapshot.choice1 = revealedCardIndex;
-      } else if (nextSnapshot.choice2 === null) {
-        nextSnapshot.choice2 = revealedCardIndex;
+      if (snapshot.choice1 === null) {
+        snapshot.choice1 = card.id;
+      } else if (snapshot.choice2 === null) {
+        snapshot.choice2 = card.id;
       }
       break;
     case 'effect': {
-      nextSnapshot.foundEffects.add(revealedCardIndex);
+      snapshot.foundEffects.add(card.id);
       break;
     }
   }
 
-  // Update matches
-  if (typeof nextSnapshot.choice1 === 'number' && typeof nextSnapshot.choice2 === 'number') {
-    const card1 = nextSnapshot.cards[nextSnapshot.choice1];
-    const card2 = nextSnapshot.cards[nextSnapshot.choice2];
-    if (card1.type !== 'matchable' || card2.type !== 'matchable')
+  // Check for a match
+  const card1 = snapshot.cards.find((card) => card.id === snapshot.choice1);
+  const card2 = snapshot.cards.find((card) => card.id === snapshot.choice2);
+  if (card1 && card2) {
+    if (card1.type !== 'matchable' || card2.type !== 'matchable') {
       throw new Error('Only matchable cards should be choices');
-    if (card1.id === card2.id) {
-      nextSnapshot.matches.add(card1.id);
-      nextSnapshot.choice1 = null;
-      nextSnapshot.choice2 = null;
+    }
+    if (card1.matchId === card2.matchId) {
+      snapshot.matches.add(card1.matchId);
+      snapshot.choice1 = null;
+      snapshot.choice2 = null;
     }
   }
-
-  return nextSnapshot;
 }
 
 export { GameProvider, useGame };

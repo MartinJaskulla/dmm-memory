@@ -28,15 +28,15 @@ export function Board() {
     <StyledMain>
       {game.cards.map((card, index) => {
         if (card.type === 'matchable') {
-          if (game.matches.has(card.id)) {
-            return <MatchedCard key={index} text={card.text} language={card.language} />;
+          if (game.matches.has(card.matchId)) {
+            return <MatchedCard key={card.id} text={card.text} language={card.language} />;
           }
-          const isCardRevealed = [game.choice1, game.choice2].includes(index);
+          const isCardRevealed = [game.choice1, game.choice2].includes(card.id);
           if (isCardRevealed) {
-            const areBothChoicesRevealed = typeof game.choice1 === 'number' && typeof game.choice2 === 'number';
+            const areBothChoicesRevealed = typeof game.choice1 === 'string' && typeof game.choice2 === 'string';
             return (
               <RevealedCard
-                key={index}
+                key={card.id}
                 text={card.text}
                 language={card.language}
                 onClick={areBothChoicesRevealed ? () => game.revealCard(index) : undefined}
@@ -45,11 +45,11 @@ export function Board() {
           }
         }
 
-        if (card.type === 'effect' && game.foundEffects.has(index)) {
-          return <EffectCard key={index} text={card.effect} />;
+        if (card.type === 'effect' && game.foundEffects.has(card.id)) {
+          return <EffectCard key={card.id} text={card.effect} />;
         }
 
-        return <HiddenCard key={index} onClick={() => game.revealCard(index)} />;
+        return <HiddenCard key={card.id} onClick={() => game.revealCard(index)} />;
       })}
     </StyledMain>
   );
