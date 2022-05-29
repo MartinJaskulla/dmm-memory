@@ -2,7 +2,7 @@ import React from 'react';
 import { BaseCard } from './BaseCard';
 import rocketImgSrc from '../../images/rocket.svg';
 import styled from 'styled-components';
-import { GameCardEffect } from '../../contexts/gameContext';
+import { GameCardEffect } from '../../features/useGame';
 
 const StyledBaseCard = styled(BaseCard)`
   border-color: var(--color-trick);

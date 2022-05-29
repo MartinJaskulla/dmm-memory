@@ -1,7 +1,7 @@
 import React from 'react';
 import owlImgSrc from '../images/owl.svg';
 import styled from 'styled-components';
-import { useGame } from '../contexts/gameContext';
+import { useGame } from '../features/useGame';
 
 const StyledHeader = styled.header`
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
@@ -28,7 +28,7 @@ const StyledHeader = styled.header`
 `;
 
 export function Header() {
-  const { moves, secondsPlayed, countdown } = useGame();
+  const { moves, secondsPlayed, timeLimit } = useGame();
   const formattedSeconds = new Date(secondsPlayed * 1000).toISOString().slice(14, 19);
 
   return (
@@ -37,7 +37,7 @@ export function Header() {
         <img alt="Memory Game Logo" src={owlImgSrc} />
         Memory Game
       </h1>
-      {typeof countdown === 'number' && <div>Countdown: {countdown}</div>}
+      {typeof timeLimit === 'number' && <div>Countdown: {timeLimit}</div>}
       <div>
         <span>Moves: {moves}</span>|<span>Time: {formattedSeconds}</span>
       </div>

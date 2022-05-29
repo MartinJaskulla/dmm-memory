@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useEverySecond } from './timer';
+import { useEverySecond } from '../utils/interval';
 
 export function useGameClock() {
   const [seconds, setSeconds] = useState(0);

@@ -4,7 +4,7 @@ import { RevealedCard, RevealedCardProps } from './Cards/RevealedCard';
 import { EffectCard, EffectCardProps } from './Cards/EffectCard';
 import { MatchedCard, MatchedCardProps } from './Cards/MatchedCard';
 import styled from 'styled-components';
-import { GameContextValue, useGame } from '../contexts/gameContext';
+import { GameContextValue, useGame } from '../features/useGame';
 
 const StyledMain = styled.main`
   margin: 0 auto;

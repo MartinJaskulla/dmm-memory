@@ -4,7 +4,7 @@
 import { useEffect, useRef } from 'react';
 
 // The timer pauses when switching to a different browser tab
-export function animationInterval(ms: number, signal: AbortSignal, callback: (time: number) => void) {
+export function interval(ms: number, signal: AbortSignal, callback: (time: number) => void) {
   const start = document?.timeline?.currentTime || performance.now();
 
   function frame(time: number) {
@@ -24,7 +24,7 @@ export function animationInterval(ms: number, signal: AbortSignal, callback: (ti
   scheduleFrame(start);
 }
 
-export function useAnimationInterval(ms: number, callback: (time: number) => void) {
+export function useInterval(ms: number, callback: (time: number) => void) {
   const callbackRef = useRef(callback);
   useEffect(() => {
     callbackRef.current = callback;
@@ -33,11 +33,11 @@ export function useAnimationInterval(ms: number, callback: (time: number) => voi
   useEffect(() => {
     const controller = new AbortController();
     // This will always call the latest callback: https://gist.github.com/jakearchibald/cb03f15670817001b1157e62a076fe95?permalink_comment_id=3869687#gistcomment-3869687
-    animationInterval(ms, controller.signal, (time) => callbackRef.current(time));
+    interval(ms, controller.signal, (time) => callbackRef.current(time));
     return () => controller.abort();
   }, [ms]);
 }
 
 export function useEverySecond(callback: () => void) {
-  useAnimationInterval(1000, callback);
+  useInterval(1000, callback);
 }

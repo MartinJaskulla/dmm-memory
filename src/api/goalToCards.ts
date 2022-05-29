@@ -1,5 +1,5 @@
-import { shuffle } from './shuffle';
-import { GameCard } from '../contexts/gameContext';
+import { shuffle } from '../utils/shuffle';
+import { GameCard } from '../features/useGame';
 import { GETGoal } from './fetchGoal';
 
 export function goalToCards(goal: GETGoal): GameCard[] {
