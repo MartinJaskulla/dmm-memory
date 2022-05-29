@@ -14,36 +14,41 @@ export const timerEffect: Effect = {
     text: 'Timer',
   },
   middleware: {
-    history: (snapshot: Snapshot) => {
-      // Change time limit
-      if (EFFECT in snapshot.effects && isCounter(snapshot.effects[EFFECT])) {
-        if (oneChoice(snapshot)) {
-          snapshot.effects[EFFECT].counter--;
-          if (snapshot.effects[EFFECT].counter === 0) {
-            delete snapshot.effects[EFFECT];
-            if (typeof snapshot.timeLimit === 'number') {
-              const revertedTimeLimit = snapshot.timeLimit - INCREASE_TIME_LIMIT_BY;
-              snapshot.timeLimit = revertedTimeLimit < 0 ? 0 : revertedTimeLimit;
-            }
-          }
-        }
-      } else {
-        const timerEffect: Timer = { counter: 3 };
-        snapshot.effects[EFFECT] = timerEffect;
+    history: {
+      active: (snapshot: Snapshot) => {
+        const counter: TimerData[typeof EFFECT] = { counter: 3 };
+        snapshot.effects[EFFECT] = counter;
         const increasedTimeLimit =
           typeof snapshot.timeLimit === 'number' ? snapshot.timeLimit + INCREASE_TIME_LIMIT_BY : snapshot.timeLimit;
         snapshot.timeLimit = increasedTimeLimit;
-      }
-
-      return snapshot;
+        return snapshot;
+      },
+      passive: (snapshot: Snapshot) => {
+        if (hasTimerData(snapshot.effects)) {
+          if (oneChoice(snapshot)) {
+            snapshot.effects[EFFECT].counter--;
+            if (snapshot.effects[EFFECT].counter === 0) {
+              // @ts-ignore
+              delete snapshot.effects[EFFECT];
+              if (typeof snapshot.timeLimit === 'number') {
+                const revertedTimeLimit = snapshot.timeLimit - INCREASE_TIME_LIMIT_BY;
+                snapshot.timeLimit = revertedTimeLimit < 0 ? 0 : revertedTimeLimit;
+              }
+            }
+          }
+        }
+        return snapshot;
+      },
     },
   },
 };
 
-interface Timer {
-  counter: number;
+interface TimerData {
+  [EFFECT]: {
+    counter: number;
+  };
 }
 
-function isCounter(effect: unknown): effect is Timer {
-  return isObject(effect) && typeof effect['counter'] === 'number';
+function hasTimerData(effectdata: unknown): effectdata is TimerData {
+  return isObject(effectdata) && isObject(effectdata[EFFECT]) && typeof effectdata[EFFECT].counter === 'number';
 }

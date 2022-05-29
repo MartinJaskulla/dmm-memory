@@ -10,7 +10,10 @@ export interface Effect {
     text: string;
   };
   middleware: {
-    history?: HistoryMiddleware;
+    history?: {
+      active?: HistoryMiddleware;
+      passive?: HistoryMiddleware;
+    };
     game?: GameMiddleware;
   };
 }
@@ -27,18 +30,17 @@ export const effects: Effects = {
   effects: effectRegistry,
   middleware: {
     history: (snapshot) => {
-      return effectRegistry.reduce((finalSnapshot, effect) => {
+      return effectRegistry.reduce((finalSnapshot, effect): Snapshot => {
         if (snapshot.latestCard === null) return finalSnapshot;
         const revealedCard = finalSnapshot.cards[snapshot.latestCard];
 
-        const sameEffect = revealedCard.type === 'effect' && revealedCard.effect === effect.effect;
-        const hasPastEffect = effect.effect in snapshot.effects;
-        if (!sameEffect && !hasPastEffect) return finalSnapshot;
+        const active = revealedCard.type === 'effect' && revealedCard.effect === effect.effect;
+        if (active) return effect.middleware.history?.active?.(finalSnapshot) || finalSnapshot;
 
-        const middleware = effect.middleware.history;
-        if (!middleware) return finalSnapshot;
+        const passive = effect.effect in snapshot.effects;
+        if (passive) return effect.middleware.history?.passive?.(finalSnapshot) || finalSnapshot;
 
-        return middleware(finalSnapshot);
+        return finalSnapshot;
       }, snapshot);
     },
     game: (game) =>
