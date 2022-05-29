@@ -7,7 +7,6 @@ const StyledBaseCard = styled(BaseCard)`
 `;
 
 export interface RevealedCardProps {
-  type: 'revealed';
   text: string;
   language: 'en' | 'ja';
   onClick?: () => void;

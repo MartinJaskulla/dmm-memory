@@ -1,10 +1,10 @@
 import React from 'react';
-import { HiddenCard, HiddenCardProps } from './Cards/HiddenCard';
-import { RevealedCard, RevealedCardProps } from './Cards/RevealedCard';
-import { EffectCard, EffectCardProps } from './Cards/EffectCard';
-import { MatchedCard, MatchedCardProps } from './Cards/MatchedCard';
+import { HiddenCard } from './Cards/HiddenCard';
+import { RevealedCard } from './Cards/RevealedCard';
+import { EffectCard } from './Cards/EffectCard';
+import { MatchedCard } from './Cards/MatchedCard';
 import styled from 'styled-components';
-import { GameContextValue, useGame } from '../features/useGame';
+import { useGame } from '../features/useGame';
 
 const StyledMain = styled.main`
   margin: 0 auto;
@@ -21,57 +21,35 @@ const StyledMain = styled.main`
   }
 `;
 
-type BoardCard = HiddenCardProps | RevealedCardProps | MatchedCardProps | EffectCardProps;
-
-function getBoardCards(game: GameContextValue): BoardCard[] {
-  return game.cards.map((card, index): BoardCard => {
-    if (card.type === 'matchable') {
-      if (game.matches.has(card.id)) {
-        return {
-          ...card,
-          type: 'matched',
-        };
-      }
-      if (index === game.choice1 || index === game.choice2) {
-        return {
-          ...card,
-          type: 'revealed',
-          ...(typeof game.choice1 === 'number' &&
-            typeof game.choice2 === 'number' && { onClick: () => game.revealCard(index) }),
-        };
-      }
-    }
-
-    if (card.type === 'effect' && game.foundEffects.has(index)) {
-      return {
-        ...card,
-        type: 'effect',
-      };
-    }
-
-    return {
-      type: 'hidden',
-      onClick: () => game.revealCard(index),
-    };
-  });
-}
-
 export function Board() {
-  const boardsCards: BoardCard[] = getBoardCards(useGame());
+  const game = useGame();
 
   return (
     <StyledMain>
-      {boardsCards.map((card, index) => {
-        switch (card.type) {
-          case 'matched':
-            return <MatchedCard key={index} {...card} />;
-          case 'hidden':
-            return <HiddenCard key={index} {...card} />;
-          case 'revealed':
-            return <RevealedCard key={index} {...card} />;
-          case 'effect':
-            return <EffectCard key={index} {...card} />;
+      {game.cards.map((card, index) => {
+        if (card.type === 'matchable') {
+          if (game.matches.has(card.id)) {
+            return <MatchedCard key={index} text={card.text} language={card.language} />;
+          }
+          const isCardRevealed = [game.choice1, game.choice2].includes(index);
+          if (isCardRevealed) {
+            const areBothChoicesRevealed = typeof game.choice1 === 'number' && typeof game.choice2 === 'number';
+            return (
+              <RevealedCard
+                key={index}
+                text={card.text}
+                language={card.language}
+                onClick={areBothChoicesRevealed ? () => game.revealCard(index) : undefined}
+              />
+            );
+          }
         }
+
+        if (card.type === 'effect' && game.foundEffects.has(index)) {
+          return <EffectCard key={index} text={card.effect} />;
+        }
+
+        return <HiddenCard key={index} onClick={() => game.revealCard(index)} />;
       })}
     </StyledMain>
   );

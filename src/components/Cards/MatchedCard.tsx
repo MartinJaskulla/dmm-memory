@@ -7,7 +7,6 @@ const StyledBaseCard = styled(BaseCard)`
 `;
 
 export interface MatchedCardProps {
-  type: 'matched';
   text: string;
   language: 'en' | 'ja';
 }

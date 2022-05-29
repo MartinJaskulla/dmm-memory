@@ -23,7 +23,6 @@ const StyledBaseCard = styled(BaseCard)`
 `;
 
 export interface HiddenCardProps {
-  type: 'hidden';
   onClick: () => void;
 }
 

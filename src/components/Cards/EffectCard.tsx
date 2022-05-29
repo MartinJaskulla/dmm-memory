@@ -2,7 +2,6 @@ import React from 'react';
 import { BaseCard } from './BaseCard';
 import rocketImgSrc from '../../images/rocket.svg';
 import styled from 'styled-components';
-import { GameCardEffect } from '../../features/useGame';
 
 const StyledBaseCard = styled(BaseCard)`
   border-color: var(--color-trick);
@@ -12,14 +11,15 @@ const StyledBaseCard = styled(BaseCard)`
   }
 `;
 
-export type EffectCardProps = GameCardEffect;
+export type EffectCardProps = {
+  text: string;
+};
 
 export function EffectCard(props: EffectCardProps) {
-  const text = props.effect.charAt(0).toUpperCase() + props.effect.slice(1);
   return (
     <StyledBaseCard>
       <img alt="Memory Game Logo" src={rocketImgSrc} />
-      {text}
+      {props.text}
     </StyledBaseCard>
   );
 }

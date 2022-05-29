@@ -35,7 +35,8 @@ export interface GameCardMatchable {
 
 export interface GameCardEffect {
   type: 'effect';
-  effect: 'timer' | 'shuffle' | 'retry' | 'trick';
+  effect: string;
+  text: string;
 }
 
 export type GameCard = GameCardMatchable | GameCardEffect;
