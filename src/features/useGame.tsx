@@ -29,7 +29,7 @@ export interface Snapshot {
   choice1: Id | null;
   choice2: Id | null;
   latestCard: Id | null;
-  matches: Set<MatchId>;
+  matched: Set<Id>;
   foundEffects: Set<Id>;
   cards: GameCard[];
   secondsPlayed: number;
@@ -44,10 +44,10 @@ const defaultSnapshot: Snapshot = {
   choice1: null,
   choice2: null,
   latestCard: null,
-  matches: new Set(),
+  matched: new Set(),
   foundEffects: new Set(),
   secondsPlayed: 0,
-  timeLimit: 10,
+  timeLimit: 1000,
   effects: {},
 };
 
@@ -170,7 +170,8 @@ export function flipCards(snapshot: Snapshot, revealedCardIndex: number): void {
       throw new Error('Only matchable cards should be choices');
     }
     if (card1.matchId === card2.matchId) {
-      snapshot.matches.add(card1.matchId);
+      snapshot.matched.add(card1.id);
+      snapshot.matched.add(card2.id);
       snapshot.choice1 = null;
       snapshot.choice2 = null;
     }

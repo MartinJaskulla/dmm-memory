@@ -28,7 +28,7 @@ export function Board() {
     <StyledMain>
       {game.cards.map((card, index) => {
         if (card.type === 'matchable') {
-          if (game.matches.has(card.matchId)) {
+          if (game.matched.has(card.id)) {
             return <MatchedCard key={card.id} text={card.text} language={card.language} />;
           }
           const isCardRevealed = [game.choice1, game.choice2].includes(card.id);

@@ -12,6 +12,7 @@ export function useHistory<Snapshot>(initialState: Snapshot): {
   function push(snapshot: Snapshot) {
     setHistory([...history, snapshot]);
     setStep(step + 1);
+    console.log([...history, snapshot]);
   }
 
   function reset(newInitialState: Snapshot) {
