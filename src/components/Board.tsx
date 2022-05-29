@@ -5,6 +5,7 @@ import { EffectCard } from './Cards/EffectCard';
 import { MatchedCard } from './Cards/MatchedCard';
 import styled from 'styled-components';
 import { useGame } from '../features/useGame';
+import { twoChoices } from '../utils/choices';
 
 const StyledMain = styled.main`
   margin: 0 auto;
@@ -34,13 +35,12 @@ export function Board() {
           }
           const isCardRevealed = [game.choice1, game.choice2].includes(card.id);
           if (isCardRevealed) {
-            const areBothChoicesRevealed = typeof game.choice1 === 'string' && typeof game.choice2 === 'string';
             return (
               <RevealedCard
                 key={card.id}
                 text={card.text}
                 language={card.language}
-                onClick={areBothChoicesRevealed ? () => game.revealCard(index) : undefined}
+                onClick={twoChoices(game) ? () => game.revealCard(index) : undefined}
               />
             );
           }

@@ -5,6 +5,7 @@ import { goalToCards } from '../api/goalToCards';
 import { useCountdown } from './useCountdown';
 import { useGameClock } from './useGameClock';
 import { effects } from '../effects/effects';
+import { oneChoice, twoChoices, zeroChoices } from '../utils/choices';
 
 export type Id = string;
 export type MatchId = number;
@@ -111,8 +112,7 @@ const GameProvider = ({ children }: GameProviderProps) => {
 
     // Set countdown
     countdown.stop();
-    const oneCardFlipped = typeof nextSnapshot.choice1 === 'string' && typeof nextSnapshot.choice2 !== 'string';
-    if (oneCardFlipped) countdown.start(nextSnapshot.timeLimit);
+    if (oneChoice(nextSnapshot)) countdown.start(nextSnapshot.timeLimit);
 
     // Save current game time
     nextSnapshot.secondsPlayed = gameClock.seconds;
@@ -146,14 +146,14 @@ export function flipCards(snapshot: Snapshot, card: GameCard): void {
   switch (card.type) {
     case 'matchable': {
       // Hide both cards, if two choices were already made
-      if (typeof snapshot.choice1 === 'string' && typeof snapshot.choice2 === 'string') {
+      if (twoChoices(snapshot)) {
         snapshot.choice1 = null;
         snapshot.choice2 = null;
       }
       // Flip one card
-      if (snapshot.choice1 === null) {
+      if (zeroChoices(snapshot)) {
         snapshot.choice1 = card.id;
-      } else if (snapshot.choice2 === null) {
+      } else if (oneChoice(snapshot)) {
         snapshot.choice2 = card.id;
       }
       // Check for a match

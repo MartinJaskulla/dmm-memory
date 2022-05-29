@@ -1,6 +1,7 @@
 import { Effect } from '../effects';
 import { Snapshot } from '../../features/useGame';
 import { isObject } from '../../utils/isObject';
+import { oneChoice } from '../../utils/choices';
 
 // Increases time limit between flips for the next three moves.
 
@@ -16,8 +17,7 @@ export const timerEffect: Effect = {
     history: (snapshot: Snapshot) => {
       // Change time limit
       if (EFFECT in snapshot.effects && isCounter(snapshot.effects[EFFECT])) {
-        const onlyOneCardChosen = typeof snapshot.choice1 === 'string' && typeof snapshot.choice2 !== 'string';
-        if (onlyOneCardChosen) {
+        if (oneChoice(snapshot)) {
           snapshot.effects[EFFECT].counter--;
           if (snapshot.effects[EFFECT].counter === 0) {
             delete snapshot.effects[EFFECT];
