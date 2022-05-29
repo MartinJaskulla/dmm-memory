@@ -4,10 +4,17 @@ import { GETGoal } from './fetchGoal';
 import { createId } from '../utils/createId';
 import { Effect } from '../effects/effects';
 
-export function goalToCards(goal: GETGoal, effects: Effect[]): Pick<Snapshot, 'cards' | 'cardIds'> {
+export function createGame(
+  goal: GETGoal,
+  effects: Effect[],
+  nPairs: number,
+  nEffects: number,
+): Pick<Snapshot, 'cards' | 'cardIds'> {
   const cards: Snapshot['cards'] = {};
 
-  effects.forEach((effect) => {
+  const effectsCopy: Effect[] = [...effects];
+  shuffle(effectsCopy);
+  effectsCopy.slice(0, nEffects).forEach((effect) => {
     const id = createId();
     cards[id] = {
       type: 'effect',
@@ -17,10 +24,9 @@ export function goalToCards(goal: GETGoal, effects: Effect[]): Pick<Snapshot, 'c
     };
   });
 
-  const goalItems: GETGoal['goal_items'] = structuredClone(goal.goal_items);
-  shuffle(goalItems);
-  const randomGoalItems = goalItems.slice(0, 6);
-  randomGoalItems.forEach((item) => {
+  const goalItemsCopy: GETGoal['goal_items'] = structuredClone(goal.goal_items);
+  shuffle(goalItemsCopy);
+  goalItemsCopy.slice(0, nPairs).forEach((item) => {
     const id1 = createId();
     cards[id1] = {
       type: 'matchable',
@@ -41,7 +47,6 @@ export function goalToCards(goal: GETGoal, effects: Effect[]): Pick<Snapshot, 'c
   });
 
   const cardIds = Object.keys(cards);
-
   shuffle(cardIds);
 
   return { cards, cardIds };

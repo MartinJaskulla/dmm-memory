@@ -1,11 +1,14 @@
 import React, { useEffect } from 'react';
 import { fetchGoal } from '../api/fetchGoal';
 import { useHistory } from './useHistory';
-import { goalToCards } from '../api/goalToCards';
+import { createGame } from '../api/createGame';
 import { useCountdown } from './useCountdown';
 import { useGameClock } from './useGameClock';
 import { effects } from '../effects/effects';
 import { oneChoice, twoChoices, zeroChoices } from '../utils/choices';
+
+const NUMBER_OF_PAIRS = 6;
+const NUMBER_OF_EFFECTS = 2;
 
 export type Id = string;
 export type MatchId = number;
@@ -95,7 +98,7 @@ const GameProvider = ({ children }: GameProviderProps) => {
 
   async function newGame() {
     const goal = await fetchGoal();
-    const { cards, cardIds } = goalToCards(goal, effects.effects);
+    const { cards, cardIds } = createGame(goal, effects.effects, NUMBER_OF_PAIRS, NUMBER_OF_EFFECTS);
     gameClock.setSeconds(0);
     history.reset({ ...defaultSnapshot, cards, cardIds });
   }
