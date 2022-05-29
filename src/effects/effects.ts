@@ -28,8 +28,8 @@ export const effects: Effects = {
   middleware: {
     history: (snapshot) => {
       return effectRegistry.reduce((finalSnapshot, effect) => {
-        const revealedCard = finalSnapshot.cards.find((card) => card.id === snapshot.latestCard);
-        if (!revealedCard) return finalSnapshot;
+        if (snapshot.latestCard === null) return finalSnapshot;
+        const revealedCard = finalSnapshot.cards[snapshot.latestCard];
 
         const sameEffect = revealedCard.type === 'effect' && revealedCard.effect === effect.effect;
         const hasPastEffect = effect.effect in snapshot.effects;

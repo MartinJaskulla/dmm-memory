@@ -26,12 +26,13 @@ export interface GameCardEffect {
 export type GameCard = GameCardMatchable | GameCardEffect;
 
 export interface Snapshot {
+  cards: Record<Id, GameCard>;
+  cardIds: Id[];
   choice1: Id | null;
   choice2: Id | null;
   latestCard: Id | null;
   matched: Set<Id>;
   foundEffects: Set<Id>;
-  cards: GameCard[];
   secondsPlayed: number;
   timeLimit: number | null;
   effects: {
@@ -40,7 +41,8 @@ export interface Snapshot {
 }
 
 const defaultSnapshot: Snapshot = {
-  cards: [],
+  cards: {},
+  cardIds: [],
   choice1: null,
   choice2: null,
   latestCard: null,
@@ -92,19 +94,20 @@ const GameProvider = ({ children }: GameProviderProps) => {
 
   async function newGame() {
     const goal = await fetchGoal();
-    const cards = goalToCards(goal, effects.effects);
+    const { cards, cardIds } = goalToCards(goal, effects.effects);
     gameClock.setSeconds(0);
-    history.reset({ ...defaultSnapshot, cards });
+    history.reset({ ...defaultSnapshot, cards, cardIds });
   }
 
   function revealCard(revealedCardIndex: number) {
     const nextSnapshot: Snapshot = structuredClone(snapshot);
 
-    // Flip cards
-    flipCards(nextSnapshot, revealedCardIndex);
-
     // Save revealed card
-    nextSnapshot.latestCard = nextSnapshot.cards[revealedCardIndex].id;
+    const revealedCardId = nextSnapshot.cardIds[revealedCardIndex];
+    nextSnapshot.latestCard = revealedCardId;
+
+    // Flip cards
+    flipCards(nextSnapshot, nextSnapshot.cards[revealedCardId]);
 
     // Set countdown
     countdown.stop();
@@ -139,11 +142,9 @@ function useGame(): GameContextValue {
   return React.useContext(GameContext);
 }
 
-export function flipCards(snapshot: Snapshot, revealedCardIndex: number): void {
-  const card = snapshot.cards[revealedCardIndex];
-
+export function flipCards(snapshot: Snapshot, card: GameCard): void {
   switch (card.type) {
-    case 'matchable':
+    case 'matchable': {
       // Hide both cards, if two choices were already made
       if (typeof snapshot.choice1 === 'string' && typeof snapshot.choice2 === 'string') {
         snapshot.choice1 = null;
@@ -155,25 +156,25 @@ export function flipCards(snapshot: Snapshot, revealedCardIndex: number): void {
       } else if (snapshot.choice2 === null) {
         snapshot.choice2 = card.id;
       }
+      // Check for a match
+      const card1 = snapshot.choice1 ? snapshot.cards[snapshot.choice1] : null;
+      const card2 = snapshot.choice2 ? snapshot.cards[snapshot.choice2] : null;
+      if (card1 && card2) {
+        if (card1.type !== 'matchable' || card2.type !== 'matchable') {
+          throw new Error('Only matchable cards should be choices');
+        }
+        if (card1.matchId === card2.matchId) {
+          snapshot.matched.add(card1.id);
+          snapshot.matched.add(card2.id);
+          snapshot.choice1 = null;
+          snapshot.choice2 = null;
+        }
+      }
       break;
+    }
     case 'effect': {
       snapshot.foundEffects.add(card.id);
       break;
-    }
-  }
-
-  // Check for a match
-  const card1 = snapshot.cards.find((card) => card.id === snapshot.choice1);
-  const card2 = snapshot.cards.find((card) => card.id === snapshot.choice2);
-  if (card1 && card2) {
-    if (card1.type !== 'matchable' || card2.type !== 'matchable') {
-      throw new Error('Only matchable cards should be choices');
-    }
-    if (card1.matchId === card2.matchId) {
-      snapshot.matched.add(card1.id);
-      snapshot.matched.add(card2.id);
-      snapshot.choice1 = null;
-      snapshot.choice2 = null;
     }
   }
 }

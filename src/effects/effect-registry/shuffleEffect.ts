@@ -13,13 +13,13 @@ export const shuffleEffect: Effect = {
   },
   middleware: {
     history: (snapshot: Snapshot) => {
-      const shuffleCardIndexOld = snapshot.cards.findIndex((card) => card.id === snapshot.latestCard);
-      snapshot.cards = shuffle(snapshot.cards);
-      const shuffleCardIndexNew = snapshot.cards.findIndex((card) => card.id === snapshot.latestCard);
+      const shuffleCardIndexOld = snapshot.cardIds.findIndex((cardId) => cardId === snapshot.latestCard);
+      snapshot.cardIds = shuffle(snapshot.cardIds);
+      const shuffleCardIndexNew = snapshot.cardIds.findIndex((cardId) => cardId === snapshot.latestCard);
       // Swap back to old index
-      [snapshot.cards[shuffleCardIndexNew], snapshot.cards[shuffleCardIndexOld]] = [
-        snapshot.cards[shuffleCardIndexOld],
-        snapshot.cards[shuffleCardIndexNew],
+      [snapshot.cardIds[shuffleCardIndexNew], snapshot.cardIds[shuffleCardIndexOld]] = [
+        snapshot.cardIds[shuffleCardIndexOld],
+        snapshot.cardIds[shuffleCardIndexNew],
       ];
 
       return snapshot;
