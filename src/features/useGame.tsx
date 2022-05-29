@@ -4,27 +4,7 @@ import { useHistory } from './useHistory';
 import { goalToCards } from '../api/goalToCards';
 import { useCountdown } from './useCountdown';
 import { useGameClock } from './useGameClock';
-
-/*
- TODO Each effect can
- - Register sth to run each second
- - middleware nextSnapshot
- - middleware contextValue
- - register an effect card (just the card, for its functionality use the middleware)
-
- addEffect((registry) => {
-  registry.addEffectCard()
- })
-
- Maybe regular rules like flipCard should not be an effect. Countdown should be? The countdown could still call a function?
- Maybe countdown should not be an effect. Game clock as well
-
- addEffectCard({
-    middleware1,
-    middleware2,
-    card: {text, type}
- })
- */
+import { effects } from '../effects/effects';
 
 export interface GameCardMatchable {
   type: 'matchable';
@@ -47,6 +27,7 @@ export type Id = number;
 export interface Snapshot {
   choice1: Index | null;
   choice2: Index | null;
+  latestCard: number | null;
   matches: Set<Id>;
   foundEffects: Set<Index>;
   cards: GameCard[];
@@ -61,6 +42,7 @@ const defaultSnapshot: Snapshot = {
   cards: [],
   choice1: null,
   choice2: null,
+  latestCard: null,
   matches: new Set(),
   foundEffects: new Set(),
   secondsPlayed: 0,
@@ -89,7 +71,7 @@ interface GameProviderProps {
 }
 
 const GameProvider = ({ children }: GameProviderProps) => {
-  const history = useHistory(defaultSnapshot);
+  const history = useHistory(defaultSnapshot, effects.middleware.history);
   const { snapshot } = history;
   const gameClock = useGameClock();
   const countdown = useCountdown(() => {
@@ -109,7 +91,7 @@ const GameProvider = ({ children }: GameProviderProps) => {
 
   async function newGame() {
     const goal = await fetchGoal();
-    const cards = goalToCards(goal);
+    const cards = goalToCards(goal, effects.cards);
     gameClock.setSeconds(0);
     history.reset({ ...defaultSnapshot, cards });
   }
@@ -117,6 +99,9 @@ const GameProvider = ({ children }: GameProviderProps) => {
   function revealCard(revealedCardIndex: number) {
     // Flip cards
     const nextSnapshot = flipCards(snapshot, revealedCardIndex);
+
+    // Save revealed card
+    nextSnapshot.latestCard = revealedCardIndex;
 
     // Countdown
     countdown.stop();
@@ -129,7 +114,7 @@ const GameProvider = ({ children }: GameProviderProps) => {
     history.push(nextSnapshot);
   }
 
-  const providerValue: GameContextValue = {
+  const value: GameContextValue = {
     ...snapshot,
     revealCard,
     newGame,
@@ -138,7 +123,9 @@ const GameProvider = ({ children }: GameProviderProps) => {
     secondsPlayed: gameClock.seconds,
   };
 
-  return <GameContext.Provider value={providerValue}>{children}</GameContext.Provider>;
+  const valueWithEffects = effects.middleware.game(value);
+
+  return <GameContext.Provider value={valueWithEffects}>{children}</GameContext.Provider>;
 };
 
 function useGame(): GameContextValue {

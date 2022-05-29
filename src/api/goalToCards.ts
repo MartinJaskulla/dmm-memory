@@ -1,14 +1,10 @@
 import { shuffle } from '../utils/shuffle';
-import { GameCard } from '../features/useGame';
+import { GameCard, GameCardEffect } from '../features/useGame';
 import { GETGoal } from './fetchGoal';
 
-export function goalToCards(goal: GETGoal): GameCard[] {
-  const cards: GameCard[] = [
-    { type: 'effect', effect: 'shuffle' },
-    { type: 'effect', effect: 'retry' },
-    { type: 'effect', effect: 'timer' },
-    { type: 'effect', effect: 'trick' },
-  ];
+export function goalToCards(goal: GETGoal, effects: GameCardEffect[]): GameCard[] {
+  const cards: GameCard[] = structuredClone(effects);
+
   const goalItems: GETGoal['goal_items'] = structuredClone(goal.goal_items);
   shuffle(goalItems);
   const randomGoalItems = goalItems.slice(0, 6);
