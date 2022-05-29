@@ -5,7 +5,6 @@ import { goalToCards } from '../utils/goalToCards';
 import { useCountdown } from '../utils/useCountdown';
 import { useGameClock } from '../utils/useGameClock';
 import { flipCards } from './flipCards';
-import { useEverySecond } from '../utils/timer';
 
 /*
  TODO Each effect can
@@ -98,12 +97,6 @@ const GameProvider = ({ children }: GameProviderProps) => {
     newGame();
   });
 
-  // Batched together so that both timers update at the same time visually
-  useEverySecond(() => {
-    gameClock.increment();
-    countdown.decrement();
-  });
-
   // React 18 calls useEffect twice in StrictMode, which means we call newGame() twice on mount.
   // Using a ref or a global or local variable to check if the call was already made is not pleasing to the eye.
   // AbortController could also be used to cancel the first request, but in this small project I don't mind fetching goal.json twice.
@@ -128,7 +121,7 @@ const GameProvider = ({ children }: GameProviderProps) => {
     if (
       typeof nextSnapshot.choice1 === 'number' &&
       typeof nextSnapshot.choice2 !== 'number' &&
-      nextSnapshot.countdown
+      typeof nextSnapshot.countdown === 'number'
     ) {
       countdown.start(nextSnapshot.countdown);
     }

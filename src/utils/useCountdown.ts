@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { animationInterval } from './timer';
 import { GameContextValue } from '../contexts/gameContext';
 
 export function useCountdown(onZero: () => void) {
   const [seconds, setSeconds] = useState<GameContextValue['countdown']>(null);
+  const abortControllerRef = useRef(new AbortController());
 
   useEffect(() => {
     if (seconds === 0) {
@@ -15,17 +17,18 @@ export function useCountdown(onZero: () => void) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [seconds]);
 
-  function start(timeLimit: GameContextValue['countdown']) {
+  function start(timeLimit: number) {
     setSeconds(timeLimit);
+    abortControllerRef.current = new AbortController();
+    animationInterval(1000, abortControllerRef.current.signal, () =>
+      setSeconds((seconds) => (typeof seconds === 'number' ? seconds - 1 : seconds)),
+    );
   }
 
   function stop() {
+    abortControllerRef.current.abort();
     setSeconds(null);
   }
 
-  function decrement() {
-    setSeconds((seconds) => (seconds === null ? null : seconds - 1));
-  }
-
-  return { start, stop, seconds, decrement };
+  return { start, stop, seconds };
 }
