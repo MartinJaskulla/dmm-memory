@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { fetchGoal } from '../api/fetchGoal';
 import { useHistory } from './useHistory';
 import { createGame } from '../api/createGame';
-import { useCountdown } from './useCountdown';
 import { effects } from '../effects/effects';
 import { oneChoice, twoChoices, zeroChoices } from '../utils/choices';
 import { ClockUnit, ClockValue } from './useClock';
@@ -29,6 +28,8 @@ export interface GameCardEffect {
 }
 export type GameCard = GameCardMatchable | GameCardEffect;
 
+export type TimeLimit = ClockUnit | null;
+
 export interface Snapshot {
   cards: Record<Id, GameCard>;
   cardIds: Id[];
@@ -38,7 +39,7 @@ export interface Snapshot {
   matched: Set<Id>;
   foundEffects: Set<Id>;
   timePlayed: ClockUnit;
-  timeLimit: number | null;
+  timeLimit: TimeLimit;
   effects: {
     [key: string]: unknown;
   };
@@ -57,7 +58,7 @@ const defaultSnapshot: Snapshot = {
   effects: {},
 };
 
-export type GameContextValue = Omit<Snapshot, 'timePlayed'> & {
+export type GameContextValue = Snapshot & {
   revealCard: (index: number) => void;
   newGame: () => void;
   moves: number;
@@ -68,7 +69,6 @@ const defaultGameContextValue: GameContextValue = {
   revealCard: () => null,
   newGame: () => null,
   moves: 0,
-  timeLimit: null,
 };
 
 const GameContext = React.createContext<GameContextValue>(defaultGameContextValue);
@@ -81,10 +81,6 @@ interface GameProviderProps {
 const GameProvider = ({ children, clock }: GameProviderProps) => {
   const history = useHistory(defaultSnapshot);
   const { snapshot } = history;
-  const countdown = useCountdown(() => {
-    alert('Time is up!');
-    newGame();
-  });
 
   // React 18 calls useEffect twice in StrictMode, which means we call newGame() twice on mount.
   // Using a ref or a global or local variable to check if the call was already made is not pleasing to the eye.
@@ -113,10 +109,6 @@ const GameProvider = ({ children, clock }: GameProviderProps) => {
     // Flip cards
     flipCards(nextSnapshot, nextSnapshot.cards[revealedCardId]);
 
-    // Set countdown
-    countdown.stop();
-    if (oneChoice(nextSnapshot)) countdown.start(nextSnapshot.timeLimit);
-
     // Save current game time
     nextSnapshot.timePlayed = clock.time;
 
@@ -131,15 +123,7 @@ const GameProvider = ({ children, clock }: GameProviderProps) => {
   }
 
   const value: GameContextValue = {
-    cardIds: snapshot.cardIds,
-    cards: snapshot.cards,
-    choice1: snapshot.choice1,
-    choice2: snapshot.choice2,
-    effects: snapshot.effects,
-    foundEffects: snapshot.foundEffects,
-    latestCard: snapshot.latestCard,
-    matched: snapshot.matched,
-    timeLimit: snapshot.timeLimit,
+    ...snapshot,
     revealCard,
     newGame,
     moves: history.history.length - 1,
