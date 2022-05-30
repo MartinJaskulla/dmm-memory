@@ -25,33 +25,38 @@ const StyledMain = styled.main`
 export function Board() {
   const game = useGame();
 
+  // if moves === 0. show cards for x seconds
+
   return (
-    <StyledMain>
-      {game.cardIds.map((cardId, index) => {
-        const card = game.cards[cardId];
-        if (card.type === 'matchable') {
-          if (game.matched.has(card.id)) {
-            return <MatchedCard key={card.id} text={card.text} language={card.language} />;
+    <>
+      <StyledMain>
+        {game.cardIds.map((cardId, index) => {
+          const card = game.cards[cardId];
+          if (card.type === 'matchable') {
+            if (game.matched.has(card.id)) {
+              return <MatchedCard key={card.id} text={card.text} language={card.language} />;
+            }
+            const isCardRevealed = [game.choice1, game.choice2].includes(card.id);
+            if (isCardRevealed || game.over) {
+              return (
+                <RevealedCard
+                  key={card.id}
+                  text={card.text}
+                  language={card.language}
+                  onClick={twoChoices(game) ? () => game.revealCard(index) : undefined}
+                />
+              );
+            }
           }
-          const isCardRevealed = [game.choice1, game.choice2].includes(card.id);
-          if (isCardRevealed) {
-            return (
-              <RevealedCard
-                key={card.id}
-                text={card.text}
-                language={card.language}
-                onClick={twoChoices(game) ? () => game.revealCard(index) : undefined}
-              />
-            );
+
+          if (card.type === 'effect' && (game.foundEffects.has(card.id) || game.over)) {
+            return <EffectCard key={card.id} text={card.effect} />;
           }
-        }
 
-        if (card.type === 'effect' && game.foundEffects.has(card.id)) {
-          return <EffectCard key={card.id} text={card.effect} />;
-        }
-
-        return <HiddenCard key={card.id} onClick={() => game.revealCard(index)} />;
-      })}
-    </StyledMain>
+          return <HiddenCard key={card.id} onClick={() => game.revealCard(index)} />;
+        })}
+      </StyledMain>
+      {game?.over && <h1>{game.over.reason}</h1>}
+    </>
   );
 }

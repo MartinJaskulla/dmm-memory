@@ -19,7 +19,7 @@ const CountdownProvider = ({ children }: CountdownProps) => {
   useEffect(() => {
     if (time === 0) {
       stop();
-      loose();
+      loose('Time is up! 😭');
     }
     // Can't wait for useEvent: https://github.com/reactjs/rfcs/pull/220
     // eslint-disable-next-line react-hooks/exhaustive-deps

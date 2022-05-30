@@ -6,8 +6,8 @@ import { effects } from '../effects/effects';
 import { oneChoice, twoChoices, zeroChoices } from '../utils/choices';
 import { ClockUnit, ClockValue } from './useClock';
 
-const NUMBER_OF_PAIRS = 6;
-const NUMBER_OF_EFFECTS = 2;
+const NUMBER_OF_PAIRS = 2;
+const NUMBER_OF_EFFECTS = 1;
 
 export type Id = string;
 export type MatchId = number;
@@ -38,6 +38,7 @@ export interface Snapshot {
   latestCard: Id | null;
   matched: Set<Id>;
   foundEffects: Set<Id>;
+  over: { win: boolean; reason: string } | null;
   timePlayed: ClockUnit;
   timeLimit: TimeLimit;
   effects: {
@@ -53,22 +54,21 @@ const defaultSnapshot: Snapshot = {
   latestCard: null,
   matched: new Set(),
   foundEffects: new Set(),
+  over: null,
   timePlayed: new Date(0),
-  timeLimit: 1000,
+  timeLimit: 1,
   effects: {},
 };
 
 export type GameValue = Snapshot & {
   revealCard: (index: number) => void;
-  win: () => void;
-  loose: () => void;
+  loose: (reason: string) => void;
   moves: number;
 };
 
 const defaultGameContextValue: GameValue = {
   ...defaultSnapshot,
   revealCard: () => null,
-  win: () => null,
   loose: () => null,
   moves: 0,
 };
@@ -78,11 +78,9 @@ const GameContext = React.createContext<GameValue>(defaultGameContextValue);
 interface GameProps {
   children: React.ReactNode;
   clock: ClockValue;
-  onWin?: (gameValue: GameValue) => void;
-  onLoose?: (gameValue: GameValue) => void;
 }
 
-const GameProvider = ({ children, clock, onWin, onLoose }: GameProps) => {
+const GameProvider = ({ children, clock }: GameProps) => {
   const history = useHistory(defaultSnapshot);
   const { snapshot } = history;
 
@@ -96,14 +94,10 @@ const GameProvider = ({ children, clock, onWin, onLoose }: GameProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function win() {
-    newGame();
-    onWin?.(gameValue);
-  }
-
-  function loose() {
-    newGame();
-    onLoose?.(gameValue);
+  function loose(reason: string) {
+    const losingSnapshot: Snapshot = structuredClone(snapshot);
+    losingSnapshot.over = { win: false, reason };
+    history.push(losingSnapshot);
   }
 
   async function newGame() {
@@ -129,6 +123,10 @@ const GameProvider = ({ children, clock, onWin, onLoose }: GameProps) => {
     // Add effects
     effects.middleware.history(nextSnapshot);
 
+    // Check win
+    const foundAllPairs = nextSnapshot.matched.size / 2 === NUMBER_OF_PAIRS;
+    if (foundAllPairs) nextSnapshot.over = { win: true, reason: 'You found all pairs! 🎉' };
+
     // Save history
     history.push(nextSnapshot);
   }
@@ -136,17 +134,12 @@ const GameProvider = ({ children, clock, onWin, onLoose }: GameProps) => {
   const gameValue: GameValue = {
     ...snapshot,
     revealCard,
-    win,
     loose,
     moves: history.history.length - 1,
   };
 
+  // TODO Delete
   const gameValueAfterEffects = effects.middleware.game(gameValue);
-
-  useEffect(() => {
-    if (checkWin(gameValueAfterEffects)) setTimeout(() => win?.(), 0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [checkWin(gameValueAfterEffects)]);
 
   return <GameContext.Provider value={gameValueAfterEffects}>{children}</GameContext.Provider>;
 };
@@ -190,10 +183,6 @@ export function flipCards(snapshot: Snapshot, card: GameCard): void {
       break;
     }
   }
-}
-
-function checkWin(gameValue: GameValue): boolean {
-  return gameValue.matched.size / 2 === NUMBER_OF_PAIRS;
 }
 
 export { GameProvider, useGame };
