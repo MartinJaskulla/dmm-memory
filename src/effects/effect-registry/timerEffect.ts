@@ -14,31 +14,29 @@ export const timerEffect: Effect = {
     text: 'Timer',
   },
   middleware: {
-    history: {
-      active: (snapshot: Snapshot) => {
-        const counter: TimerData[typeof EFFECT] = { counter: 3 };
-        snapshot.effects[EFFECT] = counter;
-        const increasedTimeLimit =
-          typeof snapshot.timeLimit === 'number' ? snapshot.timeLimit + INCREASE_TIME_LIMIT_BY : snapshot.timeLimit;
-        snapshot.timeLimit = increasedTimeLimit;
-        return snapshot;
-      },
-      passive: (snapshot: Snapshot) => {
-        if (hasTimerData(snapshot.effects)) {
-          if (oneChoice(snapshot)) {
-            snapshot.effects[EFFECT].counter--;
-            if (snapshot.effects[EFFECT].counter === 0) {
-              // @ts-ignore
-              delete snapshot.effects[EFFECT];
-              if (typeof snapshot.timeLimit === 'number') {
-                const revertedTimeLimit = snapshot.timeLimit - INCREASE_TIME_LIMIT_BY;
-                snapshot.timeLimit = revertedTimeLimit < 0 ? 0 : revertedTimeLimit;
-              }
+    active: (snapshot: Snapshot) => {
+      const counter: TimerData[typeof EFFECT] = { counter: 3 };
+      snapshot.effects[EFFECT] = counter;
+      const increasedTimeLimit =
+        typeof snapshot.timeLimit === 'number' ? snapshot.timeLimit + INCREASE_TIME_LIMIT_BY : snapshot.timeLimit;
+      snapshot.timeLimit = increasedTimeLimit;
+      return snapshot;
+    },
+    passive: (snapshot: Snapshot) => {
+      if (hasTimerData(snapshot.effects)) {
+        if (oneChoice(snapshot)) {
+          snapshot.effects[EFFECT].counter--;
+          if (snapshot.effects[EFFECT].counter === 0) {
+            // @ts-ignore
+            delete snapshot.effects[EFFECT];
+            if (typeof snapshot.timeLimit === 'number') {
+              const revertedTimeLimit = snapshot.timeLimit - INCREASE_TIME_LIMIT_BY;
+              snapshot.timeLimit = revertedTimeLimit < 0 ? 0 : revertedTimeLimit;
             }
           }
         }
-        return snapshot;
-      },
+      }
+      return snapshot;
     },
   },
 };

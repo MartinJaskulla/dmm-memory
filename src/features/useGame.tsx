@@ -120,7 +120,7 @@ const GameProvider = ({ children, clock }: GameProps) => {
   function takeSnapshot(snapshotUpdates: Partial<Snapshot>) {
     const nextSnapshot: Snapshot = merge(structuredClone(snapshot), snapshotUpdates);
     nextSnapshot.timePlayed = clock.time;
-    effects.middleware.history(nextSnapshot);
+    effects.middleware(nextSnapshot);
     history.push(nextSnapshot);
   }
 
@@ -131,10 +131,7 @@ const GameProvider = ({ children, clock }: GameProps) => {
     moves: history.history.length - 1,
   };
 
-  // TODO Delete
-  const gameValueAfterEffects = effects.middleware.game(gameValue);
-
-  return <GameContext.Provider value={gameValueAfterEffects}>{children}</GameContext.Provider>;
+  return <GameContext.Provider value={gameValue}>{children}</GameContext.Provider>;
 };
 
 function useGame(): GameValue {
