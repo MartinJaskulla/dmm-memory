@@ -3,14 +3,12 @@ import { Header } from './components/Header';
 import { Board } from './components/Board';
 import { GameProvider } from './features/useGame';
 import { useClock } from './features/useClock';
-import { CountdownProvider } from './features/useCountdown';
+import { useCountdown } from './features/useCountdown';
 
 function App() {
   return (
-    <GameProvider clock={useClock()}>
-      <CountdownProvider>
-        <Header />
-      </CountdownProvider>
+    <GameProvider clock={useClock()} countdown={useCountdown()}>
+      <Header />
       <Board />
     </GameProvider>
   );

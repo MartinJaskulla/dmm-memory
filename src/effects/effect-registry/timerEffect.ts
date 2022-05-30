@@ -23,19 +23,18 @@ export const timerEffect: Effect = {
       return snapshot;
     },
     passive: (snapshot: Snapshot) => {
-      if (hasTimerData(snapshot.effects)) {
-        if (oneChoice(snapshot)) {
-          snapshot.effects[EFFECT].counter--;
-          if (snapshot.effects[EFFECT].counter === 0) {
-            // @ts-ignore
-            delete snapshot.effects[EFFECT];
-            if (typeof snapshot.timeLimit === 'number') {
-              const revertedTimeLimit = snapshot.timeLimit - INCREASE_TIME_LIMIT_BY;
-              snapshot.timeLimit = revertedTimeLimit < 0 ? 0 : revertedTimeLimit;
-            }
-          }
-        }
-      }
+      if (!snapshot.latestCard) return snapshot;
+      const isEffectCard = snapshot.foundEffects.has(snapshot.latestCard);
+      if (isEffectCard) return snapshot;
+      if (!hasTimerData(snapshot.effects)) return snapshot;
+      if (!oneChoice(snapshot)) return snapshot;
+      snapshot.effects[EFFECT].counter--;
+      if (snapshot.effects[EFFECT].counter !== 0) return snapshot;
+      // @ts-ignore
+      delete snapshot.effects[EFFECT];
+      if (typeof snapshot.timeLimit !== 'number') return snapshot;
+      const revertedTimeLimit = snapshot.timeLimit - INCREASE_TIME_LIMIT_BY;
+      snapshot.timeLimit = revertedTimeLimit < 0 ? 0 : revertedTimeLimit;
       return snapshot;
     },
   },

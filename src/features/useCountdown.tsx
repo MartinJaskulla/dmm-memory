@@ -1,50 +1,48 @@
 import React, { createContext, ReactNode, useContext, useEffect, useRef, useState } from 'react';
 import { interval } from '../utils/interval';
-import { TimeLimit, useGame } from './useGame';
-import { oneChoice } from '../utils/choices';
+import { TimeLimit } from './useGame';
 
-export type CountdownValue = TimeLimit;
+export type CountdownValue = { remaining: TimeLimit; stop: () => void; start: (timeLimit: TimeLimit) => void };
 
-const CountdownContext = createContext<CountdownValue>(null);
+const CountdownContext = createContext<CountdownValue>({
+  remaining: null,
+  stop: () => null,
+  start: () => null,
+});
 
 interface CountdownProps {
   children: ReactNode;
 }
 
 const CountdownProvider = ({ children }: CountdownProps) => {
-  const [time, setTime] = useState<TimeLimit>(null);
+  const [remaining, setRemaining] = useState<TimeLimit>(null);
   const abortControllerRef = useRef(new AbortController());
-  const { loose, choice1, choice2, timeLimit } = useGame();
 
   useEffect(() => {
-    if (time === 0) {
-      stop();
-      loose('Time is up! 😭');
-    }
-    // Can't wait for useEvent: https://github.com/reactjs/rfcs/pull/220
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [time]);
-
-  useEffect(() => {
-    stop();
-    if (oneChoice({ choice1, choice2 })) start(timeLimit);
-  }, [choice1, choice2, timeLimit]);
+    if (remaining === 0) stop();
+  }, [remaining]);
 
   function start(timeLimit: TimeLimit) {
     if (timeLimit === null) return;
-    setTime(timeLimit);
+    setRemaining(timeLimit);
     abortControllerRef.current = new AbortController();
     interval(1000, abortControllerRef.current.signal, () =>
-      setTime((seconds) => (typeof seconds === 'number' ? seconds - 1 : seconds)),
+      setRemaining((seconds) => (typeof seconds === 'number' ? seconds - 1 : seconds)),
     );
   }
 
   function stop() {
     abortControllerRef.current.abort();
-    setTime(null);
+    setRemaining(null);
   }
 
-  return <CountdownContext.Provider value={time}>{children}</CountdownContext.Provider>;
+  const value: CountdownValue = {
+    remaining,
+    start,
+    stop,
+  };
+
+  return <CountdownContext.Provider value={value}>{children}</CountdownContext.Provider>;
 };
 
 function useCountdown(): CountdownValue {

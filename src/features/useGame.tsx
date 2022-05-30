@@ -6,8 +6,9 @@ import { effects } from '../effects/effects';
 import { oneChoice, twoChoices, zeroChoices } from '../utils/choices';
 import { ClockUnit, ClockValue } from './useClock';
 import { merge } from '../utils/merge';
+import { CountdownValue } from './useCountdown';
 
-const NUMBER_OF_PAIRS = 4;
+const NUMBER_OF_PAIRS = 2;
 const NUMBER_OF_EFFECTS = 2;
 const TIME_LIMIT = 30;
 
@@ -64,14 +65,12 @@ const defaultSnapshot: Snapshot = {
 
 export type GameValue = Snapshot & {
   revealCard: (index: number) => void;
-  loose: (reason: string) => void;
   moves: number;
 };
 
 const defaultGameContextValue: GameValue = {
   ...defaultSnapshot,
   revealCard: () => null,
-  loose: () => null,
   moves: 0,
 };
 
@@ -80,9 +79,10 @@ const GameContext = React.createContext<GameValue>(defaultGameContextValue);
 interface GameProps {
   children: React.ReactNode;
   clock: ClockValue;
+  countdown: CountdownValue;
 }
 
-const GameProvider = ({ children, clock }: GameProps) => {
+const GameProvider = ({ children, clock, countdown }: GameProps) => {
   const history = useHistory(defaultSnapshot);
   const { snapshot } = history;
 
@@ -110,10 +110,19 @@ const GameProvider = ({ children, clock }: GameProps) => {
   function revealCard(revealedCardIndex: number) {
     const cardId = snapshot.cardIds[revealedCardIndex];
     const snapshotUpdates: FlippedCards & Partial<Snapshot> = flipCards(snapshot, snapshot.cards[cardId]);
+
+    // TODO Put each comment in a function checkForWinAfterFlippingCards
     // Check for win after flipping cards
     snapshotUpdates.over =
       snapshotUpdates.matched.size / 2 === NUMBER_OF_PAIRS ? { win: true, reason: 'You found all pairs! 🎉' } : null;
     snapshotUpdates.latestCard = cardId;
+
+    // Restart countdown after flipping cards
+    countdown.stop();
+    if (oneChoice({ choice1: snapshotUpdates.choice1, choice2: snapshotUpdates.choice2 })) {
+      countdown.start(snapshot.timeLimit);
+    }
+
     takeSnapshot(snapshotUpdates);
   }
 
@@ -124,10 +133,19 @@ const GameProvider = ({ children, clock }: GameProps) => {
     history.push(nextSnapshot);
   }
 
+  useEffect(() => {
+    if (countdown.remaining === 0) loose('Time is up! 😭');
+    // Can't wait for useEvent: https://github.com/reactjs/rfcs/pull/220
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [countdown.remaining]);
+
+  useEffect(() => {
+    if (snapshot.over) alert(snapshot.over.reason);
+  }, [snapshot.over]);
+
   const gameValue: GameValue = {
     ...snapshot,
     revealCard,
-    loose,
     moves: history.history.length - 1,
   };
 
@@ -149,7 +167,7 @@ export function flipCards(snapshot: Snapshot, card: GameCard): FlippedCards {
 
   switch (card.type) {
     case 'matchable': {
-      // Hide both cards, if two choices were already made
+      // Hide both cards, if two choices were already made. Don't do this for effects. Otherwise shuffle looks confusing.
       if (twoChoices(updates)) {
         updates.choice1 = null;
         updates.choice2 = null;

@@ -22,11 +22,6 @@ const StyledMain = styled.main`
   }
 `;
 
-const StyledH1 = styled.h1`
-  display: flex;
-  justify-content: center;
-`;
-
 export function Board() {
   const game = useGame();
 
@@ -61,7 +56,6 @@ export function Board() {
           return <HiddenCard key={card.id} onClick={() => game.revealCard(index)} />;
         })}
       </StyledMain>
-      {game?.over && <StyledH1>{game.over.reason}</StyledH1>}
     </>
   );
 }
