@@ -7,7 +7,7 @@ import { useGameClock } from './useGameClock';
 import { effects } from '../effects/effects';
 import { oneChoice, twoChoices, zeroChoices } from '../utils/choices';
 
-const NUMBER_OF_PAIRS = 6;
+const NUMBER_OF_PAIRS = 1;
 const NUMBER_OF_EFFECTS = 2;
 
 export type Id = string;
@@ -125,6 +125,9 @@ const GameProvider = ({ children }: GameProviderProps) => {
 
     // Save history
     history.push(nextSnapshot);
+
+    // Check win
+    checkWin(nextSnapshot, newGame);
   }
 
   const value: GameContextValue = {
@@ -180,6 +183,17 @@ export function flipCards(snapshot: Snapshot, card: GameCard): void {
       break;
     }
   }
+}
+
+function checkWin(snapshot: Snapshot, newGame: () => void): boolean {
+  const hasWon = snapshot.matched.size / 2 === NUMBER_OF_PAIRS;
+  if (hasWon) {
+    setTimeout(() => {
+      alert('You won');
+      newGame();
+    }, 0);
+  }
+  return hasWon;
 }
 
 export { GameProvider, useGame };
