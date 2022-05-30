@@ -1,8 +1,8 @@
-import { GameContextValue, Snapshot } from '../features/useGame';
+import { GameValue, Snapshot } from '../features/useGame';
 import { effectRegistry } from './effect-registry/effectRegistry';
 
 type HistoryMiddleware = (snapshot: Snapshot) => Snapshot;
-type GameMiddleware = (game: GameContextValue) => GameContextValue;
+type GameMiddleware = (game: GameValue) => GameValue;
 
 export interface Effect {
   effect: string;

@@ -58,27 +58,28 @@ const defaultSnapshot: Snapshot = {
   effects: {},
 };
 
-export type GameContextValue = Snapshot & {
+export type GameValue = Snapshot & {
   revealCard: (index: number) => void;
   newGame: () => void;
   moves: number;
 };
 
-const defaultGameContextValue: GameContextValue = {
+const defaultGameContextValue: GameValue = {
   ...defaultSnapshot,
   revealCard: () => null,
   newGame: () => null,
   moves: 0,
 };
 
-const GameContext = React.createContext<GameContextValue>(defaultGameContextValue);
+const GameContext = React.createContext<GameValue>(defaultGameContextValue);
 
-interface GameProviderProps {
+interface GameProps {
   children: React.ReactNode;
   clock: ClockValue;
+  onWin?: () => void;
 }
 
-const GameProvider = ({ children, clock }: GameProviderProps) => {
+const GameProvider = ({ children, clock, onWin }: GameProps) => {
   const history = useHistory(defaultSnapshot);
   const { snapshot } = history;
 
@@ -119,10 +120,10 @@ const GameProvider = ({ children, clock }: GameProviderProps) => {
     history.push(nextSnapshot);
 
     // Check win
-    checkWin(nextSnapshot, newGame);
+    checkWin(nextSnapshot, newGame, onWin);
   }
 
-  const value: GameContextValue = {
+  const value: GameValue = {
     ...snapshot,
     revealCard,
     newGame,
@@ -134,7 +135,7 @@ const GameProvider = ({ children, clock }: GameProviderProps) => {
   return <GameContext.Provider value={valueWithEffects}>{children}</GameContext.Provider>;
 };
 
-function useGame(): GameContextValue {
+function useGame(): GameValue {
   return React.useContext(GameContext);
 }
 
@@ -175,12 +176,12 @@ export function flipCards(snapshot: Snapshot, card: GameCard): void {
   }
 }
 
-function checkWin(snapshot: Snapshot, newGame: () => void): boolean {
+function checkWin(snapshot: Snapshot, newGame: GameValue['newGame'], onWin: GameProps['onWin']): boolean {
   const hasWon = snapshot.matched.size / 2 === NUMBER_OF_PAIRS;
   if (hasWon) {
     setTimeout(() => {
-      alert('You won');
       newGame();
+      onWin?.();
     }, 0);
   }
   return hasWon;

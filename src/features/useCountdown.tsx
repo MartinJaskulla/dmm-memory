@@ -1,6 +1,7 @@
 import React, { createContext, ReactNode, useContext, useEffect, useRef, useState } from 'react';
 import { interval } from '../utils/interval';
 import { TimeLimit, useGame } from './useGame';
+import { oneChoice } from '../utils/choices';
 
 export type CountdownValue = TimeLimit;
 
@@ -8,9 +9,10 @@ const CountdownContext = createContext<CountdownValue>(null);
 
 interface CountdownProps {
   children: ReactNode;
+  onZero?: () => void;
 }
 
-const CountdownProvider = ({ children }: CountdownProps) => {
+const CountdownProvider = ({ children, onZero }: CountdownProps) => {
   const [time, setTime] = useState<TimeLimit>(null);
   const abortControllerRef = useRef(new AbortController());
   const { newGame, choice1, choice2, timeLimit } = useGame();
@@ -18,8 +20,8 @@ const CountdownProvider = ({ children }: CountdownProps) => {
   useEffect(() => {
     if (time === 0) {
       stop();
-      alert('Time is up!');
       newGame();
+      onZero?.();
     }
     // Can't wait for useEvent: https://github.com/reactjs/rfcs/pull/220
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -27,7 +29,7 @@ const CountdownProvider = ({ children }: CountdownProps) => {
 
   useEffect(() => {
     stop();
-    if (choice1 && !choice2) start(timeLimit);
+    if (oneChoice({ choice1, choice2 })) start(timeLimit);
   }, [choice1, choice2, timeLimit]);
 
   function start(timeLimit: TimeLimit) {
