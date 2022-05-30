@@ -1,24 +1,24 @@
 import React, { createContext, ReactNode, useContext, useState } from 'react';
 import { useEverySecond } from '../utils/interval';
 
-export type ClockUnit = number;
+export type ClockUnit = Date;
 
 export interface ClockValue {
   time: ClockUnit;
   setTime: (seconds: ClockUnit) => void;
 }
 
-const ClockContext = createContext<ClockValue>({ time: 0, setTime: () => null });
+const defaultValue: ClockValue = { time: new Date(0), setTime: () => null };
+
+const ClockContext = createContext<ClockValue>(defaultValue);
 
 interface ClockProps {
   children: ReactNode;
 }
 
 const ClockProvider = ({ children }: ClockProps) => {
-  const [time, setTime] = useState<ClockUnit>(0);
-  // TODO Is still inaccurate if someone changes game clock at 0.3s. Do what countdown does instead.
-  // TODO Use timestamps
-  useEverySecond(() => setTime((seconds) => seconds + 1));
+  const [time, setTime] = useState<ClockUnit>(defaultValue.time);
+  useEverySecond(() => setTime((date) => new Date(date.getTime() + 1000)));
 
   const value: ClockValue = { time, setTime };
 

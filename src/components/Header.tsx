@@ -33,7 +33,7 @@ export function Header() {
   const clock = useClock();
   const countdown = useCountdown();
   const { moves } = useGame();
-  const formattedSeconds = new Date(clock.time * 1000).toISOString().slice(14, 19);
+  const formattedSeconds = clock.time.toISOString().slice(14, 19);
 
   return (
     <StyledHeader>

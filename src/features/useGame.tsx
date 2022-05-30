@@ -28,7 +28,7 @@ export interface GameCardEffect {
 }
 export type GameCard = GameCardMatchable | GameCardEffect;
 
-export type TimeLimit = ClockUnit | null;
+export type TimeLimit = number | null;
 
 export interface Snapshot {
   cards: Record<Id, GameCard>;
@@ -53,7 +53,7 @@ const defaultSnapshot: Snapshot = {
   latestCard: null,
   matched: new Set(),
   foundEffects: new Set(),
-  timePlayed: 0,
+  timePlayed: new Date(0),
   timeLimit: 1000,
   effects: {},
 };
@@ -96,7 +96,7 @@ const GameProvider = ({ children, clock, onWin }: GameProps) => {
   async function newGame() {
     const goal = await fetchGoal();
     const { cards, cardIds } = createGame(goal, effects.effects, NUMBER_OF_PAIRS, NUMBER_OF_EFFECTS);
-    clock.setTime(0);
+    clock.setTime(new Date(0));
     history.reset({ ...defaultSnapshot, cards, cardIds });
   }
 
