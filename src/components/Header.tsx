@@ -42,7 +42,7 @@ export function Header() {
         <img alt="Memory Game Logo" src={owlImgSrc} />
         Memory Game
       </h1>
-      {typeof countdown.remaining === 'number' && <div>Countdown: {countdown.remaining}</div>}
+      {countdown.remaining > -1 && <div>Countdown: {countdown.remaining}</div>}
       <div>
         <span>Moves: {game.moves}</span>|<span>Time: {formattedSeconds}</span>
       </div>

@@ -31,7 +31,7 @@ export interface GameCardEffect {
 }
 export type GameCard = GameCardMatchable | GameCardEffect;
 
-export type TimeLimit = number | null;
+export type TimeLimit = number;
 
 export interface Snapshot {
   cards: Record<Id, GameCard>;

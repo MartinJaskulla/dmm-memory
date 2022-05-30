@@ -4,8 +4,8 @@ import { TimeLimit } from './useGame';
 
 export type CountdownValue = { remaining: TimeLimit; stop: () => void; start: (timeLimit: TimeLimit) => void };
 
-const CountdownContext = createContext<CountdownValue>({
-  remaining: null,
+const defaultValue: CountdownValue = {
+  remaining: -1,
   stop: () => null,
   start: () => null,
 });
