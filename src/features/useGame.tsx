@@ -3,9 +3,9 @@ import { fetchGoal } from '../api/fetchGoal';
 import { useHistory } from './useHistory';
 import { createGame } from '../api/createGame';
 import { useCountdown } from './useCountdown';
-import { useGameClock } from './useGameClock';
 import { effects } from '../effects/effects';
 import { oneChoice, twoChoices, zeroChoices } from '../utils/choices';
+import { ClockUnit, ClockValue } from './useClock';
 
 const NUMBER_OF_PAIRS = 1;
 const NUMBER_OF_EFFECTS = 2;
@@ -37,7 +37,7 @@ export interface Snapshot {
   latestCard: Id | null;
   matched: Set<Id>;
   foundEffects: Set<Id>;
-  secondsPlayed: number;
+  timePlayed: ClockUnit;
   timeLimit: number | null;
   effects: {
     [key: string]: unknown;
@@ -52,12 +52,12 @@ const defaultSnapshot: Snapshot = {
   latestCard: null,
   matched: new Set(),
   foundEffects: new Set(),
-  secondsPlayed: 0,
+  timePlayed: 0,
   timeLimit: 1000,
   effects: {},
 };
 
-export type GameContextValue = Snapshot & {
+export type GameContextValue = Omit<Snapshot, 'timePlayed'> & {
   revealCard: (index: number) => void;
   newGame: () => void;
   moves: number;
@@ -75,12 +75,12 @@ const GameContext = React.createContext<GameContextValue>(defaultGameContextValu
 
 interface GameProviderProps {
   children: React.ReactNode;
+  clock: ClockValue;
 }
 
-const GameProvider = ({ children }: GameProviderProps) => {
+const GameProvider = ({ children, clock }: GameProviderProps) => {
   const history = useHistory(defaultSnapshot);
   const { snapshot } = history;
-  const gameClock = useGameClock();
   const countdown = useCountdown(() => {
     alert('Time is up!');
     newGame();
@@ -99,7 +99,7 @@ const GameProvider = ({ children }: GameProviderProps) => {
   async function newGame() {
     const goal = await fetchGoal();
     const { cards, cardIds } = createGame(goal, effects.effects, NUMBER_OF_PAIRS, NUMBER_OF_EFFECTS);
-    gameClock.setSeconds(0);
+    clock.setTime(0);
     history.reset({ ...defaultSnapshot, cards, cardIds });
   }
 
@@ -118,7 +118,7 @@ const GameProvider = ({ children }: GameProviderProps) => {
     if (oneChoice(nextSnapshot)) countdown.start(nextSnapshot.timeLimit);
 
     // Save current game time
-    nextSnapshot.secondsPlayed = gameClock.seconds;
+    nextSnapshot.timePlayed = clock.time;
 
     // Add effects
     effects.middleware.history(nextSnapshot);
@@ -131,12 +131,18 @@ const GameProvider = ({ children }: GameProviderProps) => {
   }
 
   const value: GameContextValue = {
-    ...snapshot,
+    cardIds: snapshot.cardIds,
+    cards: snapshot.cards,
+    choice1: snapshot.choice1,
+    choice2: snapshot.choice2,
+    effects: snapshot.effects,
+    foundEffects: snapshot.foundEffects,
+    latestCard: snapshot.latestCard,
+    matched: snapshot.matched,
+    timeLimit: snapshot.timeLimit,
     revealCard,
     newGame,
     moves: history.history.length - 1,
-    timeLimit: countdown.seconds,
-    secondsPlayed: gameClock.seconds,
   };
 
   const valueWithEffects = effects.middleware.game(value);

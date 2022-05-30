@@ -2,6 +2,7 @@ import React from 'react';
 import owlImgSrc from '../images/owl.svg';
 import styled from 'styled-components';
 import { useGame } from '../features/useGame';
+import { useClock } from '../features/useClock';
 
 const StyledHeader = styled.header`
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
@@ -28,8 +29,9 @@ const StyledHeader = styled.header`
 `;
 
 export function Header() {
-  const { moves, secondsPlayed, timeLimit } = useGame();
-  const formattedSeconds = new Date(secondsPlayed * 1000).toISOString().slice(14, 19);
+  const clock = useClock();
+  const { moves, timeLimit } = useGame();
+  const formattedSeconds = new Date(clock.time * 1000).toISOString().slice(14, 19);
 
   return (
     <StyledHeader>
