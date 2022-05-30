@@ -9,19 +9,17 @@ const CountdownContext = createContext<CountdownValue>(null);
 
 interface CountdownProps {
   children: ReactNode;
-  onZero?: () => void;
 }
 
-const CountdownProvider = ({ children, onZero }: CountdownProps) => {
+const CountdownProvider = ({ children }: CountdownProps) => {
   const [time, setTime] = useState<TimeLimit>(null);
   const abortControllerRef = useRef(new AbortController());
-  const { newGame, choice1, choice2, timeLimit } = useGame();
+  const { loose, choice1, choice2, timeLimit } = useGame();
 
   useEffect(() => {
     if (time === 0) {
       stop();
-      newGame();
-      onZero?.();
+      loose();
     }
     // Can't wait for useEvent: https://github.com/reactjs/rfcs/pull/220
     // eslint-disable-next-line react-hooks/exhaustive-deps

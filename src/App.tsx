@@ -7,8 +7,12 @@ import { CountdownProvider } from './features/useCountdown';
 
 function App() {
   return (
-    <GameProvider clock={useClock()} onWin={() => alert('You won!')}>
-      <CountdownProvider onZero={() => alert('Time is up!')}>
+    <GameProvider
+      clock={useClock()}
+      onWin={(gameValue) => alert(`You have won in ${gameValue.moves} moves!`)}
+      onLoose={() => alert('Time is up!')}
+    >
+      <CountdownProvider>
         <Header />
       </CountdownProvider>
       <Board />
