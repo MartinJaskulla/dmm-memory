@@ -25,7 +25,7 @@ const StyledMain = styled.main`
 const StyledH1 = styled.h1`
   display: flex;
   justify-content: center;
-`
+`;
 
 export function Board() {
   const game = useGame();
