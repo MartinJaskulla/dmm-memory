@@ -32,8 +32,9 @@ const StyledHeader = styled.header`
 export function Header() {
   const clock = useClock();
   const countdown = useCountdown();
-  const { moves } = useGame();
-  const formattedSeconds = clock.time.toISOString().slice(14, 19);
+  const game = useGame();
+
+  const formattedSeconds = (game.over ? game.timePlayed : clock.time).toISOString().slice(14, 19);
 
   return (
     <StyledHeader>
@@ -43,7 +44,7 @@ export function Header() {
       </h1>
       {typeof countdown === 'number' && <div>Countdown: {countdown}</div>}
       <div>
-        <span>Moves: {moves}</span>|<span>Time: {formattedSeconds}</span>
+        <span>Moves: {game.moves}</span>|<span>Time: {formattedSeconds}</span>
       </div>
     </StyledHeader>
   );

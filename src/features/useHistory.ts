@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { deepFreeze } from '../utils/deepFreeze';
 
 export function useHistory<Snapshot>(initialState: Snapshot): {
   snapshot: Snapshot;
@@ -10,7 +11,7 @@ export function useHistory<Snapshot>(initialState: Snapshot): {
   const [step, setStep] = useState(0);
 
   function push(snapshot: Snapshot) {
-    setHistory([...history, snapshot]);
+    setHistory(deepFreeze([...history, snapshot]));
     setStep(step + 1);
     console.log([...history, snapshot]);
   }

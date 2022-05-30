@@ -5,9 +5,11 @@ import { createGame } from '../api/createGame';
 import { effects } from '../effects/effects';
 import { oneChoice, twoChoices, zeroChoices } from '../utils/choices';
 import { ClockUnit, ClockValue } from './useClock';
+import { merge } from '../utils/merge';
 
-const NUMBER_OF_PAIRS = 2;
-const NUMBER_OF_EFFECTS = 1;
+const NUMBER_OF_PAIRS = 4;
+const NUMBER_OF_EFFECTS = 2;
+const TIME_LIMIT = 30;
 
 export type Id = string;
 export type MatchId = number;
@@ -56,7 +58,7 @@ const defaultSnapshot: Snapshot = {
   foundEffects: new Set(),
   over: null,
   timePlayed: new Date(0),
-  timeLimit: 1,
+  timeLimit: TIME_LIMIT,
   effects: {},
 };
 
@@ -95,9 +97,7 @@ const GameProvider = ({ children, clock }: GameProps) => {
   }, []);
 
   function loose(reason: string) {
-    const losingSnapshot: Snapshot = structuredClone(snapshot);
-    losingSnapshot.over = { win: false, reason };
-    history.push(losingSnapshot);
+    takeSnapshot({ over: { win: false, reason } });
   }
 
   async function newGame() {
@@ -108,26 +108,19 @@ const GameProvider = ({ children, clock }: GameProps) => {
   }
 
   function revealCard(revealedCardIndex: number) {
-    const nextSnapshot: Snapshot = structuredClone(snapshot);
+    const cardId = snapshot.cardIds[revealedCardIndex];
+    const snapshotUpdates: FlippedCards & Partial<Snapshot> = flipCards(snapshot, snapshot.cards[cardId]);
+    // Check for win after flipping cards
+    snapshotUpdates.over =
+      snapshotUpdates.matched.size / 2 === NUMBER_OF_PAIRS ? { win: true, reason: 'You found all pairs! 🎉' } : null;
+    snapshotUpdates.latestCard = cardId;
+    takeSnapshot(snapshotUpdates);
+  }
 
-    // Save revealed card
-    const revealedCardId = nextSnapshot.cardIds[revealedCardIndex];
-    nextSnapshot.latestCard = revealedCardId;
-
-    // Flip cards
-    flipCards(nextSnapshot, nextSnapshot.cards[revealedCardId]);
-
-    // Save current game time
+  function takeSnapshot(snapshotUpdates: Partial<Snapshot>) {
+    const nextSnapshot: Snapshot = merge(structuredClone(snapshot), snapshotUpdates);
     nextSnapshot.timePlayed = clock.time;
-
-    // Add effects
     effects.middleware.history(nextSnapshot);
-
-    // Check win
-    const foundAllPairs = nextSnapshot.matched.size / 2 === NUMBER_OF_PAIRS;
-    if (foundAllPairs) nextSnapshot.over = { win: true, reason: 'You found all pairs! 🎉' };
-
-    // Save history
     history.push(nextSnapshot);
   }
 
@@ -148,41 +141,51 @@ function useGame(): GameValue {
   return React.useContext(GameContext);
 }
 
-export function flipCards(snapshot: Snapshot, card: GameCard): void {
+type FlippedCards = Pick<Snapshot, 'choice1' | 'choice2' | 'matched' | 'foundEffects'>;
+export function flipCards(snapshot: Snapshot, card: GameCard): FlippedCards {
+  const updates: FlippedCards = {
+    choice1: snapshot.choice1,
+    choice2: snapshot.choice2,
+    foundEffects: new Set(snapshot.foundEffects),
+    matched: new Set(snapshot.matched),
+  };
+
   switch (card.type) {
     case 'matchable': {
       // Hide both cards, if two choices were already made
-      if (twoChoices(snapshot)) {
-        snapshot.choice1 = null;
-        snapshot.choice2 = null;
+      if (twoChoices(updates)) {
+        updates.choice1 = null;
+        updates.choice2 = null;
       }
       // Flip one card
-      if (zeroChoices(snapshot)) {
-        snapshot.choice1 = card.id;
-      } else if (oneChoice(snapshot)) {
-        snapshot.choice2 = card.id;
+      if (zeroChoices(updates)) {
+        updates.choice1 = card.id;
+      } else if (oneChoice(updates)) {
+        updates.choice2 = card.id;
       }
       // Check for a match
-      const card1 = snapshot.choice1 ? snapshot.cards[snapshot.choice1] : null;
-      const card2 = snapshot.choice2 ? snapshot.cards[snapshot.choice2] : null;
+      const card1 = updates.choice1 ? snapshot.cards[updates.choice1] : null;
+      const card2 = updates.choice2 ? snapshot.cards[updates.choice2] : null;
       if (card1 && card2) {
         if (card1.type !== 'matchable' || card2.type !== 'matchable') {
           throw new Error('Only matchable cards should be choices');
         }
         if (card1.matchId === card2.matchId) {
-          snapshot.matched.add(card1.id);
-          snapshot.matched.add(card2.id);
-          snapshot.choice1 = null;
-          snapshot.choice2 = null;
+          updates.matched.add(card1.id);
+          updates.matched.add(card2.id);
+          updates.choice1 = null;
+          updates.choice2 = null;
         }
       }
       break;
     }
     case 'effect': {
-      snapshot.foundEffects.add(card.id);
+      updates.foundEffects.add(card.id);
       break;
     }
   }
+
+  return updates;
 }
 
 export { GameProvider, useGame };
