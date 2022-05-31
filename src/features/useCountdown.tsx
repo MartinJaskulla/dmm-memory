@@ -33,7 +33,7 @@ const CountdownProvider = ({ children }: CountdownProps) => {
 
   function stop() {
     abortControllerRef.current.abort();
-    setRemaining(defaultValue.remaining)
+    setRemaining(defaultValue.remaining);
   }
 
   const value: CountdownValue = {

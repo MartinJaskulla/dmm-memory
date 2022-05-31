@@ -2,11 +2,11 @@ import React, { useEffect } from 'react';
 import { fetchGoal } from '../api/fetchGoal';
 import { useHistory } from './useHistory';
 import { createGame } from '../api/createGame';
-import { effects } from '../effects/effects';
 import { oneChoice, twoChoices, zeroChoices } from '../utils/choices';
 import { ClockUnit, ClockValue } from './useClock';
 import { merge } from '../utils/merge';
 import { CountdownValue } from './useCountdown';
+import { Effect, effectMiddleWare } from '../effects/effectMiddleware';
 
 const NUMBER_OF_PAIRS = 2;
 const NUMBER_OF_EFFECTS = 2;
@@ -33,28 +33,26 @@ export type GameCard = GameCardMatchable | GameCardEffect;
 
 export type TimeLimit = number;
 
-export interface Snapshot {
+export interface Snapshot<T extends Record<string, unknown> = Record<string, unknown>> {
   cards: Record<Id, GameCard>;
   cardIds: Id[];
   choice1: Id | null;
   choice2: Id | null;
-  latestCard: Id | null;
+  latestCard: Id;
   matched: Set<Id>;
   foundEffects: Set<Id>;
   over: { win: boolean; reason: string } | null;
   timePlayed: ClockUnit;
   timeLimit: TimeLimit;
-  effects: {
-    [key: string]: unknown;
-  };
+  effects: T;
 }
 
 const defaultSnapshot: Snapshot = {
   cards: {},
   cardIds: [],
-  choice1: null,
+  choice1: null, // TODO Also empty string?
   choice2: null,
-  latestCard: null,
+  latestCard: '',
   matched: new Set(),
   foundEffects: new Set(),
   over: null,
@@ -80,9 +78,10 @@ interface GameProps {
   children: React.ReactNode;
   clock: ClockValue;
   countdown: CountdownValue;
+  effects: Effect[];
 }
 
-const GameProvider = ({ children, clock, countdown }: GameProps) => {
+const GameProvider = ({ children, clock, countdown, effects }: GameProps) => {
   const history = useHistory(defaultSnapshot);
   const { snapshot } = history;
 
@@ -101,15 +100,17 @@ const GameProvider = ({ children, clock, countdown }: GameProps) => {
   }
 
   async function newGame() {
-    const goal = await fetchGoal();
-    const { cards, cardIds } = createGame(goal, effects.effects, NUMBER_OF_PAIRS, NUMBER_OF_EFFECTS);
+    const { goal_items } = await fetchGoal();
+    const { cards, cardIds } = createGame(goal_items, effects, NUMBER_OF_PAIRS, NUMBER_OF_EFFECTS);
     clock.setTime(new Date(0));
     history.reset({ ...defaultSnapshot, cards, cardIds });
   }
 
   function revealCard(revealedCardIndex: number) {
     const cardId = snapshot.cardIds[revealedCardIndex];
-    const snapshotUpdates: FlippedCards & Partial<Snapshot> = flipCards(snapshot, snapshot.cards[cardId]);
+    const card = snapshot.cards[cardId];
+
+    const snapshotUpdates: FlippedCards & Partial<Snapshot> = flipCards(snapshot, card);
 
     // TODO Put each comment in a function checkForWinAfterFlippingCards
     // Check for win after flipping cards
@@ -131,7 +132,7 @@ const GameProvider = ({ children, clock, countdown }: GameProps) => {
   function takeSnapshot(snapshotUpdates: Partial<Snapshot>) {
     const nextSnapshot: Snapshot = merge(structuredClone(snapshot), snapshotUpdates);
     nextSnapshot.timePlayed = clock.time;
-    effects.middleware(nextSnapshot);
+    effectMiddleWare(effects, nextSnapshot);
     history.push(nextSnapshot);
   }
 

@@ -34,6 +34,7 @@ export function Header() {
   const countdown = useCountdown();
   const game = useGame();
 
+  // TODO Maybe change if I refactor clock to countdown style
   const formattedSeconds = (game.over ? game.timePlayed : clock.time).toISOString().slice(14, 19);
 
   return (

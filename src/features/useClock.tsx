@@ -3,6 +3,10 @@ import { useEverySecond } from '../utils/interval';
 
 export type ClockUnit = Date;
 
+// TODO Maybe clock and countdown context not needed
+// gameValue could be {gameTime: 3, snapshot: {gameTime: 2}}
+// problem? not a problem useEffect(startGameTime(setGameTime(++)) return () => resetGameTime)
+// + store game time locally useState. Can delete the useAnimationInterval and only use non-react function
 export interface ClockValue {
   time: ClockUnit;
   setTime: (seconds: ClockUnit) => void;

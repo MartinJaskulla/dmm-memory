@@ -1,4 +1,4 @@
-import { Effect } from '../effects';
+import { Effect } from '../effectMiddleware';
 import { Snapshot } from '../../features/useGame';
 import { shuffle } from '../../utils/shuffle';
 
