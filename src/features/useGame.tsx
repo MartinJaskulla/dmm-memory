@@ -132,6 +132,7 @@ const GameProvider = ({ children, clock, countdown, effects }: GameProps) => {
 
   useEffect(() => {
     countdown.restart(snapshot.timeLimit);
+    clock.setTime(snapshot.timePlayed);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [history.at]);
 
