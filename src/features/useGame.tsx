@@ -110,23 +110,13 @@ const GameProvider = ({ children, clock, countdown, effects }: GameProps) => {
     const cardId = snapshot.cardIds[revealedCardIndex];
     const card = snapshot.cards[cardId];
 
-    const snapshotUpdates: FlippedCards & Partial<Snapshot> = flipCards(snapshot, card);
+    const nextSnapshot: Snapshot = structuredClone(snapshot);
 
-    // TODO Put each comment in a function checkForWinAfterFlippingCards
-    // Check for win after flipping cards
-    snapshotUpdates.over =
-      snapshotUpdates.matched.size / 2 === NUMBER_OF_PAIRS ? { win: true, reason: 'You found all pairs! 🎉' } : null;
-    snapshotUpdates.latestCard = cardId;
-
-    // Requirements:
-    // - Once one non-effect (word) card is flipped, start a timer.
-    // - Flipping over an effect card should reset the move timer.
-    countdown.stop();
-    if (oneChoice(snapshotUpdates) || twoChoices(snapshotUpdates)) {
-      countdown.restart(snapshot.timeLimit);
-    }
-
-    takeSnapshot(snapshotUpdates);
+    nextSnapshot.latestCard = cardId;
+    flipCards(nextSnapshot, card);
+    checkWin(nextSnapshot);
+    restartCountdown(nextSnapshot, countdown);
+    takeSnapshot(nextSnapshot);
   }
 
   function takeSnapshot(snapshotUpdates: Partial<Snapshot>) {
@@ -159,51 +149,56 @@ function useGame(): GameValue {
   return React.useContext(GameContext);
 }
 
-type FlippedCards = Pick<Snapshot, 'choice1' | 'choice2' | 'matched' | 'foundEffects'>;
-export function flipCards(snapshot: Snapshot, card: GameCard): FlippedCards {
-  const updates: FlippedCards = {
-    choice1: snapshot.choice1,
-    choice2: snapshot.choice2,
-    foundEffects: new Set(snapshot.foundEffects),
-    matched: new Set(snapshot.matched),
-  };
-
+export function flipCards(snapshot: Snapshot, card: GameCard): void {
   switch (card.type) {
     case 'matchable': {
       // Hide both cards, if two choices were already made. Don't do this for effects. Otherwise shuffle looks confusing.
-      if (twoChoices(updates)) {
-        updates.choice1 = null;
-        updates.choice2 = null;
+      if (twoChoices(snapshot)) {
+        snapshot.choice1 = null;
+        snapshot.choice2 = null;
       }
       // Flip one card
-      if (zeroChoices(updates)) {
-        updates.choice1 = card.id;
-      } else if (oneChoice(updates)) {
-        updates.choice2 = card.id;
+      if (zeroChoices(snapshot)) {
+        snapshot.choice1 = card.id;
+      } else if (oneChoice(snapshot)) {
+        snapshot.choice2 = card.id;
       }
       // Check for a match
-      const card1 = updates.choice1 ? snapshot.cards[updates.choice1] : null;
-      const card2 = updates.choice2 ? snapshot.cards[updates.choice2] : null;
+      const card1 = snapshot.choice1 ? snapshot.cards[snapshot.choice1] : null;
+      const card2 = snapshot.choice2 ? snapshot.cards[snapshot.choice2] : null;
       if (card1 && card2) {
         if (card1.type !== 'matchable' || card2.type !== 'matchable') {
           throw new Error('Only matchable cards should be choices');
         }
         if (card1.matchId === card2.matchId) {
-          updates.matched.add(card1.id);
-          updates.matched.add(card2.id);
-          updates.choice1 = null;
-          updates.choice2 = null;
+          snapshot.matched.add(card1.id);
+          snapshot.matched.add(card2.id);
+          snapshot.choice1 = null;
+          snapshot.choice2 = null;
         }
       }
       break;
     }
     case 'effect': {
-      updates.foundEffects.add(card.id);
+      snapshot.foundEffects.add(card.id);
       break;
     }
   }
+}
 
-  return updates;
+function checkWin(nextSnapshot: Snapshot) {
+  nextSnapshot.over =
+    nextSnapshot.matched.size / 2 === NUMBER_OF_PAIRS ? { win: true, reason: 'You found all pairs! 🎉' } : null;
+}
+
+function restartCountdown(nextSnapshot: Snapshot, countdown: CountdownValue) {
+  // Requirements:
+  // - Once one non-effect (word) card is flipped, start a timer.
+  // - Flipping over an effect card should reset the move timer.
+  countdown.stop();
+  if (oneChoice(nextSnapshot) || twoChoices(nextSnapshot)) {
+    countdown.restart(nextSnapshot.timeLimit);
+  }
 }
 
 export { GameProvider, useGame };
