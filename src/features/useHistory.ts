@@ -6,21 +6,25 @@ export function useHistory<Snapshot>(initialState: Snapshot): {
   history: Snapshot[];
   push: (snapshot: Snapshot) => void;
   reset: (newInitialState: Snapshot) => void;
+  travel: (i: number) => void;
+  at: number;
 } {
   const [history, setHistory] = useState<Snapshot[]>([initialState]);
   const [step, setStep] = useState(0);
 
   function push(snapshot: Snapshot) {
-    setHistory(deepFreeze([...history, snapshot]));
+    setHistory(deepFreeze([...history.slice(0, step + 1), snapshot]));
     setStep(step + 1);
-    console.log([...history, snapshot]);
   }
 
   function reset(newInitialState: Snapshot) {
     setHistory([newInitialState]);
     setStep(0);
-    console.log([newInitialState]);
   }
 
-  return { snapshot: history[step], history, push, reset };
+  function travel(i: number) {
+    setStep(i);
+  }
+
+  return { snapshot: history[step], history, push, reset, travel, at: step };
 }

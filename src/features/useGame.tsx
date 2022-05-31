@@ -10,7 +10,7 @@ import { Effect, effectMiddleWare } from '../effects/effectMiddleware';
 
 const NUMBER_OF_PAIRS = 2;
 const NUMBER_OF_EFFECTS = 2;
-const TIME_LIMIT = 30;
+const TIME_LIMIT = 5;
 
 export type Id = string;
 export type MatchId = number;
@@ -64,12 +64,15 @@ const defaultSnapshot: Snapshot = {
 export type GameValue = Snapshot & {
   revealCard: (index: number) => void;
   moves: number;
+  // TODO history needs to be a provider?
+  history: ReturnType<typeof useHistory> | null;
 };
 
 const defaultGameContextValue: GameValue = {
   ...defaultSnapshot,
   revealCard: () => null,
   moves: 0,
+  history: null,
 };
 
 const GameContext = React.createContext<GameValue>(defaultGameContextValue);
@@ -124,9 +127,13 @@ const GameProvider = ({ children, clock, countdown, effects }: GameProps) => {
     updateTimeLimit(nextSnapshot, TIME_LIMIT);
     effectMiddleWare(effects, nextSnapshot);
     checkWin(nextSnapshot);
-    countdown.restart(nextSnapshot.timeLimit);
     history.push(nextSnapshot);
   }
+
+  useEffect(() => {
+    countdown.restart(snapshot.timeLimit);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [history.at]);
 
   useEffect(() => {
     if (countdown.remaining === 0) loose('Time is up! 😭');
@@ -140,6 +147,8 @@ const GameProvider = ({ children, clock, countdown, effects }: GameProps) => {
 
   const gameValue: GameValue = {
     ...snapshot,
+    // @ts-ignore
+    history,
     revealCard,
     moves: history.history.length - 1,
   };
@@ -196,6 +205,11 @@ function checkWin(nextSnapshot: Snapshot) {
 function updateTimeLimit(nextSnapshot: Snapshot, defaultTimeLimit: TimeLimit) {
   if (oneChoice(nextSnapshot) || twoChoices(nextSnapshot)) {
     nextSnapshot.timeLimit = nextSnapshot.timeLimit < 0 ? defaultTimeLimit : nextSnapshot.timeLimit;
+  }
+  // TODO effects could change game.over. I think a lot of checks have to run twice. once before effects, once after?
+  //  or by effect themselves? obviously ugly and better approach needed
+  if (nextSnapshot.over) {
+    nextSnapshot.timeLimit = -1;
   }
 }
 
