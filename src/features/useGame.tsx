@@ -57,7 +57,7 @@ const defaultSnapshot: Snapshot = {
   foundEffects: new Set(),
   over: null,
   timePlayed: new Date(0),
-  timeLimit: TIME_LIMIT,
+  timeLimit: -1,
   effects: {},
 };
 
@@ -107,22 +107,24 @@ const GameProvider = ({ children, clock, countdown, effects }: GameProps) => {
   }
 
   function revealCard(revealedCardIndex: number) {
-    const cardId = snapshot.cardIds[revealedCardIndex];
-    const card = snapshot.cards[cardId];
-
     const nextSnapshot: Snapshot = structuredClone(snapshot);
 
+    const cardId = snapshot.cardIds[revealedCardIndex];
     nextSnapshot.latestCard = cardId;
+
+    const card = snapshot.cards[cardId];
     flipCards(nextSnapshot, card);
-    checkWin(nextSnapshot);
-    restartCountdown(nextSnapshot, countdown);
+
     takeSnapshot(nextSnapshot);
   }
 
   function takeSnapshot(snapshotUpdates: Partial<Snapshot>) {
     const nextSnapshot: Snapshot = merge(structuredClone(snapshot), snapshotUpdates);
     nextSnapshot.timePlayed = clock.time;
+    updateTimeLimit(nextSnapshot, TIME_LIMIT);
     effectMiddleWare(effects, nextSnapshot);
+    checkWin(nextSnapshot);
+    countdown.restart(nextSnapshot.timeLimit);
     history.push(nextSnapshot);
   }
 
@@ -149,38 +151,38 @@ function useGame(): GameValue {
   return React.useContext(GameContext);
 }
 
-export function flipCards(snapshot: Snapshot, card: GameCard): void {
+export function flipCards(nextSnapshot: Snapshot, card: GameCard): void {
   switch (card.type) {
     case 'matchable': {
       // Hide both cards, if two choices were already made. Don't do this for effects. Otherwise shuffle looks confusing.
-      if (twoChoices(snapshot)) {
-        snapshot.choice1 = null;
-        snapshot.choice2 = null;
+      if (twoChoices(nextSnapshot)) {
+        nextSnapshot.choice1 = null;
+        nextSnapshot.choice2 = null;
       }
       // Flip one card
-      if (zeroChoices(snapshot)) {
-        snapshot.choice1 = card.id;
-      } else if (oneChoice(snapshot)) {
-        snapshot.choice2 = card.id;
+      if (zeroChoices(nextSnapshot)) {
+        nextSnapshot.choice1 = card.id;
+      } else if (oneChoice(nextSnapshot)) {
+        nextSnapshot.choice2 = card.id;
       }
       // Check for a match
-      const card1 = snapshot.choice1 ? snapshot.cards[snapshot.choice1] : null;
-      const card2 = snapshot.choice2 ? snapshot.cards[snapshot.choice2] : null;
+      const card1 = nextSnapshot.choice1 ? nextSnapshot.cards[nextSnapshot.choice1] : null;
+      const card2 = nextSnapshot.choice2 ? nextSnapshot.cards[nextSnapshot.choice2] : null;
       if (card1 && card2) {
         if (card1.type !== 'matchable' || card2.type !== 'matchable') {
           throw new Error('Only matchable cards should be choices');
         }
         if (card1.matchId === card2.matchId) {
-          snapshot.matched.add(card1.id);
-          snapshot.matched.add(card2.id);
-          snapshot.choice1 = null;
-          snapshot.choice2 = null;
+          nextSnapshot.matched.add(card1.id);
+          nextSnapshot.matched.add(card2.id);
+          nextSnapshot.choice1 = null;
+          nextSnapshot.choice2 = null;
         }
       }
       break;
     }
     case 'effect': {
-      snapshot.foundEffects.add(card.id);
+      nextSnapshot.foundEffects.add(card.id);
       break;
     }
   }
@@ -191,13 +193,9 @@ function checkWin(nextSnapshot: Snapshot) {
     nextSnapshot.matched.size / 2 === NUMBER_OF_PAIRS ? { win: true, reason: 'You found all pairs! 🎉' } : null;
 }
 
-function restartCountdown(nextSnapshot: Snapshot, countdown: CountdownValue) {
-  // Requirements:
-  // - Once one non-effect (word) card is flipped, start a timer.
-  // - Flipping over an effect card should reset the move timer.
-  countdown.stop();
+function updateTimeLimit(nextSnapshot: Snapshot, defaultTimeLimit: TimeLimit) {
   if (oneChoice(nextSnapshot) || twoChoices(nextSnapshot)) {
-    countdown.restart(nextSnapshot.timeLimit);
+    nextSnapshot.timeLimit = nextSnapshot.timeLimit < 0 ? defaultTimeLimit : nextSnapshot.timeLimit;
   }
 }
 
