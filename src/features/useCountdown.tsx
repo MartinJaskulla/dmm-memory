@@ -2,43 +2,43 @@ import React, { createContext, ReactNode, useContext, useEffect, useRef, useStat
 import { interval } from '../utils/interval';
 import { TimeLimit } from './useGame';
 
-export type CountdownValue = { remaining: TimeLimit; stop: () => void; start: (timeLimit: TimeLimit) => void };
+export type CountdownValue = { remaining: TimeLimit; stop: () => void; restart: (timeLimit: TimeLimit) => void };
 
 const defaultValue: CountdownValue = {
   remaining: -1,
   stop: () => null,
-  start: () => null,
-});
+  restart: () => null,
+};
+
+const CountdownContext = createContext<CountdownValue>(defaultValue);
 
 interface CountdownProps {
   children: ReactNode;
 }
 
 const CountdownProvider = ({ children }: CountdownProps) => {
-  const [remaining, setRemaining] = useState<TimeLimit>(null);
+  const [remaining, setRemaining] = useState<TimeLimit>(defaultValue.remaining);
   const abortControllerRef = useRef(new AbortController());
 
   useEffect(() => {
     if (remaining === 0) stop();
   }, [remaining]);
 
-  function start(timeLimit: TimeLimit) {
-    if (timeLimit === null) return;
+  function restart(timeLimit: TimeLimit) {
+    abortControllerRef.current.abort();
     setRemaining(timeLimit);
     abortControllerRef.current = new AbortController();
-    interval(1000, abortControllerRef.current.signal, () =>
-      setRemaining((seconds) => (typeof seconds === 'number' ? seconds - 1 : seconds)),
-    );
+    interval(1000, abortControllerRef.current.signal, () => setRemaining((seconds) => seconds - 1));
   }
 
   function stop() {
     abortControllerRef.current.abort();
-    setRemaining(null);
+    setRemaining(defaultValue.remaining)
   }
 
   const value: CountdownValue = {
     remaining,
-    start,
+    restart,
     stop,
   };
 

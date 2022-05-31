@@ -117,10 +117,12 @@ const GameProvider = ({ children, clock, countdown }: GameProps) => {
       snapshotUpdates.matched.size / 2 === NUMBER_OF_PAIRS ? { win: true, reason: 'You found all pairs! 🎉' } : null;
     snapshotUpdates.latestCard = cardId;
 
-    // Restart countdown after flipping cards
+    // Requirements:
+    // - Once one non-effect (word) card is flipped, start a timer.
+    // - Flipping over an effect card should reset the move timer.
     countdown.stop();
-    if (oneChoice({ choice1: snapshotUpdates.choice1, choice2: snapshotUpdates.choice2 })) {
-      countdown.start(snapshot.timeLimit);
+    if (oneChoice(snapshotUpdates) || twoChoices(snapshotUpdates)) {
+      countdown.restart(snapshot.timeLimit);
     }
 
     takeSnapshot(snapshotUpdates);
