@@ -3,7 +3,6 @@ import { fetchGoal } from '../api/fetchGoal';
 import { History, useHistory } from './useHistory';
 import { createGame } from '../api/createGame';
 import { oneChoice, twoChoices, zeroChoices } from '../utils/choices';
-import { useClock } from './useClock';
 import { merge } from '../utils/merge';
 import { CountdownValue } from './useCountdown';
 import { Effect, effectMiddleWare } from '../effects/effectMiddleware';
@@ -64,7 +63,6 @@ const defaultMove: Move = {
 export interface GameValue {
   history: History<Move>;
   revealCard: (index: number) => void;
-  seconds: number; // TODO Maybe not provided by game, but <Clock> which is placed in header???
 }
 
 const defaultGameValue: GameValue = {
@@ -76,7 +74,6 @@ const defaultGameValue: GameValue = {
     goToMove: () => null,
     resetMoves: () => null,
   },
-  seconds: -1,
   revealCard: () => null,
 };
 
@@ -91,7 +88,6 @@ interface GameProps {
 const GameProvider = ({ children, countdown, effects }: GameProps) => {
   const history = useHistory(defaultMove);
   const { move } = history;
-  const clock = useClock();
 
   const lastMoveDateRef = useRef(new Date());
   useEffect(() => {
@@ -121,7 +117,6 @@ const GameProvider = ({ children, countdown, effects }: GameProps) => {
   async function newGame() {
     const { goal_items } = await fetchGoal();
     const { cards, cardIds } = createGame(goal_items, effects, NUMBER_OF_PAIRS, NUMBER_OF_EFFECTS);
-    // clock.setTime(new Date(0)); // TODO Clock
     history.resetMoves({ ...defaultMove, cards, cardIds });
   }
 
@@ -147,9 +142,8 @@ const GameProvider = ({ children, countdown, effects }: GameProps) => {
   }
 
   useEffect(() => {
+    // TODO Countdown in its own component, just like clock to prevent app render every 1s
     countdown.restart(move.timeLimit);
-    clock.restart(100);
-    // clock.restart(history.move.date);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [history.moveIndex]);
 
@@ -166,7 +160,6 @@ const GameProvider = ({ children, countdown, effects }: GameProps) => {
   const gameValue: GameValue = {
     history,
     revealCard,
-    seconds: clock.seconds,
   };
 
   return <GameContext.Provider value={gameValue}>{children}</GameContext.Provider>;

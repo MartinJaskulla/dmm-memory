@@ -3,6 +3,7 @@ import owlImgSrc from '../images/owl.svg';
 import styled from 'styled-components';
 import { useGame } from '../features/useGame';
 import { useCountdown } from '../features/useCountdown';
+import { Clock } from './Clock';
 
 const StyledHeader = styled.header`
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
@@ -31,13 +32,6 @@ const StyledHeader = styled.header`
 export function Header() {
   const countdown = useCountdown();
   const game = useGame();
-
-  // TODO date and seconds should have same format. which will be number ms
-  const secondsSource: Date = game.history.move.gameOver
-    ? new Date(game.history.move.totalMs)
-    : new Date(game.seconds * 1000);
-  const formattedSeconds = secondsSource.toISOString().slice(14, 19);
-
   return (
     <StyledHeader>
       <h1>
@@ -46,7 +40,7 @@ export function Header() {
       </h1>
       {countdown.remaining > -1 && <div>Countdown: {countdown.remaining}</div>}
       <div>
-        <span>Moves: {game.history.moveIndex}</span>|<span>Time: {formattedSeconds}</span>
+        <span>Moves: {game.history.moveIndex}</span>|<Clock />
       </div>
     </StyledHeader>
   );
