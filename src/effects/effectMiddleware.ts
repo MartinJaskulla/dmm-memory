@@ -1,8 +1,8 @@
-import { Snapshot } from '../features/useGame';
+import { Move } from '../features/useGame';
 
-export type Middleware<T extends Snapshot['effects']> = (snapshot: Snapshot<T>) => void;
+export type Middleware<T extends Move['effects']> = (move: Move<T>) => void;
 
-export interface Effect<T extends Snapshot['effects'] = Snapshot['effects']> {
+export interface Effect<T extends Move['effects'] = Move['effects']> {
   effect: string;
   card: {
     text: string;
@@ -12,16 +12,16 @@ export interface Effect<T extends Snapshot['effects'] = Snapshot['effects']> {
     passive?: Middleware<T>;
   };
 }
-export function effectMiddleWare(effects: Effect[], snapshot: Snapshot) {
+export function effectMiddleWare(effects: Effect[], move: Move) {
   effects.forEach((effect) => {
-    const card = snapshot.cards[snapshot.latestCard];
+    const card = move.cards[move.latestCard];
 
     const active = card.type === 'effect' && card.effect === effect.effect;
-    const passive = effect.effect in snapshot.effects;
+    const passive = effect.effect in move.effects;
     if (active) {
-      effect.middleware.active?.(snapshot);
+      effect.middleware.active?.(move);
     } else if (passive) {
-      effect.middleware.passive?.(snapshot);
+      effect.middleware.passive?.(move);
     }
   });
 }

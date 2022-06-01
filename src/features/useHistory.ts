@@ -1,30 +1,39 @@
 import { useState } from 'react';
 import { deepFreeze } from '../utils/deepFreeze';
 
-export function useHistory<Snapshot>(initialState: Snapshot): {
-  snapshot: Snapshot;
-  history: Snapshot[];
-  push: (snapshot: Snapshot) => void;
-  reset: (newInitialState: Snapshot) => void;
-  travel: (i: number) => void;
-  at: number;
-} {
-  const [history, setHistory] = useState<Snapshot[]>([initialState]);
-  const [step, setStep] = useState(0);
+export interface History<M> {
+  move: M;
+  moves: M[];
+  moveIndex: number;
+  addMove: (move: M) => void;
+  resetMoves: (newInitialMove: M) => void;
+  goToMove: (moveIndex: number) => void;
+}
 
-  function push(snapshot: Snapshot) {
-    setHistory(deepFreeze([...history.slice(0, step + 1), snapshot]));
-    setStep(step + 1);
+export function useHistory<M>(initialMove: M): History<M> {
+  const [moves, setMoves] = useState<M[]>([initialMove]);
+  const [moveIndex, setMoveIndex] = useState(0);
+
+  function addMove(nextStep: M) {
+    setMoves(deepFreeze([...moves.slice(0, moveIndex + 1), nextStep]));
+    setMoveIndex(moveIndex + 1);
   }
 
-  function reset(newInitialState: Snapshot) {
-    setHistory([newInitialState]);
-    setStep(0);
+  function resetMoves(newInitialStep: M) {
+    setMoves([newInitialStep]);
+    setMoveIndex(0);
   }
 
-  function travel(i: number) {
-    setStep(i);
+  function goToMove(stepIndex: number) {
+    setMoveIndex(stepIndex);
   }
 
-  return { snapshot: history[step], history, push, reset, travel, at: step };
+  return {
+    move: moves[moveIndex],
+    moves,
+    addMove,
+    resetMoves,
+    goToMove,
+    moveIndex,
+  };
 }

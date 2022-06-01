@@ -2,13 +2,13 @@ import React from 'react';
 import { useGame } from '../features/useGame';
 
 export function TimeTravel() {
-  const game = useGame();
+  const { history } = useGame();
   return (
     <div>
-      {game?.history?.history?.map((s, i) => {
+      {history.moves.map((s, i) => {
         return (
           <div key={i}>
-            <button onClick={() => game?.history?.travel(i)}>Go to {i}</button>
+            <button onClick={() => history.goToMove(i)}>Go to {i}</button>
           </div>
         );
       })}

@@ -1,5 +1,5 @@
 import { Effect } from '../effectMiddleware';
-import { Snapshot } from '../../features/useGame';
+import { Move } from '../../features/useGame';
 
 // TODO latestCard: Id | null; Can be used to visualize retry effect. Usually choice2 would be latest card (put outline around latest card). If you reetry, keep latestCard as firstCard, so it keeps the outline
 
@@ -13,8 +13,8 @@ export const retryEffect: Effect = {
     text: 'Retry',
   },
   middleware: {
-    active: (snapshot: Snapshot) => {
-      if (!snapshot.latestCard) return snapshot;
+    active: (move: Move) => {
+      if (!move.latestCard) return move;
 
       // if (EFFECT in snapshot.effects && isRetry(snapshot.effects[EFFECT])) {
       //   if (snapshot.effects[EFFECT].savedChoice1 === null && oneChoice(snapshot)) {
@@ -33,7 +33,7 @@ export const retryEffect: Effect = {
       //   snapshot.effects[EFFECT] = retry;
       // }
 
-      return snapshot;
+      return move;
     },
   },
 };

@@ -1,5 +1,5 @@
 import { Effect } from '../effectMiddleware';
-import { Snapshot } from '../../features/useGame';
+import { Move } from '../../features/useGame';
 import { shuffle } from '../../utils/shuffle';
 
 // Reshuffles all the cards on the board. Flipped pairs and effect cards should remain face-up, but move. The shuffle card itself should not change position.
@@ -12,16 +12,16 @@ export const shuffleEffect: Effect = {
     text: 'Shuffle',
   },
   middleware: {
-    active: (snapshot: Snapshot) => {
-      const shuffleCardIndexOld = snapshot.cardIds.findIndex((cardId) => cardId === snapshot.latestCard);
-      snapshot.cardIds = shuffle(snapshot.cardIds);
-      const shuffleCardIndexNew = snapshot.cardIds.findIndex((cardId) => cardId === snapshot.latestCard);
+    active: (move: Move) => {
+      const shuffleCardIndexOld = move.cardIds.findIndex((cardId) => cardId === move.latestCard);
+      move.cardIds = shuffle(move.cardIds);
+      const shuffleCardIndexNew = move.cardIds.findIndex((cardId) => cardId === move.latestCard);
       // Swap back to old index
-      [snapshot.cardIds[shuffleCardIndexNew], snapshot.cardIds[shuffleCardIndexOld]] = [
-        snapshot.cardIds[shuffleCardIndexOld],
-        snapshot.cardIds[shuffleCardIndexNew],
+      [move.cardIds[shuffleCardIndexNew], move.cardIds[shuffleCardIndexOld]] = [
+        move.cardIds[shuffleCardIndexOld],
+        move.cardIds[shuffleCardIndexNew],
       ];
-      return snapshot;
+      return move;
     },
   },
 };

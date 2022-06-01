@@ -2,7 +2,6 @@ import React from 'react';
 import owlImgSrc from '../images/owl.svg';
 import styled from 'styled-components';
 import { useGame } from '../features/useGame';
-import { useClock } from '../features/useClock';
 import { useCountdown } from '../features/useCountdown';
 
 const StyledHeader = styled.header`
@@ -30,11 +29,12 @@ const StyledHeader = styled.header`
 `;
 
 export function Header() {
-  const clock = useClock();
   const countdown = useCountdown();
   const game = useGame();
 
-  const formattedSeconds = (game.over ? game.timePlayed : clock.time).toISOString().slice(14, 19);
+  // TODO date and seconds should have same format. which will be number ms
+  const secondsSource: Date = game.history.move.gameOver ? game.history.move.date : new Date(game.seconds * 1000);
+  const formattedSeconds = secondsSource.toISOString().slice(14, 19);
 
   return (
     <StyledHeader>
@@ -44,7 +44,7 @@ export function Header() {
       </h1>
       {countdown.remaining > -1 && <div>Countdown: {countdown.remaining}</div>}
       <div>
-        <span>Moves: {game.moves}</span>|<span>Time: {formattedSeconds}</span>
+        <span>Moves: {game.history.moveIndex}</span>|<span>Time: {formattedSeconds}</span>
       </div>
     </StyledHeader>
   );

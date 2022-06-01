@@ -1,5 +1,5 @@
 import { shuffle } from '../utils/shuffle';
-import { Snapshot } from '../features/useGame';
+import { Move } from '../features/useGame';
 import { GETGoal } from './fetchGoal';
 import { createId } from '../utils/createId';
 import { Effect } from '../effects/effectMiddleware';
@@ -9,11 +9,11 @@ export function createGame(
   effects: Effect[],
   nPairs: number,
   nEffects: number,
-): Pick<Snapshot, 'cards' | 'cardIds'> {
+): Pick<Move, 'cards' | 'cardIds'> {
   goalItems = structuredClone(goalItems);
   effects = JSON.parse(JSON.stringify(effects));
 
-  const cards: Snapshot['cards'] = {};
+  const cards: Move['cards'] = {};
 
   shuffle(effects);
   effects.slice(0, nEffects).forEach((effect) => {

@@ -1,16 +1,16 @@
 import React, { useEffect } from 'react';
 import { fetchGoal } from '../api/fetchGoal';
-import { useHistory } from './useHistory';
+import { History, useHistory } from './useHistory';
 import { createGame } from '../api/createGame';
 import { oneChoice, twoChoices, zeroChoices } from '../utils/choices';
-import { ClockUnit, ClockValue } from './useClock';
+import { useClock } from './useClock';
 import { merge } from '../utils/merge';
 import { CountdownValue } from './useCountdown';
 import { Effect, effectMiddleWare } from '../effects/effectMiddleware';
 
 const NUMBER_OF_PAIRS = 2;
 const NUMBER_OF_EFFECTS = 2;
-const TIME_LIMIT = 5;
+const TIME_LIMIT = 30;
 
 export type Id = string;
 export type MatchId = number;
@@ -33,7 +33,7 @@ export type GameCard = GameCardMatchable | GameCardEffect;
 
 export type TimeLimit = number;
 
-export interface Snapshot<T extends Record<string, unknown> = Record<string, unknown>> {
+export interface Move<T extends Record<string, unknown> = Record<string, unknown>> {
   cards: Record<Id, GameCard>;
   cardIds: Id[];
   choice1: Id | null;
@@ -41,13 +41,13 @@ export interface Snapshot<T extends Record<string, unknown> = Record<string, unk
   latestCard: Id;
   matched: Set<Id>;
   foundEffects: Set<Id>;
-  over: { win: boolean; reason: string } | null;
-  timePlayed: ClockUnit;
+  gameOver: { win: boolean; reason: string } | null;
+  date: Date;
   timeLimit: TimeLimit;
   effects: T;
 }
 
-const defaultSnapshot: Snapshot = {
+const defaultMove: Move = {
   cards: {},
   cardIds: [],
   choice1: null, // TODO Also empty string?
@@ -55,38 +55,43 @@ const defaultSnapshot: Snapshot = {
   latestCard: '',
   matched: new Set(),
   foundEffects: new Set(),
-  over: null,
-  timePlayed: new Date(0),
+  gameOver: null,
+  date: new Date(0),
   timeLimit: -1,
   effects: {},
 };
 
-export type GameValue = Snapshot & {
+export interface GameValue {
+  history: History<Move>;
   revealCard: (index: number) => void;
-  moves: number;
-  // TODO history needs to be a provider?
-  history: ReturnType<typeof useHistory> | null;
-};
+  seconds: number; // TODO Maybe not provided by game, but <Clock> which is placed in header???
+}
 
-const defaultGameContextValue: GameValue = {
-  ...defaultSnapshot,
+const defaultGameValue: GameValue = {
+  history: {
+    move: defaultMove,
+    moveIndex: 0,
+    moves: [],
+    addMove: () => null,
+    goToMove: () => null,
+    resetMoves: () => null,
+  },
+  seconds: -1,
   revealCard: () => null,
-  moves: 0,
-  history: null,
 };
 
-const GameContext = React.createContext<GameValue>(defaultGameContextValue);
+const GameContext = React.createContext<GameValue>(defaultGameValue);
 
 interface GameProps {
   children: React.ReactNode;
-  clock: ClockValue;
   countdown: CountdownValue;
   effects: Effect[];
 }
 
-const GameProvider = ({ children, clock, countdown, effects }: GameProps) => {
-  const history = useHistory(defaultSnapshot);
-  const { snapshot } = history;
+const GameProvider = ({ children, countdown, effects }: GameProps) => {
+  const history = useHistory(defaultMove);
+  const { move } = history;
+  const clock = useClock();
 
   // React 18 calls useEffect twice in StrictMode, which means we call newGame() twice on mount.
   // Using a ref or a global or local variable to check if the call was already made is not pleasing to the eye.
@@ -99,42 +104,43 @@ const GameProvider = ({ children, clock, countdown, effects }: GameProps) => {
   }, []);
 
   function loose(reason: string) {
-    takeSnapshot({ over: { win: false, reason } });
+    saveMove({ gameOver: { win: false, reason } });
   }
 
   async function newGame() {
     const { goal_items } = await fetchGoal();
     const { cards, cardIds } = createGame(goal_items, effects, NUMBER_OF_PAIRS, NUMBER_OF_EFFECTS);
-    clock.setTime(new Date(0));
-    history.reset({ ...defaultSnapshot, cards, cardIds });
+    // clock.setTime(new Date(0)); // TODO Clock
+    history.resetMoves({ ...defaultMove, date: new Date(), cards, cardIds });
   }
 
   function revealCard(revealedCardIndex: number) {
-    const nextSnapshot: Snapshot = structuredClone(snapshot);
+    const nextMove: Move = structuredClone(move);
 
-    const cardId = snapshot.cardIds[revealedCardIndex];
-    nextSnapshot.latestCard = cardId;
+    const cardId = move.cardIds[revealedCardIndex];
+    nextMove.latestCard = cardId;
 
-    const card = snapshot.cards[cardId];
-    flipCards(nextSnapshot, card);
+    const card = move.cards[cardId];
+    flipCards(nextMove, card);
 
-    takeSnapshot(nextSnapshot);
+    saveMove(nextMove);
   }
 
-  function takeSnapshot(snapshotUpdates: Partial<Snapshot>) {
-    const nextSnapshot: Snapshot = merge(structuredClone(snapshot), snapshotUpdates);
-    nextSnapshot.timePlayed = clock.time;
-    checkWin(nextSnapshot);
-    updateTimeLimit(nextSnapshot, TIME_LIMIT);
-    effectMiddleWare(effects, nextSnapshot);
-    history.push(nextSnapshot);
+  function saveMove(moveUpdates: Partial<Move>) {
+    const nextMove: Move = merge(structuredClone(move), moveUpdates);
+    nextMove.date = new Date(); // TODO Clock
+    checkWin(nextMove);
+    updateTimeLimit(nextMove, TIME_LIMIT);
+    effectMiddleWare(effects, nextMove);
+    history.addMove(nextMove);
   }
 
   useEffect(() => {
-    countdown.restart(snapshot.timeLimit);
-    clock.setTime(snapshot.timePlayed);
+    countdown.restart(move.timeLimit);
+    clock.restart(100);
+    // clock.restart(history.move.date);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [history.at]);
+  }, [history.moveIndex]);
 
   useEffect(() => {
     if (countdown.remaining === 0) loose('Time is up! 😭');
@@ -143,15 +149,13 @@ const GameProvider = ({ children, clock, countdown, effects }: GameProps) => {
   }, [countdown.remaining]);
 
   useEffect(() => {
-    if (snapshot.over) alert(snapshot.over.reason);
-  }, [snapshot.over]);
+    if (move.gameOver) alert(move.gameOver.reason);
+  }, [move.gameOver]);
 
   const gameValue: GameValue = {
-    ...snapshot,
-    // @ts-ignore
     history,
     revealCard,
-    moves: history.history.length - 1,
+    seconds: clock.seconds,
   };
 
   return <GameContext.Provider value={gameValue}>{children}</GameContext.Provider>;
@@ -161,55 +165,55 @@ function useGame(): GameValue {
   return React.useContext(GameContext);
 }
 
-export function flipCards(nextSnapshot: Snapshot, card: GameCard): void {
+export function flipCards(nextMove: Move, card: GameCard): void {
   switch (card.type) {
     case 'matchable': {
       // Hide both cards, if two choices were already made. Don't do this for effects. Otherwise shuffle looks confusing.
-      if (twoChoices(nextSnapshot)) {
-        nextSnapshot.choice1 = null;
-        nextSnapshot.choice2 = null;
+      if (twoChoices(nextMove)) {
+        nextMove.choice1 = null;
+        nextMove.choice2 = null;
       }
       // Flip one card
-      if (zeroChoices(nextSnapshot)) {
-        nextSnapshot.choice1 = card.id;
-      } else if (oneChoice(nextSnapshot)) {
-        nextSnapshot.choice2 = card.id;
+      if (zeroChoices(nextMove)) {
+        nextMove.choice1 = card.id;
+      } else if (oneChoice(nextMove)) {
+        nextMove.choice2 = card.id;
       }
       // Check for a match
-      const card1 = nextSnapshot.choice1 ? nextSnapshot.cards[nextSnapshot.choice1] : null;
-      const card2 = nextSnapshot.choice2 ? nextSnapshot.cards[nextSnapshot.choice2] : null;
+      const card1 = nextMove.choice1 ? nextMove.cards[nextMove.choice1] : null;
+      const card2 = nextMove.choice2 ? nextMove.cards[nextMove.choice2] : null;
       if (card1 && card2) {
         if (card1.type !== 'matchable' || card2.type !== 'matchable') {
           throw new Error('Only matchable cards should be choices');
         }
         if (card1.matchId === card2.matchId) {
-          nextSnapshot.matched.add(card1.id);
-          nextSnapshot.matched.add(card2.id);
-          nextSnapshot.choice1 = null;
-          nextSnapshot.choice2 = null;
+          nextMove.matched.add(card1.id);
+          nextMove.matched.add(card2.id);
+          nextMove.choice1 = null;
+          nextMove.choice2 = null;
         }
       }
       break;
     }
     case 'effect': {
-      nextSnapshot.foundEffects.add(card.id);
+      nextMove.foundEffects.add(card.id);
       break;
     }
   }
 }
 
-function checkWin(nextSnapshot: Snapshot) {
-  if (!nextSnapshot.over && nextSnapshot.matched.size / 2 === NUMBER_OF_PAIRS) {
-    nextSnapshot.over = { win: true, reason: 'You found all pairs! 🎉' };
+function checkWin(nextMove: Move) {
+  if (!nextMove.gameOver && nextMove.matched.size / 2 === NUMBER_OF_PAIRS) {
+    nextMove.gameOver = { win: true, reason: 'You found all pairs! 🎉' };
   }
 }
 
-function updateTimeLimit(nextSnapshot: Snapshot, defaultTimeLimit: TimeLimit) {
-  if (oneChoice(nextSnapshot) || twoChoices(nextSnapshot)) {
-    nextSnapshot.timeLimit = nextSnapshot.timeLimit < 0 ? defaultTimeLimit : nextSnapshot.timeLimit;
+function updateTimeLimit(nextMove: Move, defaultTimeLimit: TimeLimit) {
+  if (oneChoice(nextMove) || twoChoices(nextMove)) {
+    nextMove.timeLimit = nextMove.timeLimit < 0 ? defaultTimeLimit : nextMove.timeLimit;
   }
-  if (nextSnapshot.over) {
-    nextSnapshot.timeLimit = -1;
+  if (nextMove.gameOver) {
+    nextMove.timeLimit = -1;
   }
 }
 
