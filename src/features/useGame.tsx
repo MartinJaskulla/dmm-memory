@@ -63,7 +63,7 @@ export interface GameValue {
   history: History<Move>;
   callbacks: {
     countdown: (remainingSeconds: number) => void;
-    // Could add a callback for <Clock> or other things the game is interested in
+    clock: (remainingSeconds: number) => void;
   };
   revealCard: (index: number) => void;
 }
@@ -80,6 +80,7 @@ const defaultGameValue: GameValue = {
   },
   callbacks: {
     countdown: () => null,
+    clock: () => null,
   },
   revealCard: () => null,
 };
@@ -154,6 +155,16 @@ const GameProvider = ({ children, effects }: GameProps) => {
     switch (remainingSeconds) {
       case 0:
         loose('Time is up! 😭');
+        break;
+    }
+  }
+
+  function clock(seconds: number) {
+    const HOUR = 3600;
+    switch (seconds) {
+      case HOUR:
+        alert('Time to take a break ☕️');
+        break;
     }
   }
 
@@ -168,6 +179,7 @@ const GameProvider = ({ children, effects }: GameProps) => {
     revealCard,
     callbacks: {
       countdown,
+      clock,
     },
   };
 

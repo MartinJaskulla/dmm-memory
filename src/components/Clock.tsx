@@ -21,6 +21,11 @@ export function Clock() {
     if (game.history.move.gameOver) abortControllerRef.current.abort();
   }, [game.history.move.gameOver]);
 
+  useEffect(() => {
+    game.callbacks.clock(seconds);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seconds]);
+
   useEffect(() => () => abortControllerRef.current.abort(), []);
 
   const formattedSeconds = new Date(seconds * 1000).toISOString().slice(14, 19);
