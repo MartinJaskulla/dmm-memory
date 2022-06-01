@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { fetchGoal } from '../api/fetchGoal';
 import { History, useHistory } from './useHistory';
 import { createGame } from '../api/createGame';
@@ -42,7 +42,7 @@ export interface Move<T extends Record<string, unknown> = Record<string, unknown
   matched: Set<Id>;
   foundEffects: Set<Id>;
   gameOver: { win: boolean; reason: string } | null;
-  date: Date;
+  totalMs: number;
   timeLimit: TimeLimit;
   effects: T;
 }
@@ -56,7 +56,7 @@ const defaultMove: Move = {
   matched: new Set(),
   foundEffects: new Set(),
   gameOver: null,
-  date: new Date(0),
+  totalMs: 0,
   timeLimit: -1,
   effects: {},
 };
@@ -93,6 +93,17 @@ const GameProvider = ({ children, countdown, effects }: GameProps) => {
   const { move } = history;
   const clock = useClock();
 
+  const lastMoveDateRef = useRef(new Date());
+  useEffect(() => {
+    // Could be late, but fair for the user to start counting after the browser has painted
+    // TODO Can the displayed clock drift from this? I think so. Eveery time we push a move, we should also reset the clock to the move.totalMs
+    lastMoveDateRef.current = new Date();
+  }, [history.moveIndex]);
+
+  function getMsSinceLastMove() {
+    return new Date().getTime() - lastMoveDateRef.current.getTime();
+  }
+
   // React 18 calls useEffect twice in StrictMode, which means we call newGame() twice on mount.
   // Using a ref or a global or local variable to check if the call was already made is not pleasing to the eye.
   // AbortController could also be used to cancel the first request, but in this small project I don't mind fetching goal.json twice.
@@ -111,7 +122,7 @@ const GameProvider = ({ children, countdown, effects }: GameProps) => {
     const { goal_items } = await fetchGoal();
     const { cards, cardIds } = createGame(goal_items, effects, NUMBER_OF_PAIRS, NUMBER_OF_EFFECTS);
     // clock.setTime(new Date(0)); // TODO Clock
-    history.resetMoves({ ...defaultMove, date: new Date(), cards, cardIds });
+    history.resetMoves({ ...defaultMove, cards, cardIds });
   }
 
   function revealCard(revealedCardIndex: number) {
@@ -128,8 +139,8 @@ const GameProvider = ({ children, countdown, effects }: GameProps) => {
 
   function saveMove(moveUpdates: Partial<Move>) {
     const nextMove: Move = merge(structuredClone(move), moveUpdates);
-    nextMove.date = new Date(); // TODO Clock
-    checkWin(nextMove);
+    nextMove.totalMs = getMsSinceLastMove() + history.moves[history.moveIndex].totalMs;
+    checkWin(nextMove, NUMBER_OF_PAIRS);
     updateTimeLimit(nextMove, TIME_LIMIT);
     effectMiddleWare(effects, nextMove);
     history.addMove(nextMove);
@@ -202,8 +213,8 @@ export function flipCards(nextMove: Move, card: GameCard): void {
   }
 }
 
-function checkWin(nextMove: Move) {
-  if (!nextMove.gameOver && nextMove.matched.size / 2 === NUMBER_OF_PAIRS) {
+function checkWin(nextMove: Move, requiredPairs: number) {
+  if (!nextMove.gameOver && nextMove.matched.size / 2 === requiredPairs) {
     nextMove.gameOver = { win: true, reason: 'You found all pairs! 🎉' };
   }
 }

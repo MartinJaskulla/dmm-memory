@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { deepFreeze } from '../utils/deepFreeze';
 
 export interface History<M> {
@@ -27,6 +27,10 @@ export function useHistory<M>(initialMove: M): History<M> {
   function goToMove(stepIndex: number) {
     setMoveIndex(stepIndex);
   }
+
+  useEffect(() => {
+    console.log(moves);
+  }, [moves]);
 
   return {
     move: moves[moveIndex],

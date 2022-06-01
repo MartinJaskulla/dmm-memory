@@ -33,7 +33,9 @@ export function Header() {
   const game = useGame();
 
   // TODO date and seconds should have same format. which will be number ms
-  const secondsSource: Date = game.history.move.gameOver ? game.history.move.date : new Date(game.seconds * 1000);
+  const secondsSource: Date = game.history.move.gameOver
+    ? new Date(game.history.move.totalMs)
+    : new Date(game.seconds * 1000);
   const formattedSeconds = secondsSource.toISOString().slice(14, 19);
 
   return (

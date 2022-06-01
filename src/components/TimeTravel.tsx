@@ -3,6 +3,7 @@ import { useGame } from '../features/useGame';
 
 export function TimeTravel() {
   const { history } = useGame();
+  // TODO Game should not expose whole history. should expose custom function to time travel which calc totalMs
   return (
     <div>
       {history.moves.map((s, i) => {
