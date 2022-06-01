@@ -7,6 +7,9 @@ import { merge } from '../utils/merge';
 import { effectMiddleWare } from '../effects/effectMiddleware';
 import { EffectData } from '../effects/effect-registry/effectRegistry';
 
+export const NO_COUNTDOWN = -1;
+
+// TODO Put in config
 const PAIRS = 6;
 const HINTED_CARDS = 20;
 const NUMBER_OF_EFFECTS = 2;
@@ -64,7 +67,7 @@ const defaultMove: Move = {
   hints: new Set(),
   gameOver: null,
   totalMs: 0,
-  timeLimit: -1,
+  timeLimit: NO_COUNTDOWN,
   effects: {
     data: {} as EffectData,
     dataEffects: [],
@@ -251,7 +254,7 @@ function updateTimeLimit(nextMove: Move, defaultTimeLimit: TimeLimit) {
     nextMove.timeLimit = nextMove.timeLimit < 0 ? defaultTimeLimit : nextMove.timeLimit;
   }
   if (nextMove.gameOver) {
-    nextMove.timeLimit = -1;
+    nextMove.timeLimit = NO_COUNTDOWN;
   }
 }
 

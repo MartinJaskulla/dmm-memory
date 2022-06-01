@@ -1,4 +1,4 @@
-import { TimeLimit, useGame } from '../features/useGame';
+import { NO_COUNTDOWN, TimeLimit, useGame } from '../features/useGame';
 import React, { useEffect, useRef, useState } from 'react';
 import { interval } from '../utils/interval';
 
@@ -22,5 +22,5 @@ export function Countdown() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [remaining]);
 
-  return <>{remaining > -1 && <div>Countdown: {remaining}</div>}</>;
+  return <>{remaining > NO_COUNTDOWN && <div>Countdown: {remaining}</div>}</>;
 }
