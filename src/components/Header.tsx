@@ -34,8 +34,6 @@ export function Header() {
   const countdown = useCountdown();
   const game = useGame();
 
-  // TODO Clock does not stop on game endMaybe change if I refactor clock to countdown style
-  console.log(!!game.over, game.timePlayed, clock.time);
   const formattedSeconds = (game.over ? game.timePlayed : clock.time).toISOString().slice(14, 19);
 
   return (

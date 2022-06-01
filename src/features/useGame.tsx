@@ -124,9 +124,9 @@ const GameProvider = ({ children, clock, countdown, effects }: GameProps) => {
   function takeSnapshot(snapshotUpdates: Partial<Snapshot>) {
     const nextSnapshot: Snapshot = merge(structuredClone(snapshot), snapshotUpdates);
     nextSnapshot.timePlayed = clock.time;
+    checkWin(nextSnapshot);
     updateTimeLimit(nextSnapshot, TIME_LIMIT);
     effectMiddleWare(effects, nextSnapshot);
-    checkWin(nextSnapshot);
     history.push(nextSnapshot);
   }
 
@@ -199,16 +199,15 @@ export function flipCards(nextSnapshot: Snapshot, card: GameCard): void {
 }
 
 function checkWin(nextSnapshot: Snapshot) {
-  nextSnapshot.over =
-    nextSnapshot.matched.size / 2 === NUMBER_OF_PAIRS ? { win: true, reason: 'You found all pairs! 🎉' } : null;
+  if (!nextSnapshot.over && nextSnapshot.matched.size / 2 === NUMBER_OF_PAIRS) {
+    nextSnapshot.over = { win: true, reason: 'You found all pairs! 🎉' };
+  }
 }
 
 function updateTimeLimit(nextSnapshot: Snapshot, defaultTimeLimit: TimeLimit) {
   if (oneChoice(nextSnapshot) || twoChoices(nextSnapshot)) {
     nextSnapshot.timeLimit = nextSnapshot.timeLimit < 0 ? defaultTimeLimit : nextSnapshot.timeLimit;
   }
-  // TODO effects could change game.over. I think a lot of checks have to run twice. once before effects, once after?
-  //  or by effect themselves? obviously ugly and better approach needed
   if (nextSnapshot.over) {
     nextSnapshot.timeLimit = -1;
   }
