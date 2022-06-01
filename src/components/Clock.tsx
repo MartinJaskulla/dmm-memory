@@ -2,8 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Move, useGame } from '../features/useGame';
 import { interval } from '../utils/interval';
 
-// Put clock in its own component instead of game context
-// to prevent all children of game to render every second.
+// Put clock in its own component instead of game context to prevent all children of game to render every second.
 
 export function Clock() {
   const game = useGame();
@@ -37,7 +36,7 @@ function start(
   if (move.gameOver) return;
   abortControllerRef.current = new AbortController();
   const msToNextSecond = 1000 - (move.totalMs % 1000);
-  // When traveling back in time to a move which was made 7.3s in, the clock needs to be updated in 0.7s.
+  // When traveling back in time to a move which was made 7.3s in, the clock needs to be updated in 0.7s once.
   interval(msToNextSecond, abortControllerRef.current.signal, () => {
     abortControllerRef.current.abort();
     abortControllerRef.current = new AbortController();

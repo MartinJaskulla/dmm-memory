@@ -99,6 +99,7 @@ const GameProvider = ({ children, effects }: GameProps) => {
   useEffect(() => {
     // Could be late, but fair for the user to start counting after the browser has painted
     // TODO Can the displayed clock drift from this? I think so. Eveery time we push a move, we should also reset the clock to the move.totalMs
+    //  On the other hand clock runs less smooth if I reset clock on every move. do a test with fresg react project + archibald
     lastMoveDateRef.current = new Date();
   }, [history.moveIndex]);
 
@@ -109,6 +110,7 @@ const GameProvider = ({ children, effects }: GameProps) => {
   // React 18 calls useEffect twice in StrictMode, which means we call newGame() twice on mount.
   // Using a ref or a global or local variable to check if the call was already made is not pleasing to the eye.
   // AbortController could also be used to cancel the first request, but in this small project I don't mind fetching goal.json twice.
+  // https://jherr2020.medium.com/react-18-useeffect-double-call-for-apis-emergency-fix-724b7ee6a646
   // In a bigger project I would use a state management library or, like Dan Abramov recommends, a fetching library:
   // https://github.com/facebook/react/issues/24502#issuecomment-1118867879
   useEffect(() => {
@@ -130,10 +132,10 @@ const GameProvider = ({ children, effects }: GameProps) => {
   function revealCard(revealedCardIndex: number) {
     const nextMove: Move = structuredClone(move);
 
-    const cardId = move.cardIds[revealedCardIndex];
+    const cardId = nextMove.cardIds[revealedCardIndex];
     nextMove.latestCard = cardId;
 
-    const card = move.cards[cardId];
+    const card = nextMove.cards[cardId];
     flipCards(nextMove, card);
 
     saveMove(nextMove);

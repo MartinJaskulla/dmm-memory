@@ -7,8 +7,8 @@ export function Countdown() {
   const [remaining, setRemaining] = useState<TimeLimit>(game.history.move.timeLimit);
   const abortControllerRef = useRef(new AbortController());
 
+  // Restart the timeout, every time a new card is revealed or the user does a time travel
   useEffect(() => {
-    // debugger
     abortControllerRef.current.abort();
     setRemaining(game.history.move.timeLimit);
     if (game.history.move.timeLimit < 0) return;
