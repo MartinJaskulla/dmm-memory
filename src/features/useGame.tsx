@@ -4,7 +4,6 @@ import { History, useHistory } from './useHistory';
 import { createGame } from '../api/createGame';
 import { oneChoice, twoChoices, zeroChoices } from '../utils/choices';
 import { merge } from '../utils/merge';
-import { CountdownValue } from './useCountdown';
 import { Effect, effectMiddleWare } from '../effects/effectMiddleware';
 
 const NUMBER_OF_PAIRS = 2;
@@ -62,6 +61,10 @@ const defaultMove: Move = {
 
 export interface GameValue {
   history: History<Move>;
+  callbacks: {
+    countdown: (remainingSeconds: number) => void;
+    // Could add a callback for <Clock> or other things the game is interested in
+  };
   revealCard: (index: number) => void;
 }
 
@@ -75,6 +78,9 @@ const defaultGameValue: GameValue = {
     resetMoves: () => null,
     timeTravels: 0,
   },
+  callbacks: {
+    countdown: () => null,
+  },
   revealCard: () => null,
 };
 
@@ -82,11 +88,10 @@ const GameContext = React.createContext<GameValue>(defaultGameValue);
 
 interface GameProps {
   children: React.ReactNode;
-  countdown: CountdownValue;
   effects: Effect[];
 }
 
-const GameProvider = ({ children, countdown, effects }: GameProps) => {
+const GameProvider = ({ children, effects }: GameProps) => {
   const history = useHistory(defaultMove);
   const { move } = history;
 
@@ -108,6 +113,7 @@ const GameProvider = ({ children, countdown, effects }: GameProps) => {
   // https://github.com/facebook/react/issues/24502#issuecomment-1118867879
   useEffect(() => {
     newGame();
+    // Can't wait for useEvent: https://github.com/reactjs/rfcs/pull/220
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -142,25 +148,25 @@ const GameProvider = ({ children, countdown, effects }: GameProps) => {
     history.addMove(nextMove);
   }
 
-  useEffect(() => {
-    // TODO Countdown in its own component, just like clock to prevent app render every 1s
-    countdown.restart(move.timeLimit);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [history.moveIndex]);
-
-  useEffect(() => {
-    if (countdown.remaining === 0) loose('Time is up! 😭');
-    // Can't wait for useEvent: https://github.com/reactjs/rfcs/pull/220
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [countdown.remaining]);
+  function countdown(remainingSeconds: number) {
+    switch (remainingSeconds) {
+      case 0:
+        loose('Time is up! 😭');
+    }
+  }
 
   useEffect(() => {
     if (move.gameOver) alert(move.gameOver.reason);
   }, [move.gameOver]);
 
+  // clock callback "already playing for one hour"
+
   const gameValue: GameValue = {
     history,
     revealCard,
+    callbacks: {
+      countdown,
+    },
   };
 
   return <GameContext.Provider value={gameValue}>{children}</GameContext.Provider>;

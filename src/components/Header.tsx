@@ -2,7 +2,7 @@ import React from 'react';
 import owlImgSrc from '../images/owl.svg';
 import styled from 'styled-components';
 import { useGame } from '../features/useGame';
-import { useCountdown } from '../features/useCountdown';
+import { Countdown } from './Countdown';
 import { Clock } from './Clock';
 
 const StyledHeader = styled.header`
@@ -30,7 +30,6 @@ const StyledHeader = styled.header`
 `;
 
 export function Header() {
-  const countdown = useCountdown();
   const game = useGame();
   return (
     <StyledHeader>
@@ -38,7 +37,7 @@ export function Header() {
         <img alt="Memory Game Logo" src={owlImgSrc} />
         Memory Game
       </h1>
-      {countdown.remaining > -1 && <div>Countdown: {countdown.remaining}</div>}
+      <Countdown />
       <div>
         <span>Moves: {game.history.moveIndex}</span>|<Clock />
       </div>
