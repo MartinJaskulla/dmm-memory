@@ -19,6 +19,10 @@ export function Clock() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [game.history.timeTravels]);
 
+  useEffect(() => {
+    if (game.history.move.gameOver) abortControllerRef.current.abort();
+  }, [game.history.move.gameOver]);
+
   function start(startingMs: number) {
     if (game.history.move.gameOver) return;
     abortControllerRef.current = new AbortController();
