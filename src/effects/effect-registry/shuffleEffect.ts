@@ -7,12 +7,12 @@ import { shuffle } from '../../utils/shuffle';
 const EFFECT = 'shuffle';
 
 export const shuffleEffect: Effect = {
-  effect: EFFECT,
+  effectId: EFFECT,
   card: {
     text: 'Shuffle',
   },
   middleware: {
-    active: (move: Move) => {
+    cardClick: (move: Move) => {
       const shuffleCardIndexOld = move.cardIds.findIndex((cardId) => cardId === move.latestCard);
       move.cardIds = shuffle(move.cardIds);
       const shuffleCardIndexNew = move.cardIds.findIndex((cardId) => cardId === move.latestCard);

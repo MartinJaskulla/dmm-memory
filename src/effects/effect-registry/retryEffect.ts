@@ -8,12 +8,12 @@ import { Move } from '../../features/useGame';
 const EFFECT = 'retry';
 
 export const retryEffect: Effect = {
-  effect: EFFECT,
+  effectId: EFFECT,
   card: {
     text: 'Retry',
   },
   middleware: {
-    active: (move: Move) => {
+    cardClick: (move: Move) => {
       if (!move.latestCard) return move;
 
       // if (EFFECT in snapshot.effects && isRetry(snapshot.effects[EFFECT])) {

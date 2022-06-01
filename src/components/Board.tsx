@@ -52,7 +52,7 @@ export function Board() {
           }
 
           if (card.type === 'effect' && (move.foundEffects.has(card.id) || move.gameOver)) {
-            return <EffectCard key={card.id} text={card.effect} />;
+            return <EffectCard key={card.id} text={card.text} />;
           }
 
           return <HiddenCard key={card.id} onClick={() => game.revealCard(index)} />;

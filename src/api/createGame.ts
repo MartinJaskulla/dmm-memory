@@ -2,17 +2,16 @@ import { shuffle } from '../utils/shuffle';
 import { Id, Move } from '../features/useGame';
 import { GETGoal } from './fetchGoal';
 import { createId } from '../utils/createId';
-import { Effect } from '../effects/effectMiddleware';
+import { EffectList, effectList } from '../effects/effect-registry/effectRegistry';
 
 export function createGame(
   goalItems: GETGoal['goal_items'],
-  effects: Effect[],
   nPairs: number,
   nEffects: number,
   nHints: number,
 ): Pick<Move, 'cards' | 'cardIds' | 'hints'> {
   goalItems = structuredClone(goalItems);
-  effects = JSON.parse(JSON.stringify(effects));
+  const effects: EffectList = JSON.parse(JSON.stringify(effectList));
 
   const cards: Move['cards'] = {};
   const hints = new Set<Id>();
@@ -23,7 +22,7 @@ export function createGame(
     cards[id] = {
       type: 'effect',
       id,
-      effect: effect.effect,
+      effectId: effect.effectId,
       text: effect.card.text,
     };
   });

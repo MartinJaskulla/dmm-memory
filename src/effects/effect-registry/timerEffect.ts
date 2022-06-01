@@ -10,29 +10,31 @@ const INCREASE_TIME_FOR_MOVES = 3;
 export type TimerData = { [EFFECT]: number };
 
 export const timerEffect: Effect<TimerData> = {
-  effect: EFFECT,
+  effectId: EFFECT,
   card: {
     text: 'Timer',
   },
   middleware: {
-    active: (move: Move) => {
-      move.effects[EFFECT] = INCREASE_TIME_FOR_MOVES;
+    cardClick: (move: Move) => {
+      move.effects.data[EFFECT] = INCREASE_TIME_FOR_MOVES;
+      move.effects.dataEffects.push(EFFECT);
     },
-    passive: (move: Move<TimerData>) => {
+    data: (move: Move<TimerData>) => {
       const cardHasCountdown = move.timeLimit > -1;
       if (!cardHasCountdown) return;
 
       // Increase time once
-      if (move.effects[EFFECT] === INCREASE_TIME_FOR_MOVES) {
+      if (move.effects.data[EFFECT] === INCREASE_TIME_FOR_MOVES) {
         move.timeLimit = move.timeLimit + INCREASE_TIME_BY_SECONDS;
       }
 
       // Decrement moves
-      move.effects[EFFECT]--;
+      move.effects.data[EFFECT]--;
 
       // Decrease time after X + 1 moves
-      if (move.effects[EFFECT] < 0) {
-        delete (move as Move).effects[EFFECT];
+      if (move.effects.data[EFFECT] < 0) {
+        // @ts-ignore
+        delete move.effects.data[EFFECT];
         move.timeLimit = move.timeLimit - INCREASE_TIME_BY_SECONDS;
         // Consider the possibility of a timer penalty effect card:
         // Setting timeLimit to less than zero means there will be no countdown,

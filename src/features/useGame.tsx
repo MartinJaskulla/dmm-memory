@@ -4,7 +4,8 @@ import { History, useHistory } from './useHistory';
 import { createGame } from '../api/createGame';
 import { oneChoice, twoChoices, zeroChoices } from '../utils/choices';
 import { merge } from '../utils/merge';
-import { Effect, effectMiddleWare } from '../effects/effectMiddleware';
+import { effectMiddleWare } from '../effects/effectMiddleware';
+import { EffectData } from '../effects/effect-registry/effectRegistry';
 
 const PAIRS = 6;
 const HINTED_CARDS = 20;
@@ -25,14 +26,14 @@ export interface GameCardMatchable {
 export interface GameCardEffect {
   type: 'effect';
   id: Id;
-  effect: string;
+  effectId: string;
   text: string;
 }
 export type GameCard = GameCardMatchable | GameCardEffect;
 
 export type TimeLimit = number;
 
-export interface Move<T extends Record<string, unknown> = Record<string, unknown>> {
+export interface Move<T extends EffectData = EffectData> {
   cards: Record<Id, GameCard>;
   cardIds: Id[];
   choice1: Id | null;
@@ -44,7 +45,12 @@ export interface Move<T extends Record<string, unknown> = Record<string, unknown
   gameOver: { win: boolean; reason: string } | null;
   totalMs: number;
   timeLimit: TimeLimit;
-  effects: T;
+  effects: {
+    data: T;
+    dataEffects: string[]; // I think this allows stacking effects and maybe even doubling if I change e.g. timerEffect to always subtract time after countre is zero?
+    // don't always call each effect for example, justshift effectOrder Hmm. So either 2d array or don't shift and passive effect itself needs to remove it from effectOrder?
+    // If there are multiple times in the order, how would a passive effect know which one to remove?
+  };
 }
 
 const defaultMove: Move = {
@@ -59,7 +65,10 @@ const defaultMove: Move = {
   gameOver: null,
   totalMs: 0,
   timeLimit: -1,
-  effects: {},
+  effects: {
+    data: {} as EffectData,
+    dataEffects: [],
+  },
 };
 
 export interface GameValue {
@@ -92,10 +101,9 @@ const GameContext = React.createContext<GameValue>(defaultGameValue);
 
 interface GameProps {
   children: React.ReactNode;
-  effects: Effect[];
 }
 
-const GameProvider = ({ children, effects }: GameProps) => {
+const GameProvider = ({ children }: GameProps) => {
   const history = useHistory(defaultMove);
   const { move } = history;
 
@@ -129,7 +137,7 @@ const GameProvider = ({ children, effects }: GameProps) => {
 
   async function newGame() {
     const { goal_items } = await fetchGoal();
-    const { cards, cardIds, hints } = createGame(goal_items, effects, PAIRS, NUMBER_OF_EFFECTS, HINTED_CARDS);
+    const { cards, cardIds, hints } = createGame(goal_items, PAIRS, NUMBER_OF_EFFECTS, HINTED_CARDS);
     history.resetMoves({ ...defaultMove, cards, cardIds, hints });
   }
 
@@ -152,7 +160,7 @@ const GameProvider = ({ children, effects }: GameProps) => {
     nextMove.hints = new Set();
     checkWin(nextMove, PAIRS);
     updateTimeLimit(nextMove, TIME_LIMIT);
-    effectMiddleWare(effects, nextMove);
+    effectMiddleWare(nextMove);
     history.addMove(nextMove);
   }
 
