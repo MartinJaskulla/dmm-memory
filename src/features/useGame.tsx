@@ -73,6 +73,7 @@ const defaultGameValue: GameValue = {
     addMove: () => null,
     goToMove: () => null,
     resetMoves: () => null,
+    timeTravels: 0,
   },
   revealCard: () => null,
 };

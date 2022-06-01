@@ -2,6 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useGame } from '../features/useGame';
 import { interval } from '../utils/interval';
 
+// Put clock in its own component instead of game context
+// to prevent all children of game to render every second.
+
 export function Clock() {
   const game = useGame();
   const [seconds, setSeconds] = useState(0);
@@ -14,7 +17,7 @@ export function Clock() {
     setSeconds(new Date(game.history.move.totalMs).getUTCSeconds());
     start(game.history.move.totalMs);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [game.history.moveIndex]);
+  }, [game.history.timeTravels]);
 
   function start(startingMs: number) {
     if (game.history.move.gameOver) return;
