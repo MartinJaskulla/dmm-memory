@@ -6,7 +6,8 @@ import { oneChoice, twoChoices, zeroChoices } from '../utils/choices';
 import { merge } from '../utils/merge';
 import { Effect, effectMiddleWare } from '../effects/effectMiddleware';
 
-const NUMBER_OF_PAIRS = 2;
+const PAIRS = 6;
+const HINTED_CARDS = 20;
 const NUMBER_OF_EFFECTS = 2;
 const TIME_LIMIT = 30;
 
@@ -39,6 +40,7 @@ export interface Move<T extends Record<string, unknown> = Record<string, unknown
   latestCard: Id;
   matched: Set<Id>;
   foundEffects: Set<Id>;
+  hints: Set<Id>;
   gameOver: { win: boolean; reason: string } | null;
   totalMs: number;
   timeLimit: TimeLimit;
@@ -53,6 +55,7 @@ const defaultMove: Move = {
   latestCard: '',
   matched: new Set(),
   foundEffects: new Set(),
+  hints: new Set(),
   gameOver: null,
   totalMs: 0,
   timeLimit: -1,
@@ -126,8 +129,8 @@ const GameProvider = ({ children, effects }: GameProps) => {
 
   async function newGame() {
     const { goal_items } = await fetchGoal();
-    const { cards, cardIds } = createGame(goal_items, effects, NUMBER_OF_PAIRS, NUMBER_OF_EFFECTS);
-    history.resetMoves({ ...defaultMove, cards, cardIds });
+    const { cards, cardIds, hints } = createGame(goal_items, effects, PAIRS, NUMBER_OF_EFFECTS, HINTED_CARDS);
+    history.resetMoves({ ...defaultMove, cards, cardIds, hints });
   }
 
   function revealCard(revealedCardIndex: number) {
@@ -145,7 +148,9 @@ const GameProvider = ({ children, effects }: GameProps) => {
   function saveMove(moveUpdates: Partial<Move>) {
     const nextMove: Move = merge(structuredClone(move), moveUpdates);
     nextMove.totalMs = getMsSinceLastMove() + history.moves[history.moveIndex].totalMs;
-    checkWin(nextMove, NUMBER_OF_PAIRS);
+    // Remove hints before effectMiddleware, so that effects can add hints
+    nextMove.hints = new Set();
+    checkWin(nextMove, PAIRS);
     updateTimeLimit(nextMove, TIME_LIMIT);
     effectMiddleWare(effects, nextMove);
     history.addMove(nextMove);
