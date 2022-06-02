@@ -74,11 +74,14 @@ const defaultMove: Move = {
   },
 };
 
+export type MsGetter = () => number;
+
 export interface GameValue {
   history: History<Move>;
   callbacks: {
     countdown: (remainingSeconds: number) => void;
-    clock: (remainingSeconds: number) => void;
+    everySecond: (remainingSeconds: number) => void;
+    setMsGetter: (msGetter: MsGetter) => void;
   };
   revealCard: (index: number) => void;
 }
@@ -95,7 +98,8 @@ const defaultGameValue: GameValue = {
   },
   callbacks: {
     countdown: () => null,
-    clock: () => null,
+    everySecond: () => null,
+    setMsGetter: () => null,
   },
   revealCard: () => null,
 };
@@ -110,18 +114,6 @@ const GameProvider = ({ children }: GameProps) => {
   const history = useHistory(defaultMove);
   const { move } = history;
 
-  const lastMoveDateRef = useRef(new Date());
-  useEffect(() => {
-    // Could be late, but fair for the user to start counting after the browser has painted
-    // TODO Can the displayed clock drift from this? I think so. Eveery time we push a move, we should also reset the clock to the move.totalMs
-    //  On the other hand clock runs less smooth if I reset clock on every move. do a test with fresg react project + archibald
-    lastMoveDateRef.current = new Date();
-  }, [history.moveIndex]);
-
-  function getMsSinceLastMove() {
-    return new Date().getTime() - lastMoveDateRef.current.getTime();
-  }
-
   // React 18 calls useEffect twice in StrictMode, which means we call newGame() twice on mount.
   // Using a ref or a global or local variable to check if the call was already made is not pleasing to the eye.
   // AbortController could also be used to cancel the first request, but in this small project I don't mind fetching goal.json twice.
@@ -134,9 +126,9 @@ const GameProvider = ({ children }: GameProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function loose(reason: string) {
-    saveMove({ gameOver: { win: false, reason } });
-  }
+  useEffect(() => {
+    if (move.gameOver) alert(move.gameOver.reason);
+  }, [move.gameOver]);
 
   async function newGame() {
     const { goal_items } = await fetchGoal();
@@ -156,9 +148,13 @@ const GameProvider = ({ children }: GameProps) => {
     saveMove(nextMove);
   }
 
+  function loose(reason: string) {
+    saveMove({ gameOver: { win: false, reason } });
+  }
+
   function saveMove(moveUpdates: Partial<Move>) {
     const nextMove: Move = merge(structuredClone(move), moveUpdates);
-    nextMove.totalMs = getMsSinceLastMove() + history.moves[history.moveIndex].totalMs;
+    nextMove.totalMs = msGetterRef.current();
     // Remove hints before effectMiddleware, so that effects can add hints
     nextMove.hints = new Set();
     checkWin(nextMove, PAIRS);
@@ -175,7 +171,7 @@ const GameProvider = ({ children }: GameProps) => {
     }
   }
 
-  function clock(seconds: number) {
+  function everySecond(seconds: number) {
     const HOUR = 3600;
     switch (seconds) {
       case HOUR:
@@ -184,18 +180,19 @@ const GameProvider = ({ children }: GameProps) => {
     }
   }
 
-  useEffect(() => {
-    if (move.gameOver) alert(move.gameOver.reason);
-  }, [move.gameOver]);
+  const msGetterRef = useRef<MsGetter>(() => 0);
 
-  // clock callback "already playing for one hour"
+  function setMsGetter(msGetter: MsGetter) {
+    msGetterRef.current = msGetter;
+  }
 
   const gameValue: GameValue = {
     history,
     revealCard,
     callbacks: {
       countdown,
-      clock,
+      everySecond,
+      setMsGetter,
     },
   };
 
