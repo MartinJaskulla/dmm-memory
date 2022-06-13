@@ -2,6 +2,9 @@ import { NO_COUNTDOWN, TimeLimit, useGame } from '../features/useGame';
 import React, { useEffect, useRef, useState } from 'react';
 import { interval } from '../utils/interval';
 
+// Countdown cannot reuse the game clock, because the countdown always starts on a full second,
+// while the clock might start on 1.32s when time traveling.
+
 export function Countdown() {
   const game = useGame();
   const [remaining, setRemaining] = useState<TimeLimit>(game.history.move.timeLimit);
@@ -18,7 +21,7 @@ export function Countdown() {
   }, [game.history.moveIndex, game.history.timeTravels]);
 
   useEffect(() => {
-    game.callbacks.countdown(remaining);
+    game.callbacks.onCountdown(remaining);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [remaining]);
 

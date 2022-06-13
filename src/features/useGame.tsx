@@ -79,8 +79,8 @@ export type MsGetter = () => number;
 export interface GameValue {
   history: History<Move>;
   callbacks: {
-    countdown: (remainingSeconds: number) => void;
-    everySecond: (remainingSeconds: number) => void;
+    onCountdown: (remainingSeconds: number) => void;
+    onSecond: (second: number) => void;
     setMsGetter: (msGetter: MsGetter) => void;
   };
   revealCard: (index: number) => void;
@@ -97,8 +97,8 @@ const defaultGameValue: GameValue = {
     timeTravels: 0,
   },
   callbacks: {
-    countdown: () => null,
-    everySecond: () => null,
+    onCountdown: () => null,
+    onSecond: () => null,
     setMsGetter: () => null,
   },
   revealCard: () => null,
@@ -163,7 +163,7 @@ const GameProvider = ({ children }: GameProps) => {
     history.addMove(nextMove);
   }
 
-  function countdown(remainingSeconds: number) {
+  function onCountdown(remainingSeconds: number) {
     switch (remainingSeconds) {
       case 0:
         loose('Time is up! 😭');
@@ -171,7 +171,7 @@ const GameProvider = ({ children }: GameProps) => {
     }
   }
 
-  function everySecond(seconds: number) {
+  function onSecond(seconds: number) {
     const HOUR = 3600;
     switch (seconds) {
       case HOUR:
@@ -190,8 +190,8 @@ const GameProvider = ({ children }: GameProps) => {
     history,
     revealCard,
     callbacks: {
-      countdown,
-      everySecond,
+      onCountdown,
+      onSecond,
       setMsGetter,
     },
   };
