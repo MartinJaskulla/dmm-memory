@@ -16,6 +16,7 @@ export function Countdown() {
     setRemaining(game.history.move.timeLimit);
     if (game.history.move.timeLimit < 0) return;
     abortControllerRef.current = new AbortController();
+    // TODO Do not pause when switching tabs, use time from interval somehow?
     interval(1000, abortControllerRef.current.signal, () => setRemaining((seconds) => seconds - 1));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [game.history.moveIndex, game.history.timeTravels]);

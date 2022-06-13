@@ -80,7 +80,6 @@ export interface GameValue {
   history: History<Move>;
   callbacks: {
     onCountdown: (remainingSeconds: number) => void;
-    onSecond: (second: number) => void;
     setMsGetter: (msGetter: MsGetter) => void;
   };
   revealCard: (index: number) => void;
@@ -98,7 +97,6 @@ const defaultGameValue: GameValue = {
   },
   callbacks: {
     onCountdown: () => null,
-    onSecond: () => null,
     setMsGetter: () => null,
   },
   revealCard: () => null,
@@ -171,15 +169,6 @@ const GameProvider = ({ children }: GameProps) => {
     }
   }
 
-  function onSecond(seconds: number) {
-    const HOUR = 3600;
-    switch (seconds) {
-      case HOUR:
-        alert('Time to take a break ☕️');
-        break;
-    }
-  }
-
   const msGetterRef = useRef<MsGetter>(() => 0);
 
   function setMsGetter(msGetter: MsGetter) {
@@ -191,7 +180,6 @@ const GameProvider = ({ children }: GameProps) => {
     revealCard,
     callbacks: {
       onCountdown,
-      onSecond,
       setMsGetter,
     },
   };
