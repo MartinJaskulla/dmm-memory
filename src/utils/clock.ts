@@ -36,8 +36,8 @@ export class Clock {
     callback(this.ms); // TODO Maybe calling immediately is a problem because of React double rendering?
     this.callbacks.push(callback);
     const unsubscribe = () => {
-      console.log('unsubscribe', callback);
-      this.callbacks.splice(this.callbacks.indexOf(callback), 1);
+      const index = this.callbacks.indexOf(callback)
+      if(index !== -1) this.callbacks.splice(index, 1);
     };
     return unsubscribe;
   }
