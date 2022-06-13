@@ -39,7 +39,7 @@ export function Header() {
       </h1>
       <Countdown />
       <div>
-        <span>🐾 {game.history.moveIndex}</span> <Clock />
+        <span>🐾 {game.moveIndex}</span> <Clock />
       </div>
     </StyledHeader>
   );

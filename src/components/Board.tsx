@@ -24,34 +24,31 @@ const StyledMain = styled.main`
 
 export function Board() {
   const game = useGame();
-  const {
-    history: { move },
-  } = game;
   // if moves === 0. show cards for x seconds
 
   return (
     <>
       <StyledMain>
-        {move.cardIds.map((cardId, index) => {
-          const card = move.cards[cardId];
+        {game.move.cardIds.map((cardId, index) => {
+          const card = game.move.cards[cardId];
           if (card.type === 'matchable') {
-            if (move.matched.has(card.id)) {
+            if (game.move.matched.has(card.id)) {
               return <MatchedCard key={card.id} text={card.text} language={card.language} />;
             }
-            const isCardRevealed = [move.choice1, move.choice2].includes(card.id);
-            if (isCardRevealed || move.gameOver) {
+            const isCardRevealed = [game.move.choice1, game.move.choice2].includes(card.id);
+            if (isCardRevealed || game.move.gameOver) {
               return (
                 <RevealedCard
                   key={card.id}
                   text={card.text}
                   language={card.language}
-                  onClick={twoChoices(move) ? () => game.revealCard(index) : undefined}
+                  onClick={twoChoices(game.move) ? () => game.revealCard(index) : undefined}
                 />
               );
             }
           }
 
-          if (card.type === 'effect' && (move.foundEffects.has(card.id) || move.gameOver)) {
+          if (card.type === 'effect' && (game.move.foundEffects.has(card.id) || game.move.gameOver)) {
             return <EffectCard key={card.id} text={card.text} />;
           }
 

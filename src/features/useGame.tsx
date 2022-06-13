@@ -6,6 +6,7 @@ import { oneChoice, twoChoices, zeroChoices } from '../utils/choices';
 import { merge } from '../utils/merge';
 import { effectMiddleWare } from '../effects/effectMiddleware';
 import { EffectData } from '../effects/effect-registry/effectRegistry';
+import { Clock } from '../utils/clock';
 
 export const NO_COUNTDOWN = -1;
 
@@ -13,7 +14,9 @@ export const NO_COUNTDOWN = -1;
 const PAIRS = 6;
 const HINTED_CARDS = 20;
 const NUMBER_OF_EFFECTS = 2;
-const TIME_LIMIT = 30;
+const TIME_LIMIT = 2;
+// TODO the game clock keeps running when loosing the game in another tab...
+// TODO Game clock should be at least 2s when loosing with a timeout of 2s
 
 export type Id = string;
 export type MatchId = number;
@@ -74,30 +77,23 @@ const defaultMove: Move = {
   },
 };
 
-export type MsGetter = () => number;
-
 export interface GameValue {
-  history: History<Move>;
-  config: {
-    setMsGetter: (msGetter: MsGetter) => void;
-  };
+  move: History<Move>['move'];
+  moves: History<Move>['moves'];
+  moveIndex: History<Move>['moveIndex'];
+  goToMove: History<Move>['goToMove'];
+  // Do not provide ms directly via setState, because we don't want to re-render all children of <GameProvider> every 10ms
+  subscribeToClock: typeof Clock['prototype']['subscribe'];
   revealCard: (index: number) => void;
   loose: (reason: string) => void;
 }
 
 const defaultGameValue: GameValue = {
-  history: {
-    move: defaultMove,
-    moveIndex: 0,
-    moves: [],
-    addMove: () => null,
-    goToMove: () => null,
-    resetMoves: () => null,
-    timeTravels: 0,
-  },
-  config: {
-    setMsGetter: () => null,
-  },
+  move: defaultMove,
+  moves: [],
+  moveIndex: 0,
+  goToMove: () => null,
+  subscribeToClock: () => () => null,
   revealCard: () => null,
   loose: () => null,
 };
@@ -109,8 +105,9 @@ interface GameProps {
 }
 
 const GameProvider = ({ children }: GameProps) => {
+  const clockRef = useRef(new Clock());
   const history = useHistory(defaultMove);
-  const { move } = history;
+  const move = history.move;
 
   // React 18 calls useEffect twice in StrictMode, which means we call newGame() twice on mount.
   // Using a ref or a global or local variable to check if the call was already made is not pleasing to the eye.
@@ -129,9 +126,11 @@ const GameProvider = ({ children }: GameProps) => {
   }, [move.gameOver]);
 
   async function newGame() {
+    // clockRef.current.stop()
     const { goal_items } = await fetchGoal();
     const { cards, cardIds, hints } = createGame(goal_items, PAIRS, NUMBER_OF_EFFECTS, HINTED_CARDS);
     history.resetMoves({ ...defaultMove, cards, cardIds, hints });
+    // clockRef.current.start()
   }
 
   function revealCard(revealedCardIndex: number) {
@@ -152,7 +151,7 @@ const GameProvider = ({ children }: GameProps) => {
 
   function saveMove(moveUpdates: Partial<Move>) {
     const nextMove: Move = merge(structuredClone(move), moveUpdates);
-    nextMove.totalMs = msGetterRef.current();
+    nextMove.totalMs = clockRef.current.ms;
     // Remove hints before effectMiddleware, so that effects can add hints
     nextMove.hints = new Set();
     checkWin(nextMove, PAIRS);
@@ -161,19 +160,25 @@ const GameProvider = ({ children }: GameProps) => {
     history.addMove(nextMove);
   }
 
-  const msGetterRef = useRef<MsGetter>(() => 0);
+  // function timeTravel(moveIndex: number) {
+  //   history.goToMove(moveIndex)
+  //   clockRef.current.stop()
+  // }
 
-  function setMsGetter(msGetter: MsGetter) {
-    msGetterRef.current = msGetter;
-  }
+  useEffect(() => {
+    console.log(move);
+    clockRef.current.stop();
+    clockRef.current.start(move.totalMs);
+  }, [move]);
 
   const gameValue: GameValue = {
-    history,
+    moves: history.moves,
+    move: history.move,
+    moveIndex: history.moveIndex,
+    goToMove: history.goToMove,
     revealCard,
     loose,
-    config: {
-      setMsGetter,
-    },
+    subscribeToClock: clockRef.current.subscribe,
   };
 
   return <GameContext.Provider value={gameValue}>{children}</GameContext.Provider>;
