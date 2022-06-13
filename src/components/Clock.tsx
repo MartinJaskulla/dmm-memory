@@ -24,7 +24,7 @@ export function Clock() {
     msRef.current = ms;
   }, [ms]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => game.callbacks.setMsGetter(() => msRef.current), []);
+  useEffect(() => game.config.setMsGetter(() => msRef.current), []);
 
   // Stop updates when the game ends
   useEffect(() => {

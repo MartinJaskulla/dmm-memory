@@ -16,15 +16,26 @@ export function Countdown() {
     setRemaining(game.history.move.timeLimit);
     if (game.history.move.timeLimit < 0) return;
     abortControllerRef.current = new AbortController();
-    // TODO Do not pause when switching tabs, use time from interval somehow?
-    interval(1000, abortControllerRef.current.signal, () => setRemaining((seconds) => seconds - 1));
+    interval(1000, abortControllerRef.current.signal, (time) => {
+      const nextRemaining = game.history.move.timeLimit - Math.round(time / 1000);
+      // nextRemaining can be less than 0, if the user switches to a different tab (requestAnimationFrame does not run) and returns after the countdown is up.
+      return setRemaining(nextRemaining < 0 ? 0 : nextRemaining);
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [game.history.moveIndex, game.history.timeTravels]);
 
   useEffect(() => {
-    game.callbacks.onCountdown(remaining);
+    if (remaining === 0) game.loose('Time is up! 😭');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [remaining]);
+
+  // Stop updates when the game ends
+  useEffect(() => {
+    if (game.history.move.gameOver) abortControllerRef.current.abort();
+  }, [game.history.move.gameOver]);
+
+  // Stop updates if component unmounts
+  useEffect(() => () => abortControllerRef.current.abort(), []);
 
   return <>{remaining > NO_COUNTDOWN && <div>Countdown: {remaining}</div>}</>;
 }

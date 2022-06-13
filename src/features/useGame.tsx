@@ -78,11 +78,11 @@ export type MsGetter = () => number;
 
 export interface GameValue {
   history: History<Move>;
-  callbacks: {
-    onCountdown: (remainingSeconds: number) => void;
+  config: {
     setMsGetter: (msGetter: MsGetter) => void;
   };
   revealCard: (index: number) => void;
+  loose: (reason: string) => void;
 }
 
 const defaultGameValue: GameValue = {
@@ -95,11 +95,11 @@ const defaultGameValue: GameValue = {
     resetMoves: () => null,
     timeTravels: 0,
   },
-  callbacks: {
-    onCountdown: () => null,
+  config: {
     setMsGetter: () => null,
   },
   revealCard: () => null,
+  loose: () => null,
 };
 
 const GameContext = React.createContext<GameValue>(defaultGameValue);
@@ -161,14 +161,6 @@ const GameProvider = ({ children }: GameProps) => {
     history.addMove(nextMove);
   }
 
-  function onCountdown(remainingSeconds: number) {
-    switch (remainingSeconds) {
-      case 0:
-        loose('Time is up! 😭');
-        break;
-    }
-  }
-
   const msGetterRef = useRef<MsGetter>(() => 0);
 
   function setMsGetter(msGetter: MsGetter) {
@@ -178,8 +170,8 @@ const GameProvider = ({ children }: GameProps) => {
   const gameValue: GameValue = {
     history,
     revealCard,
-    callbacks: {
-      onCountdown,
+    loose,
+    config: {
       setMsGetter,
     },
   };
