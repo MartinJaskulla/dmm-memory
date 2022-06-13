@@ -37,5 +37,5 @@ export function Countdown() {
   // Stop updates if component unmounts
   useEffect(() => () => abortControllerRef.current.abort(), []);
 
-  return <>{remaining > NO_COUNTDOWN && <div>Countdown: {remaining}</div>}</>;
+  return <>{remaining > NO_COUNTDOWN && <div>⏳ {remaining}</div>}</>;
 }

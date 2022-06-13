@@ -14,7 +14,7 @@ const StyledHeader = styled.header`
   align-items: center;
 
   h1 {
-    font-size: 24px;
+    font-size: 1.5rem;
     font-weight: 700;
     line-height: 1.5;
     margin: 0;
@@ -39,7 +39,7 @@ export function Header() {
       </h1>
       <Countdown />
       <div>
-        <span>Moves: {game.history.moveIndex}</span>|<Clock />
+        <span>🐾 {game.history.moveIndex}</span> <Clock />
       </div>
     </StyledHeader>
   );

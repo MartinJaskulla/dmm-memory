@@ -36,5 +36,5 @@ export function Clock() {
 
   const formattedMs = new Date(ms).toISOString().slice(14, 23);
 
-  return <span>Time: {formattedMs}</span>;
+  return <span>⏱ {formattedMs}</span>;
 }
