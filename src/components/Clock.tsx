@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useGame } from '../features/useGame';
+import { formatMs } from '../utils/formatMs';
 
 export function Clock() {
   const game = useGame();
@@ -9,7 +10,6 @@ export function Clock() {
   useEffect(() => game.subscribeToClock((time) => setMs(time)), []);
   useEffect(() => setMs(game.move.totalMs), [game.move]);
 
-  const formattedMs = new Date(ms).toISOString().slice(14, 23);
-
-  return <span>⏱ {formattedMs}</span>;
+  // gameOver check is needed when the countdown times out while the user has a different tab open
+  return <span>⏱ {formatMs(game.move.gameOver ? game.move.totalMs : ms)}</span>;
 }

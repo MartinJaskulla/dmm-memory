@@ -23,7 +23,7 @@ export class Clock {
 
   start(startingMs = 0) {
     this.abortController = new AbortController();
-    interval(1000, this.abortController.signal, (ms) => {
+    interval(10, this.abortController.signal, (ms) => {
       this.ms = ms + startingMs;
     });
   }

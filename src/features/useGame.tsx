@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useDeferredValue, useEffect, useRef } from 'react';
 import { fetchGoal } from '../api/fetchGoal';
 import { History, useHistory } from './useHistory';
 import { createGame } from '../api/createGame';
@@ -14,9 +14,7 @@ export const NO_COUNTDOWN = Infinity;
 const PAIRS = 6;
 const HINTED_CARDS = 20;
 const NUMBER_OF_EFFECTS = 2;
-const TIME_LIMIT = 2;
-// TODO the game clock keeps running when loosing the game in another tab...
-// TODO Game clock should be at least 2s when loosing with a timeout of 2s
+const TIME_LIMIT = 30;
 
 export type Id = string;
 export type MatchId = number;
@@ -37,8 +35,6 @@ export interface GameCardEffect {
 }
 export type GameCard = GameCardMatchable | GameCardEffect;
 
-export type TimeLimit = number;
-
 export interface Move<T extends EffectData = EffectData> {
   cards: Record<Id, GameCard>;
   cardIds: Id[];
@@ -50,7 +46,7 @@ export interface Move<T extends EffectData = EffectData> {
   hints: Set<Id>;
   gameOver: { win: boolean; reason: string } | null;
   totalMs: number;
-  timeLimit: TimeLimit;
+  timeLimit: number;
   effects: {
     data: T;
     dataEffects: string[]; // I think this allows stacking effects and maybe even doubling if I change e.g. timerEffect to always subtract time after countre is zero?
@@ -85,7 +81,7 @@ export interface GameValue {
   // Do not provide ms directly via setState, because we don't want to re-render all children of <GameProvider> every 10ms
   subscribeToClock: typeof Clock['prototype']['subscribe'];
   revealCard: (index: number) => void;
-  loose: (reason: string) => void;
+  saveMove: (moveUpdates: Partial<Move>) => void;
 }
 
 const defaultGameValue: GameValue = {
@@ -95,7 +91,7 @@ const defaultGameValue: GameValue = {
   goToMove: () => null,
   subscribeToClock: () => () => null,
   revealCard: () => null,
-  loose: () => null,
+  saveMove: () => null,
 };
 
 const GameContext = React.createContext<GameValue>(defaultGameValue);
@@ -128,15 +124,14 @@ const GameProvider = ({ children }: GameProps) => {
   }, [deferredGameOver]);
 
   async function newGame() {
-    // clockRef.current.stop()
     const { goal_items } = await fetchGoal();
     const { cards, cardIds, hints } = createGame(goal_items, PAIRS, NUMBER_OF_EFFECTS, HINTED_CARDS);
     history.resetMoves({ ...defaultMove, cards, cardIds, hints });
-    // clockRef.current.start()
   }
 
   function revealCard(revealedCardIndex: number) {
     const nextMove: Move = structuredClone(move);
+    nextMove.totalMs = clockRef.current.ms;
 
     const cardId = nextMove.cardIds[revealedCardIndex];
     nextMove.latestCard = cardId;
@@ -147,13 +142,8 @@ const GameProvider = ({ children }: GameProps) => {
     saveMove(nextMove);
   }
 
-  function loose(reason: string) {
-    saveMove({ gameOver: { win: false, reason } });
-  }
-
   function saveMove(moveUpdates: Partial<Move>) {
     const nextMove: Move = merge(structuredClone(move), moveUpdates);
-    nextMove.totalMs = clockRef.current.ms;
     // Remove hints before effectMiddleware, so that effects can add hints
     nextMove.hints = new Set();
     checkWin(nextMove, PAIRS);
@@ -173,7 +163,7 @@ const GameProvider = ({ children }: GameProps) => {
     moveIndex: history.moveIndex,
     goToMove: history.goToMove,
     revealCard,
-    loose,
+    saveMove,
     subscribeToClock: clockRef.current.subscribe,
   };
 
@@ -227,7 +217,7 @@ function checkWin(nextMove: Move, requiredPairs: number) {
   }
 }
 
-function updateTimeLimit(nextMove: Move, defaultTimeLimit: TimeLimit) {
+function updateTimeLimit(nextMove: Move, defaultTimeLimit: number) {
   if (oneChoice(nextMove) || twoChoices(nextMove)) {
     nextMove.timeLimit = nextMove.timeLimit === NO_COUNTDOWN ? defaultTimeLimit : nextMove.timeLimit;
   }
