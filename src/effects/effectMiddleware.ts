@@ -18,6 +18,8 @@ export function effectMiddleWare(move: Move) {
 
   // Apply data effects before the click effect, because click effects add data for the next round
   move.effects.dataEffects.forEach((effectId) => effectRegistry[effectId].middleware.data?.(move));
+
+  // Remove dataEffects which have no data
   move.effects.dataEffects = move.effects.dataEffects.filter((effectId) => effectId in move.effects.data);
 
   // Apply click effect
