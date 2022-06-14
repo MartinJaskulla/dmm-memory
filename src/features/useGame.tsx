@@ -1,4 +1,4 @@
-import React, { useDeferredValue, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { fetchGoal } from '../api/fetchGoal';
 import { History, useHistory } from './useHistory';
 import { createGame } from '../api/createGame';
@@ -116,7 +116,7 @@ const GameProvider = ({ children }: GameProps) => {
   }, []);
 
   useEffect(() => {
-    if (move.gameOver) alert(move.gameOver.reason);
+    if (move.gameOver) setTimeout(() => alert(move.gameOver?.reason), 100);
   }, [move.gameOver]);
 
   async function newGame() {
