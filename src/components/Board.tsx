@@ -24,7 +24,6 @@ const StyledMain = styled.main`
 
 export function Board() {
   const game = useGame();
-  // if moves === 0. show cards for x seconds
 
   return (
     <>
@@ -36,13 +35,14 @@ export function Board() {
               return <MatchedCard key={card.id} text={card.text} language={card.language} />;
             }
             const isCardRevealed = [game.move.choice1, game.move.choice2].includes(card.id);
-            if (isCardRevealed || game.move.gameOver) {
+            const isHintCard = game.move.hints.has(card.id);
+            if (isCardRevealed || isHintCard || game.move.gameOver) {
               return (
                 <RevealedCard
                   key={card.id}
                   text={card.text}
                   language={card.language}
-                  onClick={twoChoices(game.move) ? () => game.revealCard(index) : undefined}
+                  onClick={twoChoices(game.move) || isHintCard ? () => game.revealCard(index) : undefined}
                 />
               );
             }

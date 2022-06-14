@@ -11,10 +11,10 @@ import { Clock } from '../utils/clock';
 export const NO_COUNTDOWN = Infinity;
 
 // TODO Put in config
-const PAIRS = 6;
-const HINTED_CARDS = 20;
+const PAIRS = 1;
+const HINT_CARDS = 20;
 const NUMBER_OF_EFFECTS = 2;
-const TIME_LIMIT = 30;
+const TIME_LIMIT = 2;
 
 export type Id = string;
 export type MatchId = number;
@@ -125,7 +125,7 @@ const GameProvider = ({ children }: GameProps) => {
 
   async function newGame() {
     const { goal_items } = await fetchGoal();
-    const { cards, cardIds, hints } = createGame(goal_items, PAIRS, NUMBER_OF_EFFECTS, HINTED_CARDS);
+    const { cards, cardIds, hints } = createGame(goal_items, PAIRS, NUMBER_OF_EFFECTS, HINT_CARDS);
     history.resetMoves({ ...defaultMove, cards, cardIds, hints });
   }
 
