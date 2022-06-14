@@ -20,7 +20,7 @@ export const timerEffect: Effect<TimerData> = {
       move.effects.dataEffects.push(EFFECT);
     },
     data: (move: Move<TimerData>) => {
-      const cardHasCountdown = move.timeLimit > NO_COUNTDOWN;
+      const cardHasCountdown = move.timeLimit !== NO_COUNTDOWN;
       if (!cardHasCountdown) return;
 
       // Increase time once

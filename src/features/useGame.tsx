@@ -8,7 +8,7 @@ import { effectMiddleWare } from '../effects/effectMiddleware';
 import { EffectData } from '../effects/effect-registry/effectRegistry';
 import { Clock } from '../utils/clock';
 
-export const NO_COUNTDOWN = -1;
+export const NO_COUNTDOWN = Infinity;
 
 // TODO Put in config
 const PAIRS = 6;
@@ -117,8 +117,6 @@ const GameProvider = ({ children }: GameProps) => {
   // https://github.com/facebook/react/issues/24502#issuecomment-1118867879
   useEffect(() => {
     newGame();
-    // Can't wait for useEvent: https://github.com/reactjs/rfcs/pull/220
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -160,15 +158,9 @@ const GameProvider = ({ children }: GameProps) => {
     history.addMove(nextMove);
   }
 
-  // function timeTravel(moveIndex: number) {
-  //   history.goToMove(moveIndex)
-  //   clockRef.current.stop()
-  // }
-
   useEffect(() => {
-    console.log(move);
     clockRef.current.stop();
-    clockRef.current.start(move.totalMs);
+    if (!move.gameOver) clockRef.current.start(move.totalMs);
   }, [move]);
 
   const gameValue: GameValue = {
@@ -233,7 +225,7 @@ function checkWin(nextMove: Move, requiredPairs: number) {
 
 function updateTimeLimit(nextMove: Move, defaultTimeLimit: TimeLimit) {
   if (oneChoice(nextMove) || twoChoices(nextMove)) {
-    nextMove.timeLimit = nextMove.timeLimit < 0 ? defaultTimeLimit : nextMove.timeLimit;
+    nextMove.timeLimit = nextMove.timeLimit === NO_COUNTDOWN ? defaultTimeLimit : nextMove.timeLimit;
   }
   if (nextMove.gameOver) {
     nextMove.timeLimit = NO_COUNTDOWN;

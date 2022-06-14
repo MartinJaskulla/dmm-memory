@@ -1,40 +1,35 @@
 import { NO_COUNTDOWN, TimeLimit, useGame } from '../features/useGame';
 import React, { useEffect, useRef, useState } from 'react';
-
-// Countdown cannot reuse the game clock, because the countdown always starts on a full second,
-// while the clock might start on 1.32s when time traveling.
+import { Clock } from '../utils/clock';
 
 export function Countdown() {
   const game = useGame();
-  const [remaining] = useState<TimeLimit>(game.move.timeLimit);
-  const abortControllerRef = useRef(new AbortController());
 
-  // Restart the timeout, every time a new card is revealed or the user does a time travel
-  // useEffect(() => {
-  //   abortControllerRef.current.abort();
-  //   setRemaining(game.move.timeLimit);
-  //   if (game.move.timeLimit < 0) return;
-  //   abortControllerRef.current = new AbortController();
-  //   interval(1000, abortControllerRef.current.signal, (time) => {
-  //     const nextRemaining = game.move.timeLimit - Math.round(time / 1000);
-  //     // nextRemaining can be less than 0, if the user switches to a different tab (requestAnimationFrame does not run) and returns after the countdown is up.
-  //     return setRemaining(nextRemaining < 0 ? 0 : nextRemaining);
-  //   });
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [game.moveIndex, game.timeTravels]);
+  const [ms, setMs] = useState<TimeLimit>(game.move.timeLimit * 1000);
+  // TODO Maybe I can get rid of the ref and just subscribe to clock like in Clock
+  const unsubscribeClockRef = useRef<ReturnType<typeof Clock['prototype']['subscribe']>>(() => null);
 
   useEffect(() => {
-    if (remaining === 0) game.loose('Time is up! 😭');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [remaining]);
+    unsubscribeClockRef.current();
+    setMs(game.move.timeLimit * 1000);
+    if (game.move.timeLimit === NO_COUNTDOWN) return;
+    unsubscribeClockRef.current = game.subscribeToClock((ms) => {
+      const msSinceStart = ms - game.move.totalMs;
+      const nextRemainingSeconds = game.move.timeLimit * 1000 - msSinceStart;
+      // nextRemainingSeconds can be less than 0, if the user switches to a different tab (requestAnimationFrame does not run) and returns after the countdown is up.
+      setMs(nextRemainingSeconds < 0 ? 0 : nextRemainingSeconds);
+    });
+  }, [game.move.timeLimit, game.move]);
 
-  // Stop updates when the game ends
+  useEffect(() => unsubscribeClockRef.current, []);
+
   useEffect(() => {
-    if (game.move.gameOver) abortControllerRef.current.abort();
-  }, [game.move.gameOver]);
+    if (ms === 0) game.loose('Time is up! 😭');
+  }, [ms]);
 
-  // Stop updates if component unmounts
-  useEffect(() => () => abortControllerRef.current.abort(), []);
+  if (ms === NO_COUNTDOWN) return null;
 
-  return <>{remaining > NO_COUNTDOWN && <div>⏳ {remaining}</div>}</>;
+  const formattedMs = new Date(ms).toISOString().slice(14, 23);
+
+  return <div>⏳ {formattedMs}</div>;
 }

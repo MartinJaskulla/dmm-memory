@@ -6,11 +6,10 @@ export function Clock() {
 
   const [ms, setMs] = useState(0);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => game.subscribeToClock((time) => setMs(time)), []);
+  useEffect(() => setMs(game.move.totalMs), [game.move]);
 
-  // TODO Maybe not needed to check gameOver
-  const formattedMs = new Date(game.move.gameOver ? game.move.totalMs : ms).toISOString().slice(14, 23);
+  const formattedMs = new Date(ms).toISOString().slice(14, 23);
 
   return <span>⏱ {formattedMs}</span>;
 }
