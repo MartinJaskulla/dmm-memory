@@ -4,7 +4,7 @@ import { Move, NO_COUNTDOWN } from '../../features/useGame';
 // Increases time limit between flips for the next three moves.
 
 const EFFECT = 'timer';
-const TIME_INCREASE = 30;
+const TIME_INCREASE = 15000;
 const MOVES = 3;
 
 export type TimerData = { [EFFECT]: { movesLeft: number } };
@@ -15,7 +15,7 @@ export const timerEffect: Effect<TimerData> = {
     text: 'Timer',
   },
   middleware: {
-    cardClick: (move: Move) => {
+    cardClick: (move: Move<TimerData>) => {
       move.effects.data[EFFECT] = { movesLeft: MOVES };
       move.effects.dataEffects.push(EFFECT);
     },

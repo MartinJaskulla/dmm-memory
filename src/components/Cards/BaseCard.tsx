@@ -1,5 +1,6 @@
 import React from 'react';
 import styled, { css } from 'styled-components';
+import { Language } from '../../api/fetchGoal';
 
 const StyledButton = styled.button<BaseCardProps>`
   border-radius: 10px;
@@ -30,9 +31,16 @@ const StyledButton = styled.button<BaseCardProps>`
           }
         `
       : null}
+
+  ${(props) =>
+    props.highlight
+      ? css`
+          outline-style: dashed;
+        `
+      : null}
 `;
 
-export type BaseCardProps = React.HTMLAttributes<HTMLButtonElement>;
+export type BaseCardProps = React.HTMLAttributes<HTMLButtonElement> & { lang?: Language; highlight: boolean };
 
 export function BaseCard(props: BaseCardProps) {
   return (

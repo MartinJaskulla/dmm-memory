@@ -1,5 +1,5 @@
 import React from 'react';
-import { BaseCard } from './BaseCard';
+import { BaseCard, BaseCardProps } from './BaseCard';
 import rocketImgSrc from '../../images/rocket.svg';
 import styled from 'styled-components';
 
@@ -11,15 +11,11 @@ const StyledBaseCard = styled(BaseCard)`
   }
 `;
 
-export type EffectCardProps = {
-  text: string;
-};
-
-export function EffectCard(props: EffectCardProps) {
+export function EffectCard(props: Pick<BaseCardProps, 'children' | 'highlight' | 'lang'>) {
   return (
-    <StyledBaseCard>
+    <StyledBaseCard highlight={props.highlight} lang={'en'}>
       <img alt="Memory Game Logo" src={rocketImgSrc} />
-      {props.text}
+      {props.children}
     </StyledBaseCard>
   );
 }

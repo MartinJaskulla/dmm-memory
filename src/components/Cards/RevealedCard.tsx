@@ -1,21 +1,11 @@
 import React from 'react';
-import { BaseCard } from './BaseCard';
+import { BaseCard, BaseCardProps } from './BaseCard';
 import styled from 'styled-components';
 
 const StyledBaseCard = styled(BaseCard)`
   border-color: var(--color-flipped);
 `;
 
-export interface RevealedCardProps {
-  text: string;
-  language: 'en' | 'ja';
-  onClick?: () => void;
-}
-
-export function RevealedCard(props: RevealedCardProps) {
-  return (
-    <StyledBaseCard lang={props.language} onClick={props.onClick}>
-      {props.text}
-    </StyledBaseCard>
-  );
+export function RevealedCard(props: Pick<BaseCardProps, 'children' | 'highlight' | 'lang' | 'onClick'>) {
+  return <StyledBaseCard {...props} />;
 }

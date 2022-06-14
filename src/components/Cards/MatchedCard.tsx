@@ -1,16 +1,11 @@
 import React from 'react';
-import { BaseCard } from './BaseCard';
+import { BaseCard, BaseCardProps } from './BaseCard';
 import styled from 'styled-components';
 
 const StyledBaseCard = styled(BaseCard)`
   border-color: var(--color-matched);
 `;
 
-export interface MatchedCardProps {
-  text: string;
-  language: 'en' | 'ja';
-}
-
-export function MatchedCard(props: MatchedCardProps) {
-  return <StyledBaseCard lang={props.language}>{props.text}</StyledBaseCard>;
+export function MatchedCard(props: Pick<BaseCardProps, 'children' | 'highlight' | 'lang'>) {
+  return <StyledBaseCard {...props} />;
 }

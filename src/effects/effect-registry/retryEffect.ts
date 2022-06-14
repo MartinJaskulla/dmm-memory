@@ -1,43 +1,50 @@
 import { Effect } from '../effectMiddleware';
-import { Move } from '../../features/useGame';
-
-// TODO latestCard: Id | null; Can be used to visualize retry effect. Usually choice2 would be latest card (put outline around latest card). If you reetry, keep latestCard as firstCard, so it keeps the outline
+import { checkMatch, Id, Move } from '../../features/useGame';
+import { twoChoices } from '../../utils/choices';
 
 // Retry — The next time you flip over a non-matching card, you get another chance (the first one stays flipped and the timer resets).
 
 const EFFECT = 'retry';
 
-export const retryEffect: Effect = {
+export type RetryData = { [EFFECT]: { retryCardId: Id; choice1: Move['choice1']; choice2: Move['choice2'] } };
+
+export const retryEffect: Effect<RetryData> = {
   effectId: EFFECT,
   card: {
     text: 'Retry',
   },
   middleware: {
-    cardClick: (move: Move) => {
-      if (!move.latestCard) return move;
-
-      // if (EFFECT in snapshot.effects && isRetry(snapshot.effects[EFFECT])) {
-      //   if (snapshot.effects[EFFECT].savedChoice1 === null && oneChoice(snapshot)) {
-      //     snapshot.effects[EFFECT].savedChoice1 = snapshot.choice1;
-      //   } else {
-      //     // Also check if it was a gamecard?
-      //     const isMatch = snapshot.matched.has(snapshot.latestCard);
-      //     if (!isMatch && twoChoices(snapshot)) {
-      //       snapshot.choice1 = snapshot.effects[EFFECT].savedChoice1;
-      //       delete snapshot.effects[EFFECT];
-      //     }
-      //   }
-      // } else {
-      //   // TODO Don't save when two cards are revealed
-      //   const retry: Retry = { savedChoice1: snapshot.choice1 };
-      //   snapshot.effects[EFFECT] = retry;
-      // }
-
-      return move;
+    cardClick: (move: Move<RetryData>) => {
+      move.effects.data[EFFECT] = { retryCardId: move.latestCard, choice1: null, choice2: null };
+      move.effects.dataEffects.push(EFFECT);
+    },
+    data: (move: Move<RetryData>) => {
+      const isEffectCard = move.foundEffects.has(move.latestCard);
+      const isBeforeRetry = move.effects.data[EFFECT].choice1 === null;
+      if (isBeforeRetry) {
+        if (isEffectCard) return;
+        const isMatch = move.matched.has(move.latestCard);
+        if (!isMatch && twoChoices(move)) {
+          move.disabled.add(move.choice1!);
+          move.disabled.add(move.choice2!);
+          move.highlights.add(move.choice1!);
+          move.highlights.add(move.effects.data[EFFECT].retryCardId);
+          move.effects.data[EFFECT].choice1 = move.choice1;
+          move.effects.data[EFFECT].choice2 = move.choice2;
+        }
+      } else {
+        move.disabled.delete(move.effects.data[EFFECT].choice1!);
+        move.disabled.delete(move.effects.data[EFFECT].choice2!);
+        move.highlights.delete(move.effects.data[EFFECT].choice1!);
+        move.highlights.delete(move.effects.data[EFFECT].retryCardId!);
+        if (!isEffectCard) {
+          move.choice2 = move.choice1;
+          move.choice1 = move.effects.data[EFFECT].choice1;
+          checkMatch(move);
+        }
+        // @ts-ignore
+        delete move.effects.data[EFFECT];
+      }
     },
   },
 };
-
-// interface Retry {
-//   savedChoice1: string | null;
-// }

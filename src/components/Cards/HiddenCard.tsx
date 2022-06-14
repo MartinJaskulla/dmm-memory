@@ -1,5 +1,5 @@
 import React from 'react';
-import { BaseCard } from './BaseCard';
+import { BaseCard, BaseCardProps } from './BaseCard';
 import owlImgSrc from '../../images/owl.svg';
 import styled from 'styled-components';
 
@@ -22,13 +22,9 @@ const StyledBaseCard = styled(BaseCard)`
   }
 `;
 
-export interface HiddenCardProps {
-  onClick: () => void;
-}
-
-export function HiddenCard(props: HiddenCardProps) {
+export function HiddenCard(props: Pick<BaseCardProps, 'highlight' | 'onClick'>) {
   return (
-    <StyledBaseCard onClick={props.onClick}>
+    <StyledBaseCard {...props}>
       <div>
         <img alt="Memory Game Logo" src={owlImgSrc} />
       </div>
