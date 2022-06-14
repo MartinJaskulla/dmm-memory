@@ -115,13 +115,9 @@ const GameProvider = ({ children }: GameProps) => {
     newGame();
   }, []);
 
-  // Allow game clock to paint. Needed for when the user has won.
-  // Otherwise the clock will show the 2nd last time while the alert is open
-  // and only paint the final time after the alert is closed.
-  const deferredGameOver = useDeferredValue(move.gameOver);
   useEffect(() => {
-    if (deferredGameOver) alert(deferredGameOver.reason);
-  }, [deferredGameOver]);
+    if (move.gameOver) alert(move.gameOver.reason);
+  }, [move.gameOver]);
 
   async function newGame() {
     const { goal_items } = await fetchGoal();
