@@ -40,8 +40,8 @@ export type GameCard = GameCardMatchable | GameCardEffect;
 export interface Move<T extends EffectData = EffectData> {
   cards: Record<Id, GameCard>;
   cardIds: Id[];
-  choice1: Id | null;
-  choice2: Id | null;
+  choice1: Id;
+  choice2: Id;
   latestCard: Id;
   matched: Set<Id>;
   foundEffects: Set<Id>;
@@ -62,8 +62,8 @@ export interface Move<T extends EffectData = EffectData> {
 const defaultMove: Move = {
   cards: {},
   cardIds: [],
-  choice1: null, // TODO Also empty string?
-  choice2: null,
+  choice1: '',
+  choice2: '',
   latestCard: '',
   matched: new Set(),
   foundEffects: new Set(),
@@ -132,16 +132,14 @@ const GameProvider = ({ children }: GameProps) => {
   }
 
   function revealCard(revealedCardIndex: number) {
-    // debugger
     const nextMove: Move = structuredClone(move);
-    nextMove.totalMs = clockRef.current.ms;
 
     const cardId = nextMove.cardIds[revealedCardIndex];
-    nextMove.latestCard = cardId;
-
     const card = nextMove.cards[cardId];
-    flipCards(nextMove, card);
 
+    nextMove.totalMs = clockRef.current.ms;
+    nextMove.latestCard = cardId;
+    flipCards(nextMove, card);
     saveMove(nextMove);
   }
 
@@ -150,7 +148,8 @@ const GameProvider = ({ children }: GameProps) => {
     nextMove.hints = new Set();
     startFirstCountdown(nextMove, TIME_LIMIT);
     effectMiddleWare(nextMove);
-    checkWin(nextMove, PAIRS, clockRef.current.ms, history.moves[history.moveIndex - 1]);
+    winIfAllPairsFound(nextMove, PAIRS);
+    saveCountdownIfWon(nextMove, clockRef.current.ms, history.moves[history.moveIndex - 1]);
     history.addMove(nextMove);
   }
 
@@ -181,8 +180,8 @@ export function flipCards(nextMove: Move, card: GameCard): void {
     case 'matchable': {
       // Hide both cards, if two choices were already made. Don't do this for effects. Otherwise shuffle looks confusing.
       if (twoChoices(nextMove)) {
-        nextMove.choice1 = null;
-        nextMove.choice2 = null;
+        nextMove.choice1 = '';
+        nextMove.choice2 = '';
       }
       // Flip one card
       if (zeroChoices(nextMove)) {
@@ -202,32 +201,33 @@ export function flipCards(nextMove: Move, card: GameCard): void {
 }
 
 export function checkMatch(nextMove: Move) {
-  const card1 = nextMove.choice1 ? nextMove.cards[nextMove.choice1] : null;
-  const card2 = nextMove.choice2 ? nextMove.cards[nextMove.choice2] : null;
-  if (card1 && card2) {
-    if (card1.type !== 'matchable' || card2.type !== 'matchable') {
-      throw new Error('Only matchable cards should be choices');
-    }
+  const card1 = nextMove.cards[nextMove.choice1];
+  const card2 = nextMove.cards[nextMove.choice2];
+  if (card1?.type === 'matchable' && card2?.type === 'matchable') {
     if (card1.matchId === card2.matchId) {
       nextMove.matched.add(card1.id);
       nextMove.matched.add(card2.id);
-      nextMove.choice1 = null;
-      nextMove.choice2 = null;
+      nextMove.choice1 = '';
+      nextMove.choice2 = '';
     }
-  }
-}
-
-function checkWin(nextMove: Move, requiredPairs: number, clockMs: number, previousMove: Move) {
-  if (!nextMove.gameOver && nextMove.matched.size / 2 === requiredPairs) {
-    nextMove.gameOver = { win: true, reason: 'You found all pairs! 🎉' };
-    nextMove.timeLimit = getRemainingMs(clockMs, previousMove.totalMs, nextMove.timeLimit);
   }
 }
 
 function startFirstCountdown(nextMove: Move, defaultTimeLimit: number) {
   if (oneChoice(nextMove) && nextMove.timeLimit === NO_COUNTDOWN) {
-    console.count('Should happen only once?');
     nextMove.timeLimit = defaultTimeLimit;
+  }
+}
+
+function winIfAllPairsFound(nextMove: Move, requiredPairs: number) {
+  if (!nextMove.gameOver && nextMove.matched.size / 2 === requiredPairs) {
+    nextMove.gameOver = { win: true, reason: 'You found all pairs! 🎉' };
+  }
+}
+
+function saveCountdownIfWon(nextMove: Move, clockMs: number, previousMove?: Move) {
+  if (nextMove.gameOver?.win && previousMove) {
+    nextMove.timeLimit = getRemainingMs(clockMs, previousMove.totalMs, nextMove.timeLimit);
   }
 }
 

@@ -20,24 +20,22 @@ const StyledButton = styled.button<BaseCardProps>`
   }
 
   ${(props) =>
-    props.onClick
-      ? css`
-          cursor: pointer;
+    props.onClick &&
+    css`
+      cursor: pointer;
 
-          &:focus,
-          &:hover {
-            outline: none;
-            transform: scale(1.05);
-          }
-        `
-      : null}
+      &:focus,
+      &:hover {
+        outline: none;
+        transform: scale(1.05);
+      }
+    `}
 
   ${(props) =>
-    props.highlight
-      ? css`
-          outline-style: dashed;
-        `
-      : null}
+    props.highlight &&
+    css`
+      outline-style: dashed;
+    `}
 `;
 
 export type BaseCardProps = React.HTMLAttributes<HTMLButtonElement> & { lang?: Language; highlight: boolean };

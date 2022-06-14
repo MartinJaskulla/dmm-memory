@@ -15,28 +15,28 @@ export const retryEffect: Effect<RetryData> = {
   },
   middleware: {
     cardClick: (move: Move<RetryData>) => {
-      move.effects.data[EFFECT] = { retryCardId: move.latestCard, choice1: null, choice2: null };
+      move.effects.data[EFFECT] = { retryCardId: move.latestCard, choice1: '', choice2: '' };
       move.effects.dataEffects.push(EFFECT);
     },
     data: (move: Move<RetryData>) => {
       const isEffectCard = move.foundEffects.has(move.latestCard);
-      const isBeforeRetry = move.effects.data[EFFECT].choice1 === null;
+      const isBeforeRetry = move.effects.data[EFFECT].choice1 === '';
       if (isBeforeRetry) {
         if (isEffectCard) return;
         const isMatch = move.matched.has(move.latestCard);
         if (!isMatch && twoChoices(move)) {
-          move.disabled.add(move.choice1!);
-          move.disabled.add(move.choice2!);
-          move.highlights.add(move.choice1!);
+          move.disabled.add(move.choice1);
+          move.disabled.add(move.choice2);
+          move.highlights.add(move.choice1);
           move.highlights.add(move.effects.data[EFFECT].retryCardId);
           move.effects.data[EFFECT].choice1 = move.choice1;
           move.effects.data[EFFECT].choice2 = move.choice2;
         }
       } else {
-        move.disabled.delete(move.effects.data[EFFECT].choice1!);
-        move.disabled.delete(move.effects.data[EFFECT].choice2!);
-        move.highlights.delete(move.effects.data[EFFECT].choice1!);
-        move.highlights.delete(move.effects.data[EFFECT].retryCardId!);
+        move.disabled.delete(move.effects.data[EFFECT].choice1);
+        move.disabled.delete(move.effects.data[EFFECT].choice2);
+        move.highlights.delete(move.effects.data[EFFECT].choice1);
+        move.highlights.delete(move.effects.data[EFFECT].retryCardId);
         if (!isEffectCard) {
           move.choice2 = move.choice1;
           move.choice1 = move.effects.data[EFFECT].choice1;
