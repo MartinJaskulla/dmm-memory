@@ -5,6 +5,8 @@ export interface Transliterations {
   Jpan?: string;
 }
 
+export type Language = 'en' | 'ja';
+
 export interface GETGoal {
   id: number;
   created_at: string;
@@ -41,14 +43,14 @@ export interface GETGoal {
       cue: {
         text: string;
         image?: string | null;
-        language: 'en' | 'ja';
+        language: Language;
         part_of_speech: string;
         transcription: string;
         transliterations: Transliterations;
       };
       response: {
         text: string;
-        language: 'en' | 'ja';
+        language: Language;
         transliterations: Transliterations;
       };
     };
