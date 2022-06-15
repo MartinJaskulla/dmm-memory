@@ -2,7 +2,7 @@ import { Effect } from '../effectMiddleware';
 import { GameCardMatchable, Move } from '../../features/useGame';
 import { random } from '../../utils/random';
 
-// Unflips one pair of matched word cards but flips over another pair of words.
+// Trick — Unflips one pair of matched word cards but flips over another pair of words.
 
 const EFFECT = 'trick';
 

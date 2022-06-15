@@ -17,12 +17,13 @@ const HINT_CARDS = 20;
 const NUMBER_OF_EFFECTS = 4;
 const TIME_LIMIT = 30000;
 
-export type Id = string;
+export type CardId = string;
 export type MatchId = number;
+export type EffectId = string;
 
 export interface GameCardMatchable {
   type: 'matchable';
-  id: Id;
+  id: CardId;
   matchId: MatchId;
   text: string;
   language: Language;
@@ -30,32 +31,41 @@ export interface GameCardMatchable {
 
 export interface GameCardEffect {
   type: 'effect';
-  id: Id;
-  effectId: string;
+  id: CardId;
+  effectId: EffectId;
   text: string;
 }
 
 export type GameCard = GameCardMatchable | GameCardEffect;
 
 export interface Move<T extends EffectData = EffectData> {
-  cards: Record<Id, GameCard>;
-  cardIds: Id[];
-  choice1: Id;
-  choice2: Id;
-  latestCard: Id;
-  matched: Set<Id>;
-  foundEffects: Set<Id>;
-  hints: Set<Id>;
-  highlights: Set<Id>;
-  disabled: Set<Id>;
+  cards: Record<CardId, GameCard>;
+  cardIds: CardId[];
+  choice1: CardId;
+  choice2: CardId;
+  latestCard: CardId;
+  matched: Set<CardId>;
+  foundEffects: Set<CardId>;
+  hints: Set<CardId>;
+  highlights: Set<CardId>;
+  disabled: Set<CardId>;
   gameOver: { win: boolean; reason: string } | null;
   totalMs: number;
   timeLimit: number;
   effects: {
-    data: T;
-    dataEffects: string[]; // I think this allows stacking effects and maybe even doubling if I change e.g. timerEffect to always subtract time after countre is zero?
-    // don't always call each effect for example, justshift effectOrder Hmm. So either 2d array or don't shift and passive effect itself needs to remove it from effectOrder?
-    // If there are multiple times in the order, how would a passive effect know which one to remove?
+    data: Record<CardId, T>;
+    order: [CardId, EffectId][];
+
+    // middleware stays the same
+    // shuffle never goes on the array, trick necer goes on array
+    // retry? multiples can be on array. how to make sure that if one is active the other is not?
+    // worst case, check the effect array itself for any earlier retries and don;t do anythinbg if there are any
+    // then the cleanup has to happen after all effects are run. Maybe the array is just cardId[] or {cardId: "timer"}
+    // and then a dictionary for cardId: effectData. effects can delete the dictionary entry and after all effects the cleanup
+    // removes all eentries without data in dictionary
+
+    // Other (worse?) approach:
+    // stackableEffects: [{type: 'timer', cardId: 1, movesLeft: 3}, {type: 'timer', cardId: 2, movesLeft: 3}]
   };
 }
 
@@ -74,8 +84,8 @@ const defaultMove: Move = {
   totalMs: 0,
   timeLimit: NO_COUNTDOWN,
   effects: {
-    data: {} as EffectData,
-    dataEffects: [],
+    data: {},
+    order: [],
   },
 };
 

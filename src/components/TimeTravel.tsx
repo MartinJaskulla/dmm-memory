@@ -9,7 +9,7 @@ export function TimeTravel() {
       {game.moves.map((s, i) => {
         return (
           <div key={i}>
-            <button onClick={() => game.goToMove(i)}>Go to {i}</button>
+            <button onClick={() => game.goToMove(i)}>{i}</button>
           </div>
         );
       })}

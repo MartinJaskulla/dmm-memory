@@ -1,13 +1,13 @@
 import { Effect } from '../effectMiddleware';
 import { Move, NO_COUNTDOWN } from '../../features/useGame';
 
-// Increases time limit between flips for the next three moves.
+// Timer — Increases time limit between flips for the next three moves.
 
 const EFFECT = 'timer';
 const TIME_INCREASE = 15000;
 const MOVES = 3;
 
-export type TimerData = { [EFFECT]: { movesLeft: number } };
+export type TimerData = { movesLeft: number };
 
 export const timerEffect: Effect<TimerData> = {
   effectId: EFFECT,
@@ -15,33 +15,25 @@ export const timerEffect: Effect<TimerData> = {
     text: 'Timer',
   },
   middleware: {
-    cardClick: (move: Move<TimerData>) => {
-      move.effects.data[EFFECT] = { movesLeft: MOVES };
-      move.effects.dataEffects.push(EFFECT);
+    cardClick: (move: Move<TimerData>, cardIdOfEffect) => {
+      move.effects.data[cardIdOfEffect] = { movesLeft: MOVES };
+      move.effects.order.push([cardIdOfEffect, EFFECT]);
     },
-    data: (move: Move<TimerData>) => {
+    nextClick: (move: Move<TimerData>, cardIdOfEffect) => {
       const cardHasCountdown = move.timeLimit !== NO_COUNTDOWN;
       if (!cardHasCountdown) return;
 
-      // Increase time once
-      const firstTime = move.effects.data[EFFECT].movesLeft === MOVES;
-      if (firstTime) {
+      const isFirstTime = move.effects.data[cardIdOfEffect].movesLeft === MOVES;
+      if (isFirstTime) {
         move.timeLimit = move.timeLimit + TIME_INCREASE;
       }
 
-      move.effects.data[EFFECT].movesLeft--;
+      move.effects.data[cardIdOfEffect].movesLeft--;
 
-      const oneMoveAfterTimerBonusIsGone = move.effects.data[EFFECT].movesLeft === -1;
+      const oneMoveAfterTimerBonusIsGone = move.effects.data[cardIdOfEffect].movesLeft === -1;
       if (oneMoveAfterTimerBonusIsGone) {
-        // @ts-ignore
-        delete move.effects.data[EFFECT];
         move.timeLimit = move.timeLimit - TIME_INCREASE;
-        // Consider the possibility of a timer penalty effect card:
-        // Setting timeLimit to less than zero means there will be no countdown,
-        // but the timer effect card should not be able to remove a countdown (by setting to -1).
-        // Setting it to zero means, the user looses the game, but this should be possible
-        // if another effect reduces the timeLimit.
-        move.timeLimit = move.timeLimit < 0 ? 0 : move.timeLimit;
+        delete move.effects.data[cardIdOfEffect];
       }
     },
   },

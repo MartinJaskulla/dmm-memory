@@ -1,12 +1,12 @@
 import { Effect } from '../effectMiddleware';
-import { checkMatch, Id, Move } from '../../features/useGame';
+import { checkMatch, CardId, Move } from '../../features/useGame';
 import { twoChoices } from '../../utils/choices';
 
 // Retry — The next time you flip over a non-matching card, you get another chance (the first one stays flipped and the timer resets).
 
 const EFFECT = 'retry';
 
-export type RetryData = { [EFFECT]: { retryCardId: Id; choice1: Move['choice1']; choice2: Move['choice2'] } };
+export type RetryData = { retryCardId: CardId; choice1: Move['choice1']; choice2: Move['choice2'] };
 
 export const retryEffect: Effect<RetryData> = {
   effectId: EFFECT,
@@ -14,13 +14,13 @@ export const retryEffect: Effect<RetryData> = {
     text: 'Retry',
   },
   middleware: {
-    cardClick: (move: Move<RetryData>) => {
-      move.effects.data[EFFECT] = { retryCardId: move.latestCard, choice1: '', choice2: '' };
-      move.effects.dataEffects.push(EFFECT);
+    cardClick: (move: Move<RetryData>, cardIdOfEffect) => {
+      move.effects.data[cardIdOfEffect] = { retryCardId: move.latestCard, choice1: '', choice2: '' };
+      move.effects.order.push([cardIdOfEffect, EFFECT]);
     },
-    data: (move: Move<RetryData>) => {
+    nextClick: (move: Move<RetryData>, cardIdOfEffect) => {
       const isEffectCard = move.foundEffects.has(move.latestCard);
-      const isBeforeRetry = move.effects.data[EFFECT].choice1 === '';
+      const isBeforeRetry = move.effects.data[cardIdOfEffect].choice1 === '';
       if (isBeforeRetry) {
         if (isEffectCard) return;
         const isMatch = move.matched.has(move.latestCard);
@@ -28,22 +28,21 @@ export const retryEffect: Effect<RetryData> = {
           move.disabled.add(move.choice1);
           move.disabled.add(move.choice2);
           move.highlights.add(move.choice1);
-          move.highlights.add(move.effects.data[EFFECT].retryCardId);
-          move.effects.data[EFFECT].choice1 = move.choice1;
-          move.effects.data[EFFECT].choice2 = move.choice2;
+          move.highlights.add(move.effects.data[cardIdOfEffect].retryCardId);
+          move.effects.data[cardIdOfEffect].choice1 = move.choice1;
+          move.effects.data[cardIdOfEffect].choice2 = move.choice2;
         }
       } else {
-        move.disabled.delete(move.effects.data[EFFECT].choice1);
-        move.disabled.delete(move.effects.data[EFFECT].choice2);
-        move.highlights.delete(move.effects.data[EFFECT].choice1);
-        move.highlights.delete(move.effects.data[EFFECT].retryCardId);
+        move.disabled.delete(move.effects.data[cardIdOfEffect].choice1);
+        move.disabled.delete(move.effects.data[cardIdOfEffect].choice2);
+        move.highlights.delete(move.effects.data[cardIdOfEffect].choice1);
+        move.highlights.delete(move.effects.data[cardIdOfEffect].retryCardId);
         if (!isEffectCard) {
           move.choice2 = move.choice1;
-          move.choice1 = move.effects.data[EFFECT].choice1;
+          move.choice1 = move.effects.data[cardIdOfEffect].choice1;
           checkMatch(move);
         }
-        // @ts-ignore
-        delete move.effects.data[EFFECT];
+        delete move.effects.data[cardIdOfEffect];
       }
     },
   },

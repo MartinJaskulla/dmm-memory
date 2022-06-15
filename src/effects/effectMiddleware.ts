@@ -1,29 +1,31 @@
-import { Move } from '../features/useGame';
-import { EffectData, effectList, effectRegistry } from './effect-registry/effectRegistry';
+import { CardId, EffectId, Move } from '../features/useGame';
+import { EffectData, effectRegistry } from './effect-registry/effectRegistry';
 
-export type Middleware<T extends EffectData> = (move: Move<T>) => void;
+export type Middleware<T extends EffectData> = (move: Move<T>, cardIdOfEffect: CardId) => void;
 
 export interface Effect<T extends EffectData = EffectData> {
-  effectId: string;
+  effectId: EffectId;
   card: {
     text: string;
   };
   middleware: {
     cardClick?: Middleware<T>;
-    data?: Middleware<T>;
+    nextClick?: Middleware<T>;
   };
 }
 export function effectMiddleWare(move: Move) {
   const card = move.cards[move.latestCard];
 
-  // Apply data effects before the click effect, because click effects add data for the next round
-  move.effects.dataEffects.forEach((effectId) => effectRegistry[effectId].middleware.data?.(move));
+  // Apply nextClick effects before cardClick effects, because cardClick effects add nextClick effects for the *next* round
+  move.effects.order.forEach(([cardId, effectId]) => effectRegistry[effectId].middleware.nextClick?.(move, cardId));
 
-  // Remove dataEffects which have no data
-  move.effects.dataEffects = move.effects.dataEffects.filter((effectId) => effectId in move.effects.data);
+  // Remove nextClick effects which have no data
+  move.effects.order = move.effects.order.filter(([cardId]) => cardId in move.effects.data);
 
-  // Apply click effect
-  effectList
-    .find((effect) => card.type === 'effect' && card.effectId === effect.effectId)
-    ?.middleware.cardClick?.(move);
+  // Apply cardClick effect
+  if (card.type === 'effect') {
+    Object.values(effectRegistry)
+      .find((effect) => card.effectId === effect.effectId)
+      ?.middleware.cardClick?.(move, card.id);
+  }
 }
