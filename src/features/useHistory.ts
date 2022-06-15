@@ -26,7 +26,8 @@ export function useHistory<M>(initialMove: M): History<M> {
 
   function goToMove(moveIndex: number) {
     setMoveIndex(moveIndex);
-    // This changes the reference of "move", so that "move" triggers a useEffect dependency array even if the moveIndex stays the same
+    // Changing the reference of "move", so that "move" triggers useEffect dependency arrays (moveIndex cannot do that).
+    // This is used e.g. when restarting the same move via time travel.
     setMoves(deepFreeze(structuredClone(moves)));
   }
 

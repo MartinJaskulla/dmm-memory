@@ -1,6 +1,8 @@
 import React from 'react';
 import { useGame } from '../features/useGame';
 
+// TODO Place nicer with css
+
 export function TimeTravel() {
   const game = useGame();
 

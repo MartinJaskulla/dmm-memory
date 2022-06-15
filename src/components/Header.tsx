@@ -3,7 +3,7 @@ import owlImgSrc from '../images/owl.svg';
 import styled from 'styled-components';
 import { useGame } from '../features/useGame';
 import { Countdown } from './Countdown';
-import { Clock } from './Clock';
+import { StopWatch } from './StopWatch';
 
 const StyledHeader = styled.header`
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
@@ -39,7 +39,7 @@ export function Header() {
       </h1>
       <Countdown />
       <div>
-        <span>🐾 {game.moveIndex}</span> <Clock />
+        <span>🐾 {game.moveIndex}</span> <StopWatch />
       </div>
     </StyledHeader>
   );

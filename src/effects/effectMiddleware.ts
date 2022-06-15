@@ -1,5 +1,5 @@
 import { CardId, EffectId, Move } from '../features/useGame';
-import { effectLookup } from './effect-registry/effectRegistry';
+import { effectLookup } from './effectRegistry';
 
 export type Middleware = (move: Move, cardIdOfEffect: CardId) => void;
 

@@ -107,7 +107,6 @@ interface GameProps {
 }
 
 const GameProvider = ({ children }: GameProps) => {
-  const clockRef = useRef(new Clock());
   const history = useHistory(defaultMove);
   const move = history.move;
 
@@ -153,28 +152,35 @@ const GameProvider = ({ children }: GameProps) => {
     history.addMove(nextMove);
   }
 
+  const clockRef = useRef(new Clock());
+  // Restart clock when time traveling
   useEffect(() => {
     clockRef.current.stop();
     if (!move.gameOver) clockRef.current.start(move.msPlayed);
   }, [move]);
 
-  const gameValue: GameValue = {
-    moves: history.moves,
-    move: history.move,
-    moveIndex: history.moveIndex,
-    goToMove: history.goToMove,
-    revealCard,
-    saveMove,
-    subscribeToClock: clockRef.current.subscribe,
-  };
-
-  return <GameContext.Provider value={gameValue}>{children}</GameContext.Provider>;
+  return (
+    <GameContext.Provider
+      value={{
+        moves: history.moves,
+        move: history.move,
+        moveIndex: history.moveIndex,
+        goToMove: history.goToMove,
+        revealCard,
+        saveMove,
+        subscribeToClock: clockRef.current.subscribe,
+      }}
+    >
+      {children}
+    </GameContext.Provider>
+  );
 };
 
 function useGame(): GameValue {
   return React.useContext(GameContext);
 }
 
+// Utils
 export function flipCards(nextMove: Move, card: GameCard): void {
   if (twoChoices(nextMove)) {
     nextMove.choice1 = '';
@@ -224,6 +230,7 @@ function winIfAllPairsFound(nextMove: Move, requiredPairs: number) {
   }
 }
 
+// TODO Weird that it is only on win, should also be on loss with 0. Check if alert comes twice
 function saveCountdownIfWon(nextMove: Move, clockMs: number, previousMove?: Move) {
   if (nextMove.gameOver?.win && previousMove) {
     nextMove.msPerMove = getRemainingMs(clockMs, previousMove.msPlayed, nextMove.msPerMove);

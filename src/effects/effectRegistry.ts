@@ -1,7 +1,7 @@
-import { shuffleEffect } from './shuffleEffect';
-import { timerEffect } from './timerEffect';
-import { retryEffect } from './retryEffect';
-import { trickEffect } from './trickEffect';
+import { shuffleEffect } from './effects/shuffleEffect';
+import { timerEffect } from './effects/timerEffect';
+import { retryEffect } from './effects/retryEffect';
+import { trickEffect } from './effects/trickEffect';
 
 export const effectRegistry = [shuffleEffect, timerEffect, retryEffect, trickEffect];
 

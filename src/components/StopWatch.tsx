@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useGame } from '../features/useGame';
 import { formatMs } from '../utils/formatMs';
 
-export function Clock() {
+export function StopWatch() {
   const game = useGame();
 
   const [msPlayed, setMsPlayed] = useState(0);

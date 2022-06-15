@@ -2,7 +2,7 @@ import { shuffle } from '../utils/shuffle';
 import { CardId, Move } from '../features/useGame';
 import { GETGoal } from './fetchGoal';
 import { createId } from '../utils/createId';
-import { effectRegistry } from '../effects/effect-registry/effectRegistry';
+import { effectRegistry } from '../effects/effectRegistry';
 import { pickRandom } from '../utils/pickRandom';
 
 export function createGame(
