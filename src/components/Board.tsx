@@ -5,7 +5,6 @@ import { EffectCard } from './Cards/EffectCard';
 import { MatchedCard } from './Cards/MatchedCard';
 import styled from 'styled-components';
 import { useGame } from '../hooks/useGame';
-import { twoChoices } from '../utils/choices';
 
 const StyledDiv = styled.div`
   display: grid;
@@ -34,7 +33,6 @@ export function Board() {
         {game.move.cardIds.map((cardId, index) => {
           const card = game.move.cards[cardId];
           const hasHighlight = game.move.highlighted.has(cardId) && !game.move.gameOver;
-          const isDisabled = game.move.disabled.has(cardId);
 
           if (card.type === 'matchable') {
             if (game.move.matched.has(card.cardId)) {
@@ -49,14 +47,7 @@ export function Board() {
             const isHintCard = game.move.hinted.has(card.cardId);
             if (isCardRevealed || isHintCard || game.move.gameOver) {
               return (
-                <RevealedCard
-                  key={card.cardId}
-                  lang={card.language}
-                  onClick={
-                    !isDisabled && (twoChoices(game.move) || isHintCard) ? () => game.revealCard(index) : undefined
-                  }
-                  highlight={hasHighlight}
-                >
+                <RevealedCard key={card.cardId} lang={card.language} highlight={hasHighlight}>
                   {card.text}
                 </RevealedCard>
               );
@@ -71,13 +62,7 @@ export function Board() {
             );
           }
 
-          return (
-            <HiddenCard
-              key={card.cardId}
-              onClick={!isDisabled ? () => game.revealCard(index) : undefined}
-              highlight={hasHighlight}
-            />
-          );
+          return <HiddenCard key={card.cardId} onClick={() => game.revealCard(index)} highlight={hasHighlight} />;
         })}
       </StyledMain>
     </StyledDiv>

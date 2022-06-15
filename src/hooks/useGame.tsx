@@ -48,7 +48,6 @@ export interface Move<T = any> {
   matched: Set<CardId>;
   hinted: Set<CardId>;
   highlighted: Set<CardId>;
-  disabled: Set<CardId>;
   gameOver: { win: boolean; reason: string } | null;
   msPlayed: number;
   msPerMove: number;
@@ -68,7 +67,6 @@ const defaultMove: Move = {
   matched: new Set(),
   hinted: new Set(),
   highlighted: new Set(),
-  disabled: new Set(),
   gameOver: null,
   msPlayed: 0,
   msPerMove: NO_COUNTDOWN,
