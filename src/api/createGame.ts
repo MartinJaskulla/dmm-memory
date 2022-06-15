@@ -10,17 +10,17 @@ export function createGame(
   nPairs: number,
   nEffects: number,
   nHints: number,
-): Pick<Move, 'cards' | 'cardIds' | 'hints'> {
+): Pick<Move, 'cards' | 'cardIds' | 'hinted'> {
   const cards: Move['cards'] = {};
-  const hints = new Set<CardId>();
+  const hinted = new Set<CardId>();
 
   // Allow duplicate effects
   for (let i = 0; i < nEffects; i++) {
     const effect = pickRandom(effectRegistry);
-    const id = createId();
-    cards[id] = {
+    const cardId = createId();
+    cards[cardId] = {
       type: 'effect',
-      id,
+      cardId,
       effectId: effect.effectId,
       text: effect.card.text,
     };
@@ -29,27 +29,27 @@ export function createGame(
   goalItems = structuredClone(goalItems);
   shuffle(goalItems);
   goalItems.slice(0, nPairs).forEach((goalItem) => {
-    const id1 = createId();
-    cards[id1] = {
+    const cardId1 = createId();
+    cards[cardId1] = {
       type: 'matchable',
-      id: id1,
+      cardId: cardId1,
       matchId: goalItem.item.id,
       text: goalItem.item.cue.text,
       language: goalItem.item.cue.language,
     };
 
-    const id2 = createId();
-    cards[id2] = {
+    const cardId2 = createId();
+    cards[cardId2] = {
       type: 'matchable',
-      id: id2,
+      cardId: cardId2,
       matchId: goalItem.item.id,
       text: goalItem.item.response.text,
       language: goalItem.item.response.language,
     };
 
     if (nHints > 0) {
-      const hintId = Math.random() < 0.5 ? id1 : id2;
-      hints.add(hintId);
+      const hintId = Math.random() < 0.5 ? cardId1 : cardId2;
+      hinted.add(hintId);
       nHints--;
     }
   });
@@ -57,5 +57,5 @@ export function createGame(
   const cardIds: CardId[] = Object.keys(cards);
   shuffle(cardIds);
 
-  return { cards, cardIds, hints };
+  return { cards, cardIds, hinted };
 }

@@ -20,19 +20,19 @@ export const timerEffect: Effect = {
       move.effects.queue.push([cardIdOfEffect, EFFECT]);
     },
     onQueue: (move: Move<TimerData>, cardIdOfEffect) => {
-      const cardHasCountdown = move.timeLimit !== NO_COUNTDOWN;
+      const cardHasCountdown = move.msPerMove !== NO_COUNTDOWN;
       if (!cardHasCountdown) return;
 
       const isFirstTime = move.effects.data[cardIdOfEffect].movesLeft === MOVES;
       if (isFirstTime) {
-        move.timeLimit = move.timeLimit + TIME_INCREASE;
+        move.msPerMove = move.msPerMove + TIME_INCREASE;
       }
 
       move.effects.data[cardIdOfEffect].movesLeft--;
 
       const oneMoveAfterTimerBonusIsGone = move.effects.data[cardIdOfEffect].movesLeft === -1;
       if (oneMoveAfterTimerBonusIsGone) {
-        move.timeLimit = move.timeLimit - TIME_INCREASE;
+        move.msPerMove = move.msPerMove - TIME_INCREASE;
         delete move.effects.data[cardIdOfEffect];
       }
     },

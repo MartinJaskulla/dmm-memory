@@ -24,6 +24,6 @@ export function effectMiddleWare(move: Move) {
 
   // Call onClick when effect card was clicked
   if (card.type === 'effect') {
-    effectLookup[card.effectId]?.middleware.onClick?.(move, card.id);
+    effectLookup[card.effectId]?.middleware.onClick?.(move, card.cardId);
   }
 }

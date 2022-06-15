@@ -30,16 +30,16 @@ export const retryEffect: Effect = {
         if (!isMatch && twoChoices(move)) {
           move.disabled.add(move.choice1);
           move.disabled.add(move.choice2);
-          move.highlights.add(move.choice1);
-          move.highlights.add(move.effects.data[cardIdOfEffect].retryCardId);
+          move.highlighted.add(move.choice1);
+          move.highlighted.add(move.effects.data[cardIdOfEffect].retryCardId);
           move.effects.data[cardIdOfEffect].choice1 = move.choice1;
           move.effects.data[cardIdOfEffect].choice2 = move.choice2;
         }
       } else {
         move.disabled.delete(move.effects.data[cardIdOfEffect].choice1);
         move.disabled.delete(move.effects.data[cardIdOfEffect].choice2);
-        move.highlights.delete(move.effects.data[cardIdOfEffect].choice1);
-        move.highlights.delete(move.effects.data[cardIdOfEffect].retryCardId);
+        move.highlighted.delete(move.effects.data[cardIdOfEffect].choice1);
+        move.highlighted.delete(move.effects.data[cardIdOfEffect].retryCardId);
         if (!isEffectCard) {
           move.choice2 = move.choice1;
           move.choice1 = move.effects.data[cardIdOfEffect].choice1;

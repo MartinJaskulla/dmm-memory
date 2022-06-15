@@ -22,7 +22,7 @@ export type EffectId = string;
 
 export interface GameCardMatchable {
   type: 'matchable';
-  id: CardId;
+  cardId: CardId;
   matchId: MatchId;
   text: string;
   language: Language;
@@ -30,7 +30,7 @@ export interface GameCardMatchable {
 
 export interface GameCardEffect {
   type: 'effect';
-  id: CardId;
+  cardId: CardId;
   effectId: EffectId;
   text: string;
 }
@@ -44,14 +44,14 @@ export interface Move<T = any> {
   choice1: CardId;
   choice2: CardId;
   latestCard: CardId;
-  matched: Set<CardId>;
   foundEffects: Set<CardId>;
-  hints: Set<CardId>;
-  highlights: Set<CardId>;
+  matched: Set<CardId>;
+  hinted: Set<CardId>;
+  highlighted: Set<CardId>;
   disabled: Set<CardId>;
   gameOver: { win: boolean; reason: string } | null;
-  totalMs: number;
-  timeLimit: number;
+  msPlayed: number;
+  msPerMove: number;
   effects: {
     data: Record<CardId, T>;
     queue: [CardId, EffectId][];
@@ -64,14 +64,14 @@ const defaultMove: Move = {
   choice1: '',
   choice2: '',
   latestCard: '',
-  matched: new Set(),
   foundEffects: new Set(),
-  hints: new Set(),
-  highlights: new Set(),
+  matched: new Set(),
+  hinted: new Set(),
+  highlighted: new Set(),
   disabled: new Set(),
   gameOver: null,
-  totalMs: 0,
-  timeLimit: NO_COUNTDOWN,
+  msPlayed: 0,
+  msPerMove: NO_COUNTDOWN,
   effects: {
     data: {},
     queue: [],
@@ -79,6 +79,7 @@ const defaultMove: Move = {
 };
 
 export interface GameValue {
+  // TODO Just provide history...
   move: History<Move>['move'];
   moves: History<Move>['moves'];
   moveIndex: History<Move>['moveIndex'];
@@ -126,8 +127,8 @@ const GameProvider = ({ children }: GameProps) => {
 
   async function newGame() {
     const { goal_items } = await fetchGoal();
-    const { cards, cardIds, hints } = createGame(goal_items, PAIRS, NUMBER_OF_EFFECTS, HINT_CARDS);
-    history.resetMoves({ ...defaultMove, cards, cardIds, hints });
+    const game = createGame(goal_items, PAIRS, NUMBER_OF_EFFECTS, HINT_CARDS);
+    history.resetMoves({ ...defaultMove, ...game });
   }
 
   function revealCard(revealedCardIndex: number) {
@@ -136,7 +137,7 @@ const GameProvider = ({ children }: GameProps) => {
     const cardId = nextMove.cardIds[revealedCardIndex];
     const card = nextMove.cards[cardId];
 
-    nextMove.totalMs = clockRef.current.ms;
+    nextMove.msPlayed = clockRef.current.ms;
     nextMove.latestCard = cardId;
     flipCards(nextMove, card);
     saveMove(nextMove);
@@ -144,7 +145,7 @@ const GameProvider = ({ children }: GameProps) => {
 
   function saveMove(moveUpdates: Partial<Move>) {
     const nextMove: Move = merge(structuredClone(move), moveUpdates);
-    nextMove.hints = new Set();
+    nextMove.hinted = new Set();
     startFirstCountdown(nextMove, TIME_LIMIT);
     effectMiddleWare(nextMove);
     winIfAllPairsFound(nextMove, PAIRS);
@@ -154,7 +155,7 @@ const GameProvider = ({ children }: GameProps) => {
 
   useEffect(() => {
     clockRef.current.stop();
-    if (!move.gameOver) clockRef.current.start(move.totalMs);
+    if (!move.gameOver) clockRef.current.start(move.msPlayed);
   }, [move]);
 
   const gameValue: GameValue = {
@@ -183,16 +184,16 @@ export function flipCards(nextMove: Move, card: GameCard): void {
     case 'matchable': {
       // Flip one card
       if (zeroChoices(nextMove)) {
-        nextMove.choice1 = card.id;
+        nextMove.choice1 = card.cardId;
       } else if (oneChoice(nextMove)) {
-        nextMove.choice2 = card.id;
+        nextMove.choice2 = card.cardId;
       }
       // Check for a match
       checkMatch(nextMove);
       break;
     }
     case 'effect': {
-      nextMove.foundEffects.add(card.id);
+      nextMove.foundEffects.add(card.cardId);
       break;
     }
   }
@@ -203,8 +204,8 @@ export function checkMatch(nextMove: Move) {
   const card2 = nextMove.cards[nextMove.choice2];
   if (card1?.type === 'matchable' && card2?.type === 'matchable') {
     if (card1.matchId === card2.matchId) {
-      nextMove.matched.add(card1.id);
-      nextMove.matched.add(card2.id);
+      nextMove.matched.add(card1.cardId);
+      nextMove.matched.add(card2.cardId);
       nextMove.choice1 = '';
       nextMove.choice2 = '';
     }
@@ -212,8 +213,8 @@ export function checkMatch(nextMove: Move) {
 }
 
 function startFirstCountdown(nextMove: Move, defaultTimeLimit: number) {
-  if (oneChoice(nextMove) && nextMove.timeLimit === NO_COUNTDOWN) {
-    nextMove.timeLimit = defaultTimeLimit;
+  if (oneChoice(nextMove) && nextMove.msPerMove === NO_COUNTDOWN) {
+    nextMove.msPerMove = defaultTimeLimit;
   }
 }
 
@@ -225,7 +226,7 @@ function winIfAllPairsFound(nextMove: Move, requiredPairs: number) {
 
 function saveCountdownIfWon(nextMove: Move, clockMs: number, previousMove?: Move) {
   if (nextMove.gameOver?.win && previousMove) {
-    nextMove.timeLimit = getRemainingMs(clockMs, previousMove.totalMs, nextMove.timeLimit);
+    nextMove.msPerMove = getRemainingMs(clockMs, previousMove.msPlayed, nextMove.msPerMove);
   }
 }
 

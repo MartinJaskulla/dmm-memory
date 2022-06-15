@@ -19,13 +19,15 @@ export const trickEffect: Effect = {
         const matchedCards: GameCardMatchable[] = [];
         Object.values(move.cards)
           .filter((card): card is GameCardMatchable => card.type === 'matchable')
-          .forEach((card) => (move.matched.has(card.id) ? matchedCards.push(card) : nonMatchedCards.push(card)));
+          .forEach((card) => (move.matched.has(card.cardId) ? matchedCards.push(card) : nonMatchedCards.push(card)));
 
         const newMatchId = pickRandom(nonMatchedCards).matchId;
-        const newMatchCardIds = nonMatchedCards.filter((card) => card.matchId === newMatchId).map((card) => card.id);
+        const newMatchCardIds = nonMatchedCards
+          .filter((card) => card.matchId === newMatchId)
+          .map((card) => card.cardId);
 
         const oldMatchId = pickRandom(matchedCards).matchId;
-        const oldMatchCardIds = matchedCards.filter((card) => card.matchId === oldMatchId).map((card) => card.id);
+        const oldMatchCardIds = matchedCards.filter((card) => card.matchId === oldMatchId).map((card) => card.cardId);
 
         oldMatchCardIds.forEach((cardId) => move.matched.delete(cardId));
         newMatchCardIds.forEach((cardId) => move.matched.add(cardId));

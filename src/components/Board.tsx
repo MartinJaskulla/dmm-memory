@@ -30,24 +30,24 @@ export function Board() {
       <StyledMain>
         {game.move.cardIds.map((cardId, index) => {
           const card = game.move.cards[cardId];
-          const hasHighlight = game.move.highlights.has(cardId) && !game.move.gameOver;
+          const hasHighlight = game.move.highlighted.has(cardId) && !game.move.gameOver;
           const isDisabled = game.move.disabled.has(cardId);
 
           if (card.type === 'matchable') {
-            if (game.move.matched.has(card.id)) {
+            if (game.move.matched.has(card.cardId)) {
               return (
-                <MatchedCard key={card.id} lang={card.language} highlight={hasHighlight}>
+                <MatchedCard key={card.cardId} lang={card.language} highlight={hasHighlight}>
                   {card.text}
                 </MatchedCard>
               );
             }
 
-            const isCardRevealed = [game.move.choice1, game.move.choice2].includes(card.id);
-            const isHintCard = game.move.hints.has(card.id);
+            const isCardRevealed = [game.move.choice1, game.move.choice2].includes(card.cardId);
+            const isHintCard = game.move.hinted.has(card.cardId);
             if (isCardRevealed || isHintCard || game.move.gameOver) {
               return (
                 <RevealedCard
-                  key={card.id}
+                  key={card.cardId}
                   lang={card.language}
                   onClick={
                     !isDisabled && (twoChoices(game.move) || isHintCard) ? () => game.revealCard(index) : undefined
@@ -60,9 +60,9 @@ export function Board() {
             }
           }
 
-          if (card.type === 'effect' && (game.move.foundEffects.has(card.id) || game.move.gameOver)) {
+          if (card.type === 'effect' && (game.move.foundEffects.has(card.cardId) || game.move.gameOver)) {
             return (
-              <EffectCard key={card.id} highlight={hasHighlight}>
+              <EffectCard key={card.cardId} highlight={hasHighlight}>
                 {card.text}
               </EffectCard>
             );
@@ -70,7 +70,7 @@ export function Board() {
 
           return (
             <HiddenCard
-              key={card.id}
+              key={card.cardId}
               onClick={!isDisabled ? () => game.revealCard(index) : undefined}
               highlight={hasHighlight}
             />
