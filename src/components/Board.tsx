@@ -7,10 +7,14 @@ import styled from 'styled-components';
 import { useGame } from '../features/useGame';
 import { twoChoices } from '../utils/choices';
 
+const StyledDiv = styled.div`
+  display: grid;
+  place-items: center;
+  min-height: calc(100vh - var(--header-height));
+`;
+
 const StyledMain = styled.main`
-  margin: 1rem auto;
-  max-width: 90vw;
-  width: 35rem;
+  width: 30rem;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-gap: 1.5rem;
@@ -25,7 +29,7 @@ export function Board() {
   const game = useGame();
 
   return (
-    <>
+    <StyledDiv>
       <StyledMain>
         {game.move.cardIds.map((cardId, index) => {
           const card = game.move.cards[cardId];
@@ -76,6 +80,6 @@ export function Board() {
           );
         })}
       </StyledMain>
-    </>
+    </StyledDiv>
   );
 }

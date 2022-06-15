@@ -1,5 +1,4 @@
 :root {
-  /* CSS variabless for styles used in the example asset. */
   --color-focus-ring: #029af7;
   --color-flipped: var(--color-primary-orange);
   --color-matched: #a9d948;
@@ -9,6 +8,7 @@
   --color-white: #ffffff;
   --font-stack-en: 'Open Sans', sans-serif;
   --font-stack-ja: 'Noto Sans JP', 'Open Sans', sans-serif;
+  --header-height: 4rem;
 }
 
 [lang='en'] {
@@ -17,9 +17,4 @@
 
 [lang='ja'] {
   font-family: var(--font-stack-ja);
-}
-
-html {
-  /* Starts shrinking for screens < 1280px */
-  font-size: clamp(0.75rem, 1vw + 0.2rem, 1rem);
 }

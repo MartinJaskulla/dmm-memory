@@ -1,4 +1,4 @@
-import { NO_COUNTDOWN, useGame } from '../features/useGame';
+import { NO_COUNTDOWN, TIME_LIMIT, useGame } from '../features/useGame';
 import React, { useEffect, useState } from 'react';
 import { formatMs } from '../utils/formatMs';
 
@@ -28,7 +28,7 @@ export function Countdown() {
   }, [remainingMs]);
 
   if (game.move.gameOver?.reason === TIME_OUT) return <DisplayedCountdown ms={0} />;
-  if (remainingMs === NO_COUNTDOWN) return null;
+  if (remainingMs === NO_COUNTDOWN) return <DisplayedCountdown ms={TIME_LIMIT} />;
   return <DisplayedCountdown ms={remainingMs} />;
 }
 

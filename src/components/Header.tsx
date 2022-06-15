@@ -1,15 +1,15 @@
 import React from 'react';
 import owlImgSrc from '../images/owl.svg';
 import styled from 'styled-components';
-import { useGame } from '../features/useGame';
 import { Countdown } from './Countdown';
 import { StopWatch } from './StopWatch';
+import { TimeTravel } from './TimeTravel';
 
 const StyledHeader = styled.header`
+  height: var(--header-height);
+  padding: 0 1rem;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
   color: var(--color-text);
-  padding: 12px 16px;
-  margin-bottom: 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -31,16 +31,16 @@ const StyledHeader = styled.header`
 `;
 
 export function Header() {
-  const game = useGame();
   return (
     <StyledHeader>
       <h1>
         <img alt="Memory Game Logo" src={owlImgSrc} />
         Memory Game
       </h1>
-      <Countdown />
+      <TimeTravel />
       <div>
-        <span>🐾 {game.moveIndex}</span> <StopWatch />
+        <StopWatch />
+        <Countdown />
       </div>
     </StyledHeader>
   );
