@@ -54,18 +54,7 @@ export interface Move<T = any> {
   timeLimit: number;
   effects: {
     data: Record<CardId, T>;
-    order: [CardId, EffectId][];
-
-    // middleware stays the same
-    // shuffle never goes on the array, trick necer goes on array
-    // retry? multiples can be on array. how to make sure that if one is active the other is not?
-    // worst case, check the effect array itself for any earlier retries and don;t do anythinbg if there are any
-    // then the cleanup has to happen after all effects are run. Maybe the array is just cardId[] or {cardId: "timer"}
-    // and then a dictionary for cardId: effectData. effects can delete the dictionary entry and after all effects the cleanup
-    // removes all eentries without data in dictionary
-
-    // Other (worse?) approach:
-    // stackableEffects: [{type: 'timer', cardId: 1, movesLeft: 3}, {type: 'timer', cardId: 2, movesLeft: 3}]
+    queue: [CardId, EffectId][];
   };
 }
 
@@ -85,7 +74,7 @@ const defaultMove: Move = {
   timeLimit: NO_COUNTDOWN,
   effects: {
     data: {},
-    order: [],
+    queue: [],
   },
 };
 

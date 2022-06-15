@@ -12,7 +12,7 @@ export const trickEffect: Effect = {
     text: 'Trick',
   },
   middleware: {
-    cardClick: (move: Move) => {
+    onClick: (move: Move) => {
       const atLeastOneMatch = move.matched.size >= 2;
       if (atLeastOneMatch) {
         const nonMatchedCards: GameCardMatchable[] = [];

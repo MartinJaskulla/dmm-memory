@@ -12,7 +12,7 @@ export const shuffleEffect: Effect = {
     text: 'Shuffle',
   },
   middleware: {
-    cardClick: (move: Move) => {
+    onClick: (move: Move) => {
       const oldShuffleCardIndex = move.cardIds.findIndex((cardId) => cardId === move.latestCard);
       move.cardIds = shuffle(move.cardIds);
       const newShuffleCardIndex = move.cardIds.findIndex((cardId) => cardId === move.latestCard);

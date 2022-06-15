@@ -9,21 +9,21 @@ export interface Effect {
     text: string;
   };
   middleware: {
-    cardClick: Middleware;
-    nextClick?: Middleware;
+    onClick: Middleware;
+    onQueue?: Middleware;
   };
 }
 export function effectMiddleWare(move: Move) {
   const card = move.cards[move.latestCard];
 
-  // Apply nextClick effects before cardClick effects, because cardClick effects add nextClick effects for the *next* round
-  move.effects.order.forEach(([cardId, effectId]) => effectLookup[effectId].middleware.nextClick?.(move, cardId));
+  // Call onQueue before onClick, because onClicks queue onQueues for the *next* move
+  move.effects.queue.forEach(([cardId, effectId]) => effectLookup[effectId].middleware.onQueue?.(move, cardId));
 
-  // Remove nextClick effects which have no data
-  move.effects.order = move.effects.order.filter(([cardId]) => cardId in move.effects.data);
+  // Remove onQueues which have no data
+  move.effects.queue = move.effects.queue.filter(([cardId]) => cardId in move.effects.data);
 
-  // Apply cardClick effect
+  // Call onClick when effect card was clicked
   if (card.type === 'effect') {
-    effectLookup[card.effectId]?.middleware.cardClick?.(move, card.id);
+    effectLookup[card.effectId]?.middleware.onClick?.(move, card.id);
   }
 }

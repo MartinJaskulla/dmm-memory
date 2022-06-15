@@ -14,11 +14,14 @@ export const retryEffect: Effect = {
     text: 'Retry',
   },
   middleware: {
-    cardClick: (move: Move<RetryData>, cardIdOfEffect) => {
+    onClick: (move: Move<RetryData>, cardIdOfEffect) => {
       move.effects.data[cardIdOfEffect] = { retryCardId: move.latestCard, choice1: '', choice2: '' };
-      move.effects.order.push([cardIdOfEffect, EFFECT]);
+      move.effects.queue.push([cardIdOfEffect, EFFECT]);
     },
-    nextClick: (move: Move<RetryData>, cardIdOfEffect) => {
+    onQueue: (move: Move<RetryData>, cardIdOfEffect) => {
+      const otherRetriesQueued = move.effects.queue.find(([, effectId]) => effectId === EFFECT)?.[0] !== cardIdOfEffect;
+      if (otherRetriesQueued) return;
+
       const isEffectCard = move.foundEffects.has(move.latestCard);
       const isBeforeRetry = move.effects.data[cardIdOfEffect].choice1 === '';
       if (isBeforeRetry) {

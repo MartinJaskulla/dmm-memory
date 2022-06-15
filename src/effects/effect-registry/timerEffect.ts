@@ -15,11 +15,11 @@ export const timerEffect: Effect = {
     text: 'Timer',
   },
   middleware: {
-    cardClick: (move: Move<TimerData>, cardIdOfEffect) => {
+    onClick: (move: Move<TimerData>, cardIdOfEffect) => {
       move.effects.data[cardIdOfEffect] = { movesLeft: MOVES };
-      move.effects.order.push([cardIdOfEffect, EFFECT]);
+      move.effects.queue.push([cardIdOfEffect, EFFECT]);
     },
-    nextClick: (move: Move<TimerData>, cardIdOfEffect) => {
+    onQueue: (move: Move<TimerData>, cardIdOfEffect) => {
       const cardHasCountdown = move.timeLimit !== NO_COUNTDOWN;
       if (!cardHasCountdown) return;
 
