@@ -1,6 +1,6 @@
 import { Effect } from '../effectMiddleware';
 import { GameCardMatchable, Move } from '../../features/useGame';
-import { random } from '../../utils/random';
+import { pickRandom } from '../../utils/pickRandom';
 
 // Trick — Unflips one pair of matched word cards but flips over another pair of words.
 
@@ -21,10 +21,10 @@ export const trickEffect: Effect = {
           .filter((card): card is GameCardMatchable => card.type === 'matchable')
           .forEach((card) => (move.matched.has(card.id) ? matchedCards.push(card) : nonMatchedCards.push(card)));
 
-        const newMatchId = nonMatchedCards[random(0, nonMatchedCards.length - 1)].matchId;
+        const newMatchId = pickRandom(nonMatchedCards).matchId;
         const newMatchCardIds = nonMatchedCards.filter((card) => card.matchId === newMatchId).map((card) => card.id);
 
-        const oldMatchId = matchedCards[random(0, move.matched.size - 1)].matchId;
+        const oldMatchId = pickRandom(matchedCards).matchId;
         const oldMatchCardIds = matchedCards.filter((card) => card.matchId === oldMatchId).map((card) => card.id);
 
         oldMatchCardIds.forEach((cardId) => move.matched.delete(cardId));

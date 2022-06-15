@@ -3,6 +3,7 @@ import { CardId, Move } from '../features/useGame';
 import { GETGoal } from './fetchGoal';
 import { createId } from '../utils/createId';
 import { effectRegistry } from '../effects/effect-registry/effectRegistry';
+import { pickRandom } from '../utils/pickRandom';
 
 export function createGame(
   goalItems: GETGoal['goal_items'],
@@ -10,14 +11,12 @@ export function createGame(
   nEffects: number,
   nHints: number,
 ): Pick<Move, 'cards' | 'cardIds' | 'hints'> {
-  goalItems = structuredClone(goalItems);
-  const effects: typeof effectRegistry = JSON.parse(JSON.stringify(effectRegistry));
-
   const cards: Move['cards'] = {};
   const hints = new Set<CardId>();
 
-  shuffle(effects);
-  effects.slice(0, nEffects).forEach((effect) => {
+  // Allow duplicate effects
+  for (let i = 0; i < nEffects; i++) {
+    const effect = pickRandom(effectRegistry);
     const id = createId();
     cards[id] = {
       type: 'effect',
@@ -25,8 +24,9 @@ export function createGame(
       effectId: effect.effectId,
       text: effect.card.text,
     };
-  });
+  }
 
+  goalItems = structuredClone(goalItems);
   shuffle(goalItems);
   goalItems.slice(0, nPairs).forEach((goalItem) => {
     const id1 = createId();
