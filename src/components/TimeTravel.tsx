@@ -1,5 +1,5 @@
 import React from 'react';
-import { useGame } from '../features/useGame';
+import { useGame } from '../hooks/useGame';
 import styled from 'styled-components';
 
 const StyledInput = styled.input`

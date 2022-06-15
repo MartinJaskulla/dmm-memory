@@ -1,5 +1,5 @@
 import { Effect } from '../effectMiddleware';
-import { Move, NO_COUNTDOWN } from '../../features/useGame';
+import { Move, NO_COUNTDOWN } from '../../hooks/useGame';
 
 // Timer — Increases time limit between flips for the next three moves.
 

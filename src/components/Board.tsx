@@ -4,7 +4,7 @@ import { RevealedCard } from './Cards/RevealedCard';
 import { EffectCard } from './Cards/EffectCard';
 import { MatchedCard } from './Cards/MatchedCard';
 import styled from 'styled-components';
-import { useGame } from '../features/useGame';
+import { useGame } from '../hooks/useGame';
 import { twoChoices } from '../utils/choices';
 
 const StyledDiv = styled.div`

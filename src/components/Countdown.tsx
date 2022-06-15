@@ -1,4 +1,4 @@
-import { NO_COUNTDOWN, TIME_LIMIT, useGame } from '../features/useGame';
+import { NO_COUNTDOWN, TIME_LIMIT, useGame } from '../hooks/useGame';
 import React, { useEffect, useState } from 'react';
 import { formatMs } from '../utils/formatMs';
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Header } from './components/Header';
 import { Board } from './components/Board';
-import { GameProvider } from './features/useGame';
+import { GameProvider } from './hooks/useGame';
 
 function App() {
   return (

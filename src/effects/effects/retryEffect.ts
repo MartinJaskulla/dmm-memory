@@ -1,5 +1,5 @@
 import { Effect } from '../effectMiddleware';
-import { checkMatch, CardId, Move } from '../../features/useGame';
+import { checkMatch, CardId, Move } from '../../hooks/useGame';
 import { twoChoices } from '../../utils/choices';
 
 // Retry — The next time you flip over a non-matching card, you get another chance (the first one stays flipped and the timer resets).

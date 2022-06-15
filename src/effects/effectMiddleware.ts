@@ -1,4 +1,4 @@
-import { CardId, EffectId, Move } from '../features/useGame';
+import { CardId, EffectId, Move } from '../hooks/useGame';
 import { effectLookup } from './effectRegistry';
 
 export type Middleware = (move: Move, cardIdOfEffect: CardId) => void;
