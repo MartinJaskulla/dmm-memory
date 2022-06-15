@@ -8,7 +8,7 @@ const EFFECT = 'retry';
 
 export type RetryData = { retryCardId: CardId; choice1: Move['choice1']; choice2: Move['choice2'] };
 
-export const retryEffect: Effect<RetryData> = {
+export const retryEffect: Effect = {
   effectId: EFFECT,
   card: {
     text: 'Retry',

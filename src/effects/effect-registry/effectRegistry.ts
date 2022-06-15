@@ -1,14 +1,11 @@
-import { Effect } from '../effectMiddleware';
 import { shuffleEffect } from './shuffleEffect';
-import { TimerData, timerEffect } from './timerEffect';
-import { RetryData, retryEffect } from './retryEffect';
+import { timerEffect } from './timerEffect';
+import { retryEffect } from './retryEffect';
 import { trickEffect } from './trickEffect';
 
-export type EffectData = TimerData | RetryData;
-export type EffectRegistry = { [key: string]: Effect<TimerData> | Effect<RetryData> };
-export const effectRegistry: EffectRegistry = {
-  [shuffleEffect.effectId]: shuffleEffect,
-  [timerEffect.effectId]: timerEffect,
-  [retryEffect.effectId]: retryEffect,
-  [trickEffect.effectId]: trickEffect,
-};
+export const effectRegistry = [shuffleEffect, timerEffect, retryEffect, trickEffect];
+
+export const effectLookup = effectRegistry.reduce((registry: Record<string, typeof effectRegistry[0]>, effect) => {
+  registry[effect.effectId] = effect;
+  return registry;
+}, {});

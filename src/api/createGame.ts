@@ -2,7 +2,7 @@ import { shuffle } from '../utils/shuffle';
 import { CardId, Move } from '../features/useGame';
 import { GETGoal } from './fetchGoal';
 import { createId } from '../utils/createId';
-import { EffectRegistry, effectRegistry } from '../effects/effect-registry/effectRegistry';
+import { effectRegistry } from '../effects/effect-registry/effectRegistry';
 
 export function createGame(
   goalItems: GETGoal['goal_items'],
@@ -11,7 +11,7 @@ export function createGame(
   nHints: number,
 ): Pick<Move, 'cards' | 'cardIds' | 'hints'> {
   goalItems = structuredClone(goalItems);
-  const effects: EffectRegistry[keyof EffectRegistry][] = JSON.parse(JSON.stringify(Object.values(effectRegistry)));
+  const effects: typeof effectRegistry = JSON.parse(JSON.stringify(effectRegistry));
 
   const cards: Move['cards'] = {};
   const hints = new Set<CardId>();

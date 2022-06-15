@@ -9,7 +9,7 @@ const MOVES = 3;
 
 export type TimerData = { movesLeft: number };
 
-export const timerEffect: Effect<TimerData> = {
+export const timerEffect: Effect = {
   effectId: EFFECT,
   card: {
     text: 'Timer',

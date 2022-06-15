@@ -5,7 +5,6 @@ import { createGame } from '../api/createGame';
 import { oneChoice, twoChoices, zeroChoices } from '../utils/choices';
 import { merge } from '../utils/merge';
 import { effectMiddleWare } from '../effects/effectMiddleware';
-import { EffectData } from '../effects/effect-registry/effectRegistry';
 import { Clock } from '../utils/clock';
 import { getRemainingMs } from '../components/Countdown';
 
@@ -38,7 +37,8 @@ export interface GameCardEffect {
 
 export type GameCard = GameCardMatchable | GameCardEffect;
 
-export interface Move<T extends EffectData = EffectData> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface Move<T = any> {
   cards: Record<CardId, GameCard>;
   cardIds: CardId[];
   choice1: CardId;
