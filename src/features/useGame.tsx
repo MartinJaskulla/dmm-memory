@@ -175,13 +175,12 @@ function useGame(): GameValue {
 }
 
 export function flipCards(nextMove: Move, card: GameCard): void {
+  if (twoChoices(nextMove)) {
+    nextMove.choice1 = '';
+    nextMove.choice2 = '';
+  }
   switch (card.type) {
     case 'matchable': {
-      // Hide both cards, if two choices were already made. Don't do this for effects. Otherwise shuffle looks confusing.
-      if (twoChoices(nextMove)) {
-        nextMove.choice1 = '';
-        nextMove.choice2 = '';
-      }
       // Flip one card
       if (zeroChoices(nextMove)) {
         nextMove.choice1 = card.id;
