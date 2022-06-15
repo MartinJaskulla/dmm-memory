@@ -15,25 +15,25 @@ export const timerEffect: Effect = {
     text: 'Timer',
   },
   middleware: {
-    onClick: (move: Move<TimerData>, cardIdOfEffect) => {
-      move.effects.data[cardIdOfEffect] = { movesLeft: MOVES };
-      move.effects.queue.push([cardIdOfEffect, EFFECT]);
+    onClick: (nextMove: Move<TimerData>, cardIdOfEffect) => {
+      nextMove.effects.data[cardIdOfEffect] = { movesLeft: MOVES };
+      nextMove.effects.queue.push([cardIdOfEffect, EFFECT]);
     },
-    onQueue: (move: Move<TimerData>, cardIdOfEffect) => {
-      const cardHasCountdown = move.msPerMove !== NO_COUNTDOWN;
+    onQueue: (nextMove: Move<TimerData>, cardIdOfEffect) => {
+      const cardHasCountdown = nextMove.msPerMove !== NO_COUNTDOWN;
       if (!cardHasCountdown) return;
 
-      const isFirstTime = move.effects.data[cardIdOfEffect].movesLeft === MOVES;
+      const isFirstTime = nextMove.effects.data[cardIdOfEffect].movesLeft === MOVES;
       if (isFirstTime) {
-        move.msPerMove = move.msPerMove + TIME_INCREASE;
+        nextMove.msPerMove = nextMove.msPerMove + TIME_INCREASE;
       }
 
-      move.effects.data[cardIdOfEffect].movesLeft--;
+      nextMove.effects.data[cardIdOfEffect].movesLeft--;
 
-      const oneMoveAfterTimerBonusIsGone = move.effects.data[cardIdOfEffect].movesLeft === -1;
+      const oneMoveAfterTimerBonusIsGone = nextMove.effects.data[cardIdOfEffect].movesLeft === -1;
       if (oneMoveAfterTimerBonusIsGone) {
-        move.msPerMove = move.msPerMove - TIME_INCREASE;
-        delete move.effects.data[cardIdOfEffect];
+        nextMove.msPerMove = nextMove.msPerMove - TIME_INCREASE;
+        delete nextMove.effects.data[cardIdOfEffect];
       }
     },
   },

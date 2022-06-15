@@ -12,16 +12,16 @@ export const shuffleEffect: Effect = {
     text: 'Shuffle',
   },
   middleware: {
-    onClick: (move: Move) => {
-      const oldShuffleCardIndex = move.cardIds.findIndex((cardId) => cardId === move.latestCard);
-      move.cardIds = shuffle(move.cardIds);
-      const newShuffleCardIndex = move.cardIds.findIndex((cardId) => cardId === move.latestCard);
+    onClick: (nextMove: Move) => {
+      const oldShuffleCardIndex = nextMove.cardIds.findIndex((cardId) => cardId === nextMove.latestCard);
+      nextMove.cardIds = shuffle(nextMove.cardIds);
+      const newShuffleCardIndex = nextMove.cardIds.findIndex((cardId) => cardId === nextMove.latestCard);
       // Swap shuffle card back to old index
-      [move.cardIds[newShuffleCardIndex], move.cardIds[oldShuffleCardIndex]] = [
-        move.cardIds[oldShuffleCardIndex],
-        move.cardIds[newShuffleCardIndex],
+      [nextMove.cardIds[newShuffleCardIndex], nextMove.cardIds[oldShuffleCardIndex]] = [
+        nextMove.cardIds[oldShuffleCardIndex],
+        nextMove.cardIds[newShuffleCardIndex],
       ];
-      return move;
+      return nextMove;
     },
   },
 };

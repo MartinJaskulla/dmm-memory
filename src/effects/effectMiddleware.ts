@@ -1,7 +1,7 @@
 import { CardId, EffectId, Move } from '../hooks/useGame';
 import { effectLookup } from './effectRegistry';
 
-export type Middleware = (move: Move, cardIdOfEffect: CardId) => void;
+export type Middleware = (nextMove: Move, cardIdOfEffect: CardId) => void;
 
 export interface Effect {
   effectId: EffectId;
@@ -13,17 +13,19 @@ export interface Effect {
     onQueue?: Middleware;
   };
 }
-export function effectMiddleWare(move: Move) {
-  const card = move.cards[move.latestCard];
+export function effectMiddleWare(nextMove: Move) {
+  const card = nextMove.cards[nextMove.latestCard];
 
   // Call onQueue before onClick, because onClicks queue onQueues for the *next* move
-  move.effects.queue.forEach(([cardId, effectId]) => effectLookup[effectId].middleware.onQueue?.(move, cardId));
+  nextMove.effects.queue.forEach(([cardIdOfEffect, effectId]) =>
+    effectLookup[effectId].middleware.onQueue?.(nextMove, cardIdOfEffect),
+  );
 
-  // Remove onQueues which have no data
-  move.effects.queue = move.effects.queue.filter(([cardId]) => cardId in move.effects.data);
+  // Remove onQueues which have no data. TODO effects should cleanup themselves, export a util function here that removes from both?
+  nextMove.effects.queue = nextMove.effects.queue.filter(([cardId]) => cardId in nextMove.effects.data);
 
   // Call onClick when effect card was clicked
   if (card.type === 'effect') {
-    effectLookup[card.effectId]?.middleware.onClick?.(move, card.cardId);
+    effectLookup[card.effectId]?.middleware.onClick?.(nextMove, card.cardId);
   }
 }

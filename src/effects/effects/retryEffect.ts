@@ -1,12 +1,13 @@
 import { Effect } from '../effectMiddleware';
-import { checkMatch, CardId, Move } from '../../hooks/useGame';
+import { checkMatch, Move } from '../../hooks/useGame';
 import { twoChoices } from '../../utils/choices';
 
 // Retry — The next time you flip over a non-matching card, you get another chance (the first one stays flipped and the timer resets).
 
 const EFFECT = 'retry';
 
-export type RetryData = { retryCardId: CardId; choice1: Move['choice1']; choice2: Move['choice2'] };
+// Storing move, because it is easier than finding the previous move when time traveling
+export type RetryData = { choice1: Move['choice1']; choice2: Move['choice2'] };
 
 export const retryEffect: Effect = {
   effectId: EFFECT,
@@ -14,38 +15,65 @@ export const retryEffect: Effect = {
     text: 'Retry',
   },
   middleware: {
-    onClick: (move: Move<RetryData>, cardIdOfEffect) => {
-      move.effects.data[cardIdOfEffect] = { retryCardId: move.latestCard, choice1: '', choice2: '' };
-      move.effects.queue.push([cardIdOfEffect, EFFECT]);
+    onClick: (nextMove: Move<RetryData>, cardIdOfEffect) => {
+      nextMove.effects.data[cardIdOfEffect] = { choice1: '', choice2: '' };
+      nextMove.effects.queue.push([cardIdOfEffect, EFFECT]);
     },
-    onQueue: (move: Move<RetryData>, cardIdOfEffect) => {
-      const otherRetriesQueued = move.effects.queue.find(([, effectId]) => effectId === EFFECT)?.[0] !== cardIdOfEffect;
-      if (otherRetriesQueued) return;
+    onQueue: (nextMove: Move<RetryData>, cardIdOfEffect) => {
+      const retryCardIdsInQueue = nextMove.effects.queue
+        .filter(([, effectId]) => effectId === EFFECT)
+        .map(([cardId]) => cardId);
 
-      const isEffectCard = move.foundEffects.has(move.latestCard);
-      const isBeforeRetry = move.effects.data[cardIdOfEffect].choice1 === '';
-      if (isBeforeRetry) {
-        if (isEffectCard) return;
-        const isMatch = move.matched.has(move.latestCard);
-        if (!isMatch && twoChoices(move)) {
-          move.disabled.add(move.choice1);
-          move.disabled.add(move.choice2);
-          move.highlighted.add(move.choice2);
-          move.highlighted.add(move.effects.data[cardIdOfEffect].retryCardId);
-          move.effects.data[cardIdOfEffect].choice1 = move.choice1;
-          move.effects.data[cardIdOfEffect].choice2 = move.choice2;
+      const isFirstRetryInQueue = retryCardIdsInQueue[0] === cardIdOfEffect;
+      if (!isFirstRetryInQueue) return;
+
+      const beforeRetryMove = nextMove.effects.data[cardIdOfEffect].choice1 === '';
+      if (beforeRetryMove) {
+        const isMatch = nextMove.matched.has(nextMove.latestCard);
+        if (!isMatch && twoChoices(nextMove)) {
+          // C1 -> C2 (User has just chosen wrong 2nd card)
+          nextMove.highlighted.add(nextMove.choice2);
+          nextMove.highlighted.add(cardIdOfEffect);
+          nextMove.effects.data[cardIdOfEffect].choice1 = nextMove.choice1;
+          nextMove.effects.data[cardIdOfEffect].choice2 = nextMove.choice2;
+          return;
         }
       } else {
-        move.disabled.delete(move.effects.data[cardIdOfEffect].choice1);
-        move.disabled.delete(move.effects.data[cardIdOfEffect].choice2);
-        move.highlighted.delete(move.effects.data[cardIdOfEffect].choice2);
-        move.highlighted.delete(move.effects.data[cardIdOfEffect].retryCardId);
-        if (!isEffectCard) {
-          move.choice2 = move.choice1;
-          move.choice1 = move.effects.data[cardIdOfEffect].choice1;
-          checkMatch(move);
+        // C1 -> new C2 (User has just retried their 2nd card)
+        const previousChoice1 = nextMove.effects.data[cardIdOfEffect].choice1;
+        const previousChoice2 = nextMove.effects.data[cardIdOfEffect].choice2;
+
+        // I treat every effect card as mini retry cards in the regular game, so I should do the same here.
+        // e.g. choice1 -> timer resets the counter and does not un-flip choice1 on the next move.
+        // All effect cards allow you to search for the next matchable card.
+        const isEffectCard = nextMove.foundEffects.has(nextMove.latestCard);
+        if (isEffectCard) {
+          nextMove.choice2 = previousChoice2;
+          nextMove.choice1 = previousChoice1;
+          return;
         }
-        delete move.effects.data[cardIdOfEffect];
+
+        nextMove.highlighted.delete(previousChoice2);
+        nextMove.highlighted.delete(cardIdOfEffect);
+
+        const isMatchableCard = nextMove.cards[nextMove.latestCard].type === 'matchable';
+        if (isMatchableCard) {
+          nextMove.choice2 = nextMove.choice1;
+          nextMove.choice1 = previousChoice1;
+          checkMatch(nextMove);
+
+          const isMatch = nextMove.matched.has(nextMove.latestCard);
+          const moreRetries = retryCardIdsInQueue.length > 1;
+          if (!isMatch && moreRetries) {
+            const nextRetryCardId = retryCardIdsInQueue[1];
+            nextMove.highlighted.add(nextMove.choice2);
+            nextMove.highlighted.add(nextRetryCardId);
+            nextMove.effects.data[nextRetryCardId].choice1 = nextMove.choice1;
+            nextMove.effects.data[nextRetryCardId].choice2 = nextMove.choice2;
+          }
+        }
+
+        delete nextMove.effects.data[cardIdOfEffect];
       }
     },
   },
