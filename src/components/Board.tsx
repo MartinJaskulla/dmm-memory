@@ -8,8 +8,7 @@ import { useGame } from '../features/useGame';
 import { twoChoices } from '../utils/choices';
 
 const StyledMain = styled.main`
-  margin: 0 auto;
-  padding: 32px 0;
+  margin: 1rem auto;
   max-width: 90vw;
   width: 35rem;
   display: grid;

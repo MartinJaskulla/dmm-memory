@@ -11,8 +11,8 @@ import { getRemainingMs } from '../components/Countdown';
 export const NO_COUNTDOWN = Infinity;
 
 // TODO Put in config
-const PAIRS = 3;
-const HINT_CARDS = 20;
+const PAIRS = 4;
+const HINT_CARDS = 2;
 const NUMBER_OF_EFFECTS = 4;
 const TIME_LIMIT = 30000;
 

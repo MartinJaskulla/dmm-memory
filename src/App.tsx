@@ -8,8 +8,8 @@ function App() {
   return (
     <GameProvider>
       <Header />
-      <Board />
       <TimeTravel />
+      <Board />
     </GameProvider>
   );
 }
