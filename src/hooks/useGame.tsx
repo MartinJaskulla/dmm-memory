@@ -7,19 +7,16 @@ import { merge } from '../utils/merge';
 import { effectMiddleWare } from '../effects/effectMiddleware';
 import { Clock } from '../utils/clock';
 import { getRemainingMs } from '../components/Countdown';
+import { CONFIG } from '../config/config';
+import { GAME_OVER, GameOver } from '../config/gameOver';
+import { MESSAGES } from '../config/messages';
 
+// TODO constants file? Can I eextract more elsewhere?
 export const NO_COUNTDOWN = Infinity;
-
-// TODO Put in config
-const PAIRS = 5;
-const HINT_CARDS = 3;
-const NUMBER_OF_EFFECTS = 6;
-export const TIME_LIMIT = 30000;
 
 export type CardId = string;
 export type MatchId = number;
 export type EffectId = string;
-
 export interface GameCardMatchable {
   type: 'matchable';
   cardId: CardId;
@@ -27,14 +24,12 @@ export interface GameCardMatchable {
   text: string;
   language: Language;
 }
-
 export interface GameCardEffect {
   type: 'effect';
   cardId: CardId;
   effectId: EffectId;
   text: string;
 }
-
 export type GameCard = GameCardMatchable | GameCardEffect;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -48,7 +43,7 @@ export interface Move<T = any> {
   matched: Set<CardId>;
   hinted: Set<CardId>;
   highlighted: Set<CardId>;
-  gameOver: { win: boolean; reason: string } | null;
+  gameOver: GameOver | null;
   msPlayed: number;
   msPerMove: number;
   effects: {
@@ -119,12 +114,15 @@ const GameProvider = ({ children }: GameProps) => {
   }, []);
 
   useEffect(() => {
-    if (move.gameOver) setTimeout(() => alert(move.gameOver?.reason), 100);
+    if (move.gameOver) {
+      const messageId = move.gameOver.id;
+      setTimeout(() => alert(MESSAGES[messageId]), 100);
+    }
   }, [move.gameOver]);
 
   async function newGame() {
     const { goal_items } = await fetchGoal();
-    const game = createGame(goal_items, PAIRS, NUMBER_OF_EFFECTS, HINT_CARDS);
+    const game = createGame(goal_items);
     history.resetMoves({ ...defaultMove, ...game });
   }
 
@@ -143,9 +141,9 @@ const GameProvider = ({ children }: GameProps) => {
   function saveMove(moveUpdates: Partial<Move>) {
     const nextMove: Move = merge(structuredClone(move), moveUpdates);
     nextMove.hinted = new Set();
-    startFirstCountdown(nextMove, TIME_LIMIT);
+    startFirstCountdown(nextMove, CONFIG.TIME_PER_MOVE);
     effectMiddleWare(nextMove);
-    winIfAllPairsFound(nextMove, PAIRS);
+    winIfAllPairsFound(nextMove, CONFIG.PAIRS);
     saveCountdownIfWon(nextMove, clockRef.current.ms, history.moves[history.moveIndex - 1]);
     history.addMove(nextMove);
   }
@@ -224,7 +222,7 @@ function startFirstCountdown(nextMove: Move, defaultTimeLimit: number) {
 
 function winIfAllPairsFound(nextMove: Move, requiredPairs: number) {
   if (!nextMove.gameOver && nextMove.matched.size / 2 === requiredPairs) {
-    nextMove.gameOver = { win: true, reason: 'You found all pairs! 🎉' };
+    nextMove.gameOver = GAME_OVER.FOUND_ALL_PAIRS;
   }
 }
 

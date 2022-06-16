@@ -4,18 +4,14 @@ import { GETGoal } from './fetchGoal';
 import { createId } from '../utils/createId';
 import { effectRegistry } from '../effects/effectRegistry';
 import { pickRandom } from '../utils/pickRandom';
+import { CONFIG } from '../config/config';
 
-export function createGame(
-  goalItems: GETGoal['goal_items'],
-  nPairs: number,
-  nEffects: number,
-  nHints: number,
-): Pick<Move, 'cards' | 'cardIds' | 'hinted'> {
+export function createGame(goalItems: GETGoal['goal_items']): Pick<Move, 'cards' | 'cardIds' | 'hinted'> {
   const cards: Move['cards'] = {};
   const hinted = new Set<CardId>();
 
   // Allow duplicate effects
-  for (let i = 0; i < nEffects; i++) {
+  for (let i = 0; i < CONFIG.EFFECTS; i++) {
     const effect = pickRandom(effectRegistry);
     const cardId = createId();
     cards[cardId] = {
@@ -26,9 +22,10 @@ export function createGame(
     };
   }
 
+  let remainingHints = CONFIG.HINTS;
   goalItems = structuredClone(goalItems);
   shuffle(goalItems);
-  goalItems.slice(0, nPairs).forEach((goalItem) => {
+  goalItems.slice(0, CONFIG.PAIRS).forEach((goalItem) => {
     const cardId1 = createId();
     cards[cardId1] = {
       type: 'matchable',
@@ -47,10 +44,10 @@ export function createGame(
       language: goalItem.item.response.language,
     };
 
-    if (nHints > 0) {
+    if (remainingHints > 0) {
       const hintId = Math.random() < 0.5 ? cardId1 : cardId2;
       hinted.add(hintId);
-      nHints--;
+      remainingHints--;
     }
   });
 

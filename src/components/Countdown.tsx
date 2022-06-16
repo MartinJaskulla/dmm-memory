@@ -1,8 +1,8 @@
-import { NO_COUNTDOWN, TIME_LIMIT, useGame } from '../hooks/useGame';
+import { NO_COUNTDOWN, useGame } from '../hooks/useGame';
 import React, { useEffect, useState } from 'react';
 import { formatMs } from '../utils/formatMs';
-
-const TIME_OUT = 'Time is up! 😭';
+import { CONFIG } from '../config/config';
+import { GAME_OVER } from '../config/gameOver';
 
 export function Countdown() {
   const game = useGame();
@@ -22,13 +22,17 @@ export function Countdown() {
   useEffect(() => {
     if (remainingMs === 0)
       game.saveMove({
-        gameOver: { win: false, reason: TIME_OUT },
+        gameOver: GAME_OVER.TIME_PER_MOVE_RAN_OUT,
         msPlayed: game.move.msPlayed + game.move.msPerMove,
       });
   }, [remainingMs]);
 
-  if (game.move.gameOver?.reason === TIME_OUT) return <DisplayedCountdown ms={0} />;
-  if (remainingMs === NO_COUNTDOWN) return <DisplayedCountdown ms={TIME_LIMIT} />;
+  if (game.move.gameOver === GAME_OVER.TIME_PER_MOVE_RAN_OUT) {
+    return <DisplayedCountdown ms={0} />;
+  }
+  if (remainingMs === NO_COUNTDOWN) {
+    return <DisplayedCountdown ms={CONFIG.TIME_PER_MOVE} />;
+  }
   return <DisplayedCountdown ms={remainingMs} />;
 }
 

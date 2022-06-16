@@ -43,9 +43,9 @@ export const retryEffect: Effect = {
         const previousChoice1 = nextMove.effects.data[cardIdOfEffect].choice1;
         const previousChoice2 = nextMove.effects.data[cardIdOfEffect].choice2;
 
-        // I treat every effect card as mini retry cards in the regular game, so I should do the same here.
-        // e.g. choice1 -> timer resets the counter and does not un-flip choice1 on the next move.
-        // All effect cards allow you to search for the next matchable card.
+        // Treating retry as "Retry until choice2 is filled with a new matchable card".
+        // Consistent with how other effects are treated as mini retry effects in the regular game:
+        // Card1 -> Effect -> Card2 (Card1 does not un-flip, because Effect is not treated as a choice)
         const isEffectCard = nextMove.foundEffects.has(nextMove.latestCard);
         if (isEffectCard) {
           nextMove.choice2 = previousChoice2;
