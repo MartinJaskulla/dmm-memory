@@ -1,5 +1,5 @@
 import { shuffle } from '../utils/shuffle';
-import { CardId, Move } from '../hooks/useGame';
+import { CardId, Move } from '../hooks/useHistory/useHistoryValue';
 import { GETGoal } from './fetchGoal';
 import { createId } from '../utils/createId';
 import { effectRegistry } from '../effects/effectRegistry';

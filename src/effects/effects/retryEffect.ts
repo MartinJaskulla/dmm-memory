@@ -1,6 +1,7 @@
 import { Effect } from '../effectMiddleware';
-import { checkMatch, Move } from '../../hooks/useGame';
 import { twoChoices } from '../../utils/choices';
+import { Move } from '../../hooks/useHistory/useHistoryValue';
+import { Game } from '../../hooks/useGame/game';
 
 // Retry — The next time you flip over a non-matching card, you get another chance (the first one stays flipped and the timer resets).
 
@@ -60,7 +61,7 @@ export const retryEffect: Effect = {
         if (isMatchableCard) {
           nextMove.choice2 = nextMove.choice1;
           nextMove.choice1 = previousChoice1;
-          checkMatch(nextMove);
+          Game.checkMatch(nextMove);
 
           const isMatch = nextMove.matched.has(nextMove.latestCard);
           const moreRetries = retryCardIdsInQueue.length > 1;

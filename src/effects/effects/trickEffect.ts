@@ -1,6 +1,6 @@
 import { Effect } from '../effectMiddleware';
-import { GameCardMatchable, Move } from '../../hooks/useGame';
 import { pickRandom } from '../../utils/pickRandom';
+import { GameCardMatchable, Move } from '../../hooks/useHistory/useHistoryValue';
 
 // Trick — Unflips one pair of matched word cards but flips over another pair of words.
 

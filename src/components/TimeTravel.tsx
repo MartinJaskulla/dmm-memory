@@ -1,13 +1,13 @@
 import React from 'react';
-import { useGame } from '../hooks/useGame';
 import styled from 'styled-components';
+import { useHistory } from '../hooks/useHistory/useHistory';
 
 const StyledInput = styled.input`
   margin-right: 1rem;
 `;
 
 export function TimeTravel() {
-  const game = useGame();
+  const history = useHistory();
 
   return (
     <div>
@@ -15,11 +15,11 @@ export function TimeTravel() {
         type="range"
         step="1"
         min="0"
-        max={game.moves.length - 1}
-        value={game.moveIndex}
-        onChange={(event) => game.goToMove(Number(event.target.value))}
+        max={history.moves.length - 1}
+        value={history.moveIndex}
+        onChange={(event) => history.goToMove(Number(event.target.value))}
       />
-      <button onClick={() => game.goToMove(game.moveIndex)}>🐾 {game.moveIndex}</button>
+      <button onClick={() => history.goToMove(history.moveIndex)}>🐾 {history.moveIndex}</button>
     </div>
   );
 }

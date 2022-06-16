@@ -1,19 +1,11 @@
-import { interval } from './interval';
+import { interval } from '../../utils/interval';
 
-export type ClockCallback = (ms: number) => void;
+type ClockCallback = (ms: number) => void;
 
 export class Clock {
   private abortController = new AbortController();
   private callbacks: ClockCallback[] = [];
-
-  private _ms = 0;
-  public get ms() {
-    return this._ms;
-  }
-  private set ms(ms: number) {
-    this._ms = ms;
-    this.callbacks.forEach((callback) => callback(ms));
-  }
+  private ms = 0;
 
   constructor() {
     this.start = this.start.bind(this);
@@ -21,10 +13,15 @@ export class Clock {
     this.subscribe = this.subscribe.bind(this);
   }
 
+  getMs() {
+    return this.ms;
+  }
+
   start(startingMs = 0) {
     this.abortController = new AbortController();
     interval(10, this.abortController.signal, (ms) => {
       this.ms = ms + startingMs;
+      this.callbacks.forEach((callback) => callback(this.ms));
     });
   }
 

@@ -17,8 +17,6 @@
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "off",
     "no-debugger": "off",
-    "react/prop-types": "off",
-    "react/display-name": "off",
-    "@typescript-eslint/ban-ts-comment": "off"
+    "react/prop-types": "off"
   }
 }

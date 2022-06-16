@@ -1,3 +1,5 @@
+import { cachedFetch } from '../utils/cachedFetch';
+
 export interface Transliterations {
   Hira?: string;
   Hrkt?: string;
@@ -90,7 +92,5 @@ export interface GETGoal {
 }
 
 export async function fetchGoal(): Promise<GETGoal> {
-  const response = await fetch('./goal.json');
-  const json: GETGoal = await response.json();
-  return json;
+  return cachedFetch<GETGoal>('./goal.json');
 }

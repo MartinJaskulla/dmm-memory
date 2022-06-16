@@ -1,4 +1,4 @@
-import { Move } from '../hooks/useGame';
+import { Move } from '../hooks/useHistory/useHistoryValue';
 
 export function zeroChoices(choices: Pick<Move, 'choice1' | 'choice2'>): boolean {
   return Boolean(!choices.choice1 && !choices.choice2);

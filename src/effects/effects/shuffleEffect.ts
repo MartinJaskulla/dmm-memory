@@ -1,5 +1,5 @@
 import { Effect } from '../effectMiddleware';
-import { Move } from '../../hooks/useGame';
+import { Move } from '../../hooks/useHistory/useHistoryValue';
 import { shuffle } from '../../utils/shuffle';
 
 // Shuffle — Reshuffles all the cards on the board. Flipped pairs and effect cards should remain faceup, but move. The shuffle card itself should not change position.

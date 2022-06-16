@@ -4,7 +4,8 @@ import { RevealedCard } from './Cards/RevealedCard';
 import { EffectCard } from './Cards/EffectCard';
 import { MatchedCard } from './Cards/MatchedCard';
 import styled from 'styled-components';
-import { useGame } from '../hooks/useGame';
+import { useHistory } from '../hooks/useHistory/useHistory';
+import { useGame } from '../hooks/useGame/useGame';
 
 const StyledDiv = styled.div`
   display: grid;
@@ -25,17 +26,18 @@ const StyledMain = styled.main`
 `;
 
 export function Board() {
+  const history = useHistory();
   const game = useGame();
 
   return (
     <StyledDiv>
       <StyledMain>
-        {game.move.cardIds.map((cardId, index) => {
-          const card = game.move.cards[cardId];
-          const hasHighlight = game.move.highlighted.has(cardId) && !game.move.gameOver;
+        {history.move.cardIds.map((cardId, index) => {
+          const card = history.move.cards[cardId];
+          const hasHighlight = history.move.highlighted.has(cardId) && !history.move.gameOver;
 
           if (card.type === 'matchable') {
-            if (game.move.matched.has(card.cardId)) {
+            if (history.move.matched.has(card.cardId)) {
               return (
                 <MatchedCard key={card.cardId} lang={card.language} highlight={hasHighlight}>
                   {card.text}
@@ -43,9 +45,9 @@ export function Board() {
               );
             }
 
-            const isCardRevealed = [game.move.choice1, game.move.choice2].includes(card.cardId);
-            const isHintCard = game.move.hinted.has(card.cardId);
-            if (isCardRevealed || isHintCard || game.move.gameOver) {
+            const isCardRevealed = [history.move.choice1, history.move.choice2].includes(card.cardId);
+            const isHintCard = history.move.hinted.has(card.cardId);
+            if (isCardRevealed || isHintCard || history.move.gameOver) {
               return (
                 <RevealedCard key={card.cardId} lang={card.language} highlight={hasHighlight}>
                   {card.text}
@@ -54,7 +56,7 @@ export function Board() {
             }
           }
 
-          if (card.type === 'effect' && (game.move.foundEffects.has(card.cardId) || game.move.gameOver)) {
+          if (card.type === 'effect' && (history.move.foundEffects.has(card.cardId) || history.move.gameOver)) {
             return (
               <EffectCard key={card.cardId} highlight={hasHighlight}>
                 {card.text}
