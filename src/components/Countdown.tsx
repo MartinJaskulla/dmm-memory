@@ -11,7 +11,7 @@ export function Countdown() {
 
   useEffect(() => {
     setRemainingMs(game.move.msPerMove);
-    if (game.move.msPerMove === NO_COUNTDOWN) return;
+    if (game.move.msPerMove === NO_COUNTDOWN || game.move.gameOver) return;
     return game.subscribeToClock((msPlayed) => {
       const newRemaining = getRemainingMs(msPlayed, game.move.msPlayed, game.move.msPerMove);
       // newRemaining can be less than 0 if the user switches to a different tab (requestAnimationFrame does not run) and returns after the countdown is over.
@@ -29,6 +29,14 @@ export function Countdown() {
 
   if (game.move.gameOver === GAME_OVER.TIME_PER_MOVE_RAN_OUT) {
     return <DisplayedCountdown ms={0} />;
+  }
+
+  if (game.move.gameOver) {
+    return (
+      <DisplayedCountdown
+        ms={game.move.msPerMove - (game.move.msPlayed - game.moves[game.moves.length - 2].msPlayed)}
+      />
+    );
   }
   if (remainingMs === NO_COUNTDOWN) {
     return <DisplayedCountdown ms={CONFIG.TIME_PER_MOVE} />;

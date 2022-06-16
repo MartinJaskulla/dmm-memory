@@ -6,7 +6,6 @@ import { oneChoice, twoChoices, zeroChoices } from '../utils/choices';
 import { merge } from '../utils/merge';
 import { effectMiddleWare } from '../effects/effectMiddleware';
 import { Clock } from '../utils/clock';
-import { getRemainingMs } from '../components/Countdown';
 import { CONFIG } from '../config/config';
 import { GAME_OVER, GameOver } from '../config/gameOver';
 import { MESSAGES } from '../config/messages';
@@ -144,7 +143,6 @@ const GameProvider = ({ children }: GameProps) => {
     startFirstCountdown(nextMove, CONFIG.TIME_PER_MOVE);
     effectMiddleWare(nextMove);
     winIfAllPairsFound(nextMove, CONFIG.PAIRS);
-    saveCountdownIfWon(nextMove, clockRef.current.ms, history.moves[history.moveIndex]);
     history.addMove(nextMove);
   }
 
@@ -223,13 +221,6 @@ function startFirstCountdown(nextMove: Move, defaultTimeLimit: number) {
 function winIfAllPairsFound(nextMove: Move, requiredPairs: number) {
   if (!nextMove.gameOver && nextMove.matched.size / 2 === requiredPairs) {
     nextMove.gameOver = GAME_OVER.FOUND_ALL_PAIRS;
-  }
-}
-
-// TODO Weird that it is only on win, should also be on loss with 0. Check if alert comes twice
-function saveCountdownIfWon(nextMove: Move, clockMs: number, previousMove?: Move) {
-  if (nextMove.gameOver?.win && previousMove) {
-    nextMove.msPerMove = getRemainingMs(clockMs, previousMove.msPlayed, nextMove.msPerMove);
   }
 }
 
