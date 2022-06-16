@@ -144,7 +144,7 @@ const GameProvider = ({ children }: GameProps) => {
     startFirstCountdown(nextMove, CONFIG.TIME_PER_MOVE);
     effectMiddleWare(nextMove);
     winIfAllPairsFound(nextMove, CONFIG.PAIRS);
-    saveCountdownIfWon(nextMove, clockRef.current.ms, history.moves[history.moveIndex - 1]);
+    saveCountdownIfWon(nextMove, clockRef.current.ms, history.moves[history.moveIndex]);
     history.addMove(nextMove);
   }
 
