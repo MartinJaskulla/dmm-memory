@@ -21,7 +21,7 @@ export function effectMiddleWare(nextMove: Move) {
     effectLookup[effectId].middleware.onQueue?.(nextMove, cardIdOfEffect),
   );
 
-  // Remove onQueues which have no data. TODO effects should cleanup themselves, export a util function here that removes from both?
+  // Remove onQueues which have no data.
   nextMove.effects.queue = nextMove.effects.queue.filter(([cardId]) => cardId in nextMove.effects.data);
 
   // Call onClick when effect card was clicked

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { formatMs } from '../utils/formatMs';
 import { CONFIG } from '../config/config';
 import { GAME_OVER } from '../config/gameOver';
-import { NO_COUNTDOWN } from '../hooks/useHistory/useHistoryValue';
+import { History, NO_COUNTDOWN } from '../hooks/useHistory/useHistoryValue';
 import { useHistory } from '../hooks/useHistory/useHistory';
 import { useClock } from '../hooks/useClock/useClock';
 
@@ -33,14 +33,8 @@ export function Countdown() {
   if (history.move.gameOver === GAME_OVER.TIME_PER_MOVE_RAN_OUT) {
     return <DisplayedCountdown ms={0} />;
   }
-
   if (history.move.gameOver) {
-    return (
-      // TODO HELPER FN
-      <DisplayedCountdown
-        ms={history.move.msPerMove - (history.move.msPlayed - history.moves[history.moves.length - 2].msPlayed)}
-      />
-    );
+    return <DisplayedCountdown ms={finalRemainingMs(history)} />;
   }
   if (remainingMs === NO_COUNTDOWN) {
     return <DisplayedCountdown ms={CONFIG.TIME_PER_MOVE} />;
@@ -55,4 +49,10 @@ function DisplayedCountdown({ ms }: { ms: number }) {
 export function getRemainingMsForMove(clockMs: number, moveMs: number, moveTimeLimit: number) {
   const msSinceStart = clockMs - moveMs;
   return moveTimeLimit - msSinceStart;
+}
+
+function finalRemainingMs(history: History) {
+  const lastMove = history.move;
+  const secondLastMove = history.moves[history.moves.length - 2];
+  return secondLastMove.msPerMove - (lastMove.msPlayed - secondLastMove.msPlayed);
 }

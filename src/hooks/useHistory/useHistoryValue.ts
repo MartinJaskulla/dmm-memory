@@ -4,7 +4,6 @@ import { GameOver } from '../../config/gameOver';
 import { Language } from '../../api/fetchGoal';
 import { merge } from '../../utils/merge';
 
-// TODO constants file? Can I eextract more elsewhere?
 export const NO_COUNTDOWN = Infinity;
 
 export type CardId = string;

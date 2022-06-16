@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { fetchGoal } from '../../api/fetchGoal';
 import { defaultMove } from '../useHistory/useHistoryValue';
-import { createGame } from '../../api/createGame';
+import { createGame } from './createGame';
 import { useClock } from '../useClock/useClock';
 import { MESSAGES } from '../../config/messages';
 import { useHistory } from '../useHistory/useHistory';

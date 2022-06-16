@@ -31,10 +31,7 @@ export const trickEffect: Effect = {
       oldMatchCardIds.forEach((cardId) => nextMove.matched.delete(cardId));
       newMatchCardIds.forEach((cardId) => nextMove.matched.add(cardId));
 
-      // MMXT
-      // If by chance choice1 is part of the new match, choice1 needs to be reset
-      // MMXXT
-      // If by chance one of the choices is part of the new match, it needs to be reset.
+      // choice1 or choice2 could be part of the new match and need to be cleared
       if (nextMove.matched.has(nextMove.choice1)) nextMove.choice1 = '';
       if (nextMove.matched.has(nextMove.choice2)) nextMove.choice2 = '';
     },

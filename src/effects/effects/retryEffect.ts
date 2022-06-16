@@ -7,7 +7,8 @@ import { Game } from '../../hooks/useGame/game';
 
 const EFFECT = 'retry';
 
-// Storing move, because it is easier than finding the previous move when time traveling
+// Storing choices of the current move although we could look it up them up in the history later instead,
+// just because it is easier. Maybe it is better to not store redundant data...
 export type RetryData = { choice1: Move['choice1']; choice2: Move['choice2'] };
 
 export const retryEffect: Effect = {
