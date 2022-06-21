@@ -18,7 +18,7 @@ export class Game {
     nextMove.msPlayed = msPlayed;
     nextMove.hinted = new Set();
 
-    Game.startFirstCountdown(nextMove);
+    Game.startCountdown(nextMove);
     effectMiddleWare(nextMove);
     Game.winIfAllPairsFound(nextMove);
     return nextMove;
@@ -59,8 +59,8 @@ export class Game {
     }
   }
 
-  static startFirstCountdown(nextMove: Move): void {
-    if (oneChoice(nextMove) && nextMove.msPerMove === NO_COUNTDOWN) {
+  static startCountdown(nextMove: Move): void {
+    if (nextMove.msPerMove === NO_COUNTDOWN && oneChoice(nextMove)) {
       nextMove.msPerMove = CONFIG.TIME_PER_MOVE;
     }
   }
