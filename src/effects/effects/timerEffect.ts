@@ -4,7 +4,7 @@ import { Move, NO_COUNTDOWN } from '../../hooks/useHistory/useHistoryValue';
 // Timer — Increases time limit between flips for the next three moves.
 
 const EFFECT = 'timer';
-const TIME_INCREASE = 15000;
+const TIME_INCREASE = 15_000;
 const MOVES = 3;
 
 export type TimerData = { movesLeft: number };
