@@ -1,7 +1,7 @@
 import { shuffle } from '../../utils/shuffle';
 import { CardId, Move } from '../useHistory/useHistoryValue';
 import { GETGoal } from '../../api/fetchGoal';
-import { createId } from '../../utils/createId';
+import { v4 } from 'uuid';
 import { effectRegistry } from '../../effects/effectRegistry';
 import { pickRandom } from '../../utils/pickRandom';
 import { CONFIG } from '../../config/config';
@@ -13,7 +13,7 @@ export function createGame(goalItems: GETGoal['goal_items']): Pick<Move, 'cards'
   // Allow duplicate effects
   for (let i = 0; i < CONFIG.EFFECTS; i++) {
     const effect = pickRandom(effectRegistry);
-    const cardId = createId();
+    const cardId = v4();
     cards[cardId] = {
       type: 'effect',
       cardId,
@@ -26,7 +26,7 @@ export function createGame(goalItems: GETGoal['goal_items']): Pick<Move, 'cards'
   goalItems = structuredClone(goalItems);
   shuffle(goalItems);
   goalItems.slice(0, CONFIG.PAIRS).forEach((goalItem) => {
-    const cardId1 = createId();
+    const cardId1 = v4();
     cards[cardId1] = {
       type: 'matchable',
       cardId: cardId1,
@@ -35,7 +35,7 @@ export function createGame(goalItems: GETGoal['goal_items']): Pick<Move, 'cards'
       language: goalItem.item.cue.language,
     };
 
-    const cardId2 = createId();
+    const cardId2 = v4();
     cards[cardId2] = {
       type: 'matchable',
       cardId: cardId2,
