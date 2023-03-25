@@ -53,6 +53,11 @@ export function getRemainingMsForMove(clockMs: number, moveMs: number, moveTimeL
 
 function finalRemainingMs(history: History) {
   const lastMove = history.move;
-  const secondLastMove = history.moves[history.moves.length - 2];
+  // When the game has ended there will be at least 2 moves, because:
+  // - The first "move" is not a move the user makes, but the initial game state.
+  // - The last "move" is also not made by the user, but pushed by the game when loosing.
+  // - finalRemainingMs is called after this last move has been pushed.
+  const NON_PLAYER_MOVES = 2;
+  const secondLastMove = history.moves[history.moves.length - NON_PLAYER_MOVES];
   return secondLastMove.msPerMove - (lastMove.msPlayed - secondLastMove.msPlayed);
 }
