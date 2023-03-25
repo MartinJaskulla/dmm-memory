@@ -1,46 +1,118 @@
-# Getting Started with Create React App
+# Developer Project
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+We would like you to create a memory game, where cards are flipped over to find pairs of corresponding words in Japanese and English with the same meaning.
 
-## Available Scripts
+![Example Image](./readme/example.png)
+_An example of what the game might look like. In this case "Say" matches "言う" and "Have" matches "持っている." "行く" is a flipped card that is still unmatched. The "Trick" card is a [special effects card](#special-effect-cards)._
 
-In the project directory, you can run:
+## API and Content structure
 
-### `npm start`
+Please use the data provided in the api folder to provide content for the game. The cards should be pairs of Japanese-English words, where one side is the translation of the other.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+Our top-level structure for content is a `goal`. This represents a course on https://iknow.jp
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+A goal has `goal_items`, which contain a `cue` and a `response`. The cue contains data for the language being studied. The response contains data for the native language of the learner.
 
-### `npm test`
+A `goal_item` also has a position, sound, and example sentences, which themselves have audio and an image. Here's a sample entry:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```json
+    {
+      "item": {
+        "id": 34891,
+        "type": "text",
+        "cue": {
+          "text": "have",
+          "image": null,
+          "language": "en",
+          "part_of_speech": "Verb",
+          "transcription": "hæv",
+          "transliterations": {}
+        },
+        "response": {
+          "text": "持っている",
+          "language": "ja",
+          "transliterations": {
+            "Hira": "もっている",
+            "Hrkt": "もっている",
+            "Latn": "motteiru"
+          }
+        }
+      },
+      "position": 1,
+      "sound": "http://assets1.iknow.jp/assets/legacy/core/audio/core1_1_q_1.mp3",
+      "sentences": [
+        {
+          "position": 1,
+          "cue": {
+            "id": 12375,
+            "language": "en",
+            "text": "I <b>have</b> a lot of money."
+          },
+          "response": {
+            "id": 30730,
+            "language": "ja",
+            "text": "私はお金をたくさん持っている。",
+            "transliterations": {
+              "Hira": "わたし は おかね を たくさん もっている 。",
+              "Hrkt": "わたし は おかね を たくさん もっている 。",
+              "Latn": "watashi ha okane wo takusan motteiru .",
+              "Jpan": "私 は お金 を たくさん 持っている 。"
+            }
+          },
+          "image": "http://assets1.iknow.jp/assets/legacy/images/01/3004759.jpg",
+          "sound": "http://assets1.iknow.jp/assets/legacy/core/audio/core1_1_s1_1.mp3"
+        },
+      ]
+     }
+```
 
-### `npm run build`
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Features
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Please make a game using this template with at least the following features:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+* Gameplay where the player flips over cards, where a pair of cards flip back over unless they have the same meaning (are the same item).
+* Special effect cards (described below)
+* Keep track of the length of a game, as well as the number of card flips, displayed during the game.
+* Once one non-effect (word) card is flipped, start a timer. If the timer expires before the user flips over another word card, they lose the game.
+* When the game starts, show a few non-matching cards to the player to help them get started.
+* At the end of the game, reveal any cards that are not flipped (including effects cards).
+* Store the game state such that playback features can be implemented.
 
-### `npm run eject`
+### Special Effect Cards
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+In addition to the cards corresponding to word pairs, add a few special effect cards that change the game.
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+These cards should be added to the board and look like regular cards, but instead of prompting to flip another card and get a match,
+flipping one of these cards activates its effect immediately. Please implement the following special effect cards:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+* Timer — Increases time limit between flips for the next three moves.
+* Shuffle — Reshuffles all the cards on the board. Flipped pairs and effect cards should remain faceup, but move. The shuffle card itself should not change position.
+* Retry — The next time you flip over a non-matching card, you get another chance (the first one stays flipped and the timer resets).
+* Trick — Unflips one pair of matched word cards but flips over another pair of words.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+Note that it's not required to flip over all of these cards to finish the game. The game still ends when all pairs of word cards have been flipped faceup.
 
-## Learn More
+Flipping over an effect card should reset the move timer.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Insert a random selection of these cards into the board, along with the word cards.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+There are edge cases to consider with effect cards—implement sensible behavior for any you encounter.
+
+### Storing Game State
+
+While implementing playback features is not expected, the game state should be persisted in a manner that would make implementing features such as replay and rewind feasible.
+
+For example, some chess sites support a replay feature for users to watch back their games:
+
+![Chess Example](./readme/chess-example-preview.png)
+
+## Notes
+
+Please use the JSON data in the api directory. You may also use the provided stylesheets and images.
+Write your application as though it was production code: keep it well-factored for future expansion.
+Leave room in your code design for new features, even though you won't implement them.
+
+When implementing effect cards, consider that in a real product, new ones may be added or old ones taken away.
+Focus mainly on logic over things like animation and presentation.
+When you're finished, we'll chat about the code and how it could be expanded in a real product.
