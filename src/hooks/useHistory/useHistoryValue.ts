@@ -47,7 +47,7 @@ export interface Move<T = any> {
   };
 }
 
-export const defaultMove: Move = {
+const defaultMove: Move = {
   cards: {},
   cardIds: [],
   choice1: '',
@@ -71,7 +71,7 @@ export interface History {
   moves: Move[];
   moveIndex: number;
   addMove: (move: Partial<Move>) => void;
-  resetMoves: (newInitialMove: Move) => void;
+  resetMoves: (newInitialMove: Partial<Move>) => void;
   goToMove: (moveIndex: number) => void;
 }
 
@@ -86,8 +86,8 @@ export function useHistoryValue(initialMove = defaultMove): History {
     setMoveIndex(moveIndex + 1);
   }
 
-  function resetMoves(newInitialMove: Move) {
-    setMoves([newInitialMove]);
+  function resetMoves(newInitialMove: Partial<Move>) {
+    setMoves([{ ...defaultMove, ...newInitialMove }]);
     setMoveIndex(0);
   }
 

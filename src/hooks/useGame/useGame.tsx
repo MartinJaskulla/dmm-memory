@@ -1,6 +1,5 @@
 import React, { useEffect } from 'react';
 import { fetchGoal } from '../../api/fetchGoal';
-import { defaultMove } from '../useHistory/useHistoryValue';
 import { createGame } from './createGame';
 import { useClock } from '../useClock/useClock';
 import { MESSAGES } from '../../config/messages';
@@ -31,7 +30,7 @@ const GameProvider = ({ children }: GameProps) => {
   async function newGame() {
     const { goal_items } = await fetchGoal();
     const game = createGame(goal_items);
-    history.resetMoves({ ...defaultMove, ...game });
+    history.resetMoves(game);
   }
 
   useEffect(() => {
