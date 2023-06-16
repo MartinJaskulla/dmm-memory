@@ -13,5 +13,5 @@ export function StopWatch() {
   useEffect(() => setMsPlayed(history.move.msPlayed), [history.move]);
 
   // gameOver check is needed when the countdown times out while the user has a different tab open
-  return <span>⏱ {formatMs(history.move.gameOver ? history.move.msPlayed : msPlayed)}</span>;
+  return <span>⏱️ {formatMs(history.move.gameOver ? history.move.msPlayed : msPlayed)}</span>;
 }
