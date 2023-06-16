@@ -19,7 +19,7 @@ export function TimeTravel() {
         value={history.moveIndex}
         onChange={(event) => history.goToMove(Number(event.target.value))}
       />
-      <button onClick={() => history.goToMove(history.moveIndex)}>🐾 {history.moveIndex}</button>
+      <span>🧳 {history.moveIndex}</span>
     </div>
   );
 }
