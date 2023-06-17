@@ -7,5 +7,5 @@ const StyledBaseCard = styled(BaseCard)`
 `;
 
 export function RevealedCard(props: Pick<BaseCardProps, 'children' | 'highlight' | 'lang' | 'onClick'>) {
-  return <StyledBaseCard {...props} />;
+  return <StyledBaseCard {...props} disabled />;
 }

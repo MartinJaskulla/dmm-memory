@@ -22,7 +22,7 @@ const StyledBaseCard = styled(BaseCard)`
   }
 `;
 
-export function HiddenCard(props: Pick<BaseCardProps, 'highlight' | 'onClick'>) {
+export function HiddenCard(props: Pick<BaseCardProps, 'highlight' | 'onClick' | 'disabled'>) {
   return (
     <StyledBaseCard {...props}>
       <div>

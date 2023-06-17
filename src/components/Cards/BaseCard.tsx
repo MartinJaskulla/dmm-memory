@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { ButtonHTMLAttributes } from 'react';
 import styled, { css } from 'styled-components';
 import { Language } from '../../api/fetchGoal';
 
 const StyledButton = styled.button<BaseCardProps>`
+  color: var(--color-text);
   border-radius: 10px;
   width: 100%;
   height: 100%;
@@ -38,14 +39,10 @@ const StyledButton = styled.button<BaseCardProps>`
     `}
 `;
 
-export type BaseCardProps = React.HTMLAttributes<HTMLButtonElement> & { lang?: Language; highlight: boolean };
+export type BaseCardProps = ButtonHTMLAttributes<HTMLButtonElement> & { lang?: Language; highlight: boolean };
 
 export function BaseCard(props: BaseCardProps) {
-  return (
-    <StyledButton {...props} tabIndex={props.onClick ? 0 : -1}>
-      {props.children}
-    </StyledButton>
-  );
+  return <StyledButton {...props}>{props.children}</StyledButton>;
 }
 
 /*

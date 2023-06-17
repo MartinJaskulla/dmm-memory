@@ -7,5 +7,5 @@ const StyledBaseCard = styled(BaseCard)`
 `;
 
 export function MatchedCard(props: Pick<BaseCardProps, 'children' | 'highlight' | 'lang'>) {
-  return <StyledBaseCard {...props} />;
+  return <StyledBaseCard {...props} disabled />;
 }

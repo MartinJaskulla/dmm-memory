@@ -75,7 +75,8 @@ export function Board() {
               front={
                 <HiddenCard
                   key={card.cardId}
-                  onClick={() => !flipped && game.revealCard(index)}
+                  disabled={flipped}
+                  onClick={() => game.revealCard(index)}
                   highlight={hasHighlight}
                 />
               }

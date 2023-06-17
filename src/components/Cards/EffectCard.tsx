@@ -13,7 +13,7 @@ const StyledBaseCard = styled(BaseCard)`
 
 export function EffectCard(props: Pick<BaseCardProps, 'children' | 'highlight' | 'lang'>) {
   return (
-    <StyledBaseCard highlight={props.highlight} lang={'en'}>
+    <StyledBaseCard highlight={props.highlight} lang={'en'} disabled>
       <img alt="Memory Game Logo" src={rocketImgSrc} />
       {props.children}
     </StyledBaseCard>
