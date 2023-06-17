@@ -3,8 +3,6 @@ import { twoChoices } from '../../utils/choices';
 import { Move } from '../../hooks/useHistory/useHistoryValue';
 import { Game } from '../../hooks/useGame/game';
 
-// Retry — The next time you flip over a non-matching card, you get another chance (the first one stays flipped and the timer resets).
-
 const EFFECT = 'retry';
 
 // Storing choices of the current move although we could look it up them up in the history later instead,
@@ -13,6 +11,8 @@ export type RetryData = { choice1: Move['choice1']; choice2: Move['choice2'] };
 
 export const retryEffect: Effect = {
   effectId: EFFECT,
+  description:
+    'Retry — The next time you flip over a non-matching card, you get another chance (the first one stays flipped and the timer resets).',
   card: {
     text: 'Retry',
   },

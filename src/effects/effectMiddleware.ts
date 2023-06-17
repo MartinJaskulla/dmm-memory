@@ -12,6 +12,7 @@ export interface Effect {
     onClick: Middleware;
     onQueue?: Middleware;
   };
+  description: string;
 }
 export function effectMiddleWare(nextMove: Move) {
   const card = nextMove.cards[nextMove.latestCard];

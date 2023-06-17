@@ -3,6 +3,7 @@ import { oneChoice, twoChoices, zeroChoices } from '../../utils/choices';
 import { GAME_OVER } from '../../config/gameOver';
 import { CONFIG } from '../../config/config';
 import { effectMiddleWare } from '../../effects/effectMiddleware';
+import { effectExplanation } from '../../effects/effectExplanation';
 
 export class Game {
   static revealCard(cardIndex: number, currentMove: Move, msPlayed: number): Move {
@@ -19,6 +20,8 @@ export class Game {
     nextMove.hinted = new Set();
 
     Game.startCountdown(nextMove);
+
+    effectExplanation(nextMove);
     effectMiddleWare(nextMove);
     Game.winIfAllPairsFound(nextMove);
     return nextMove;

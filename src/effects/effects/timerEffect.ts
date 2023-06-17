@@ -1,8 +1,6 @@
 import { Effect } from '../effectMiddleware';
 import { Move, NO_COUNTDOWN } from '../../hooks/useHistory/useHistoryValue';
 
-// Timer — Increases time limit between flips for the next three moves.
-
 const EFFECT = 'timer';
 const TIME_INCREASE = 15_000;
 const MOVES = 3;
@@ -11,6 +9,7 @@ export type TimerData = { movesLeft: number };
 
 export const timerEffect: Effect = {
   effectId: EFFECT,
+  description: 'Timer — Increases time limit between flips for the next three moves.',
   card: {
     text: 'Timer',
   },

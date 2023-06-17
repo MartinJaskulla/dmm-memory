@@ -2,12 +2,11 @@ import { Effect } from '../effectMiddleware';
 import { pickRandom } from '../../utils/pickRandom';
 import { GameCardMatchable, Move } from '../../hooks/useHistory/useHistoryValue';
 
-// Trick — Unflips one pair of matched word cards but flips over another pair of words.
-
 const EFFECT = 'trick';
 
 export const trickEffect: Effect = {
   effectId: EFFECT,
+  description: 'Trick — Unflips one pair of matched word cards but flips over another pair of words.',
   card: {
     text: 'Trick',
   },
