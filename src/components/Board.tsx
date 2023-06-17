@@ -6,7 +6,7 @@ import { MatchedCard } from './Cards/MatchedCard';
 import styled from 'styled-components';
 import { useHistory } from '../hooks/useHistory/useHistory';
 import { useGame } from '../hooks/useGame/useGame';
-import { Card } from './Cards/Card';
+import { Card3D } from './Card3D';
 
 const StyledDiv = styled.div`
   display: grid;
@@ -69,7 +69,7 @@ export function Board() {
           }
 
           return (
-            <Card
+            <Card3D
               key={card.cardId}
               flipped={flipped}
               front={
