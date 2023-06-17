@@ -1,7 +1,13 @@
 import React, { ReactNode } from 'react';
 import { useSpring, animated } from 'react-spring';
 
-// TODO Remove ts-ignore
+/*
+React spring animations are interruptible. For example:
+- Flip card 1
+- Flip non-matching card 2
+- Flip card 3. Card 1 and 2 are un-flipped. If the animation of card 2 has not finished,
+it will stop in-place and smoothly transition to the reverse un-flipping animation.
+ */
 
 interface CardArgs {
   front: ReactNode;
@@ -9,11 +15,6 @@ interface CardArgs {
   flipped: boolean;
 }
 
-// React spring animations are interruptible. For example:
-// - Flip card 1
-// - Flip non-matching card 2
-// - Flip card 3. Card 1 and 2 are un-flipped. If the animation of card 2 has not finished,
-// it will stop in-place and smoothly transition to the reverse un-flipping animation.
 export function Card({ front, back, flipped }: CardArgs) {
   const { transform, opacity } = useSpring({
     opacity: flipped ? 1 : 0,
@@ -28,7 +29,6 @@ export function Card({ front, back, flipped }: CardArgs) {
         height: '100%',
       }}
     >
-      {/* @ts-ignore */}
       <animated.div
         style={{
           backfaceVisibility: 'hidden',
