@@ -47,11 +47,3 @@ design system (here I allow maximum flexibility by allowing all HTMLButton attri
 - You can add functionality to all buttons by modifying the base component
 - Consumers of variant components are only importing the code they need for the variant they are using
  */
-
-/*
-TODO
-- Can still use Base/variant pattern, just need front end back in one
-- Maybe add 3d carf flip from cover-letter project. I already have a repo with this
-
-
- */
