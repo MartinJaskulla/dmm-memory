@@ -16,20 +16,13 @@ const StyledButton = styled.button<BaseCardProps>`
   border: 5px solid var(--color-text);
 
   &:focus-visible {
-    outline: none;
-    transform: scale(1.05);
+    outline: 5px solid var(--color-focus-ring);
   }
 
   ${(props) =>
     props.onClick &&
     css`
       cursor: pointer;
-
-      &:focus,
-      &:hover {
-        outline: none;
-        transform: scale(1.05);
-      }
     `}
 
   ${(props) =>
@@ -48,10 +41,17 @@ export function BaseCard(props: BaseCardProps) {
 /*
 Base & Variants pattern:
 - How AirBnb designs components (Base & Variants pattern): https://www.youtube.com/watch?v=UxoX2faIgDQ&t=23291s
-- Lessons from creative writing for component design: https://www.youtube.com/watch?v=JDDxR1a15Yo&t=9337s
 
 - The base component allows you to restrict which properties can be overwritten and therefore enforcing your
 design system (here I allow maximum flexibility by allowing all HTMLButton attributes)
 - You can add functionality to all buttons by modifying the base component
 - Consumers of variant components are only importing the code they need for the variant they are using
+ */
+
+/*
+TODO
+- Can still use Base/variant pattern, just need front end back in one
+- Maybe add 3d carf flip from cover-letter project. I already have a repo with this
+
+
  */

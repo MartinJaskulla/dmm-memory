@@ -2,7 +2,6 @@ import React, { ReactNode } from 'react';
 import { useSpring, animated } from 'react-spring';
 
 // TODO Remove ts-ignore
-// TODO Issue is the hover effect. it is only applied of the card is interactive e.g. effect card cannot be turned back.
 
 interface CardArgs {
   front: ReactNode;
