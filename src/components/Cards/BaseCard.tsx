@@ -12,7 +12,7 @@ const StyledButton = styled.button<BaseCardProps>`
   justify-content: space-evenly;
   align-items: center;
   padding: 0;
-  background: none;
+  background: var(--color-white);
   border: 5px solid var(--color-text);
 
   &:focus-visible {

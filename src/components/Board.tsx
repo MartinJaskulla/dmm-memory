@@ -7,6 +7,7 @@ import styled from 'styled-components';
 import { useHistory } from '../hooks/useHistory/useHistory';
 import { useGame } from '../hooks/useGame/useGame';
 import { Card3D } from './Card3D';
+import FlipMove from 'react-flip-move';
 
 const StyledDiv = styled.div`
   display: grid;
@@ -33,57 +34,60 @@ export function Board() {
   return (
     <StyledDiv>
       <StyledMain>
-        {history.move.cardIds.map((cardId, index) => {
-          const card = history.move.cards[cardId];
-          const hasHighlight = history.move.highlighted.has(cardId) && !history.move.gameOver;
+        <FlipMove typeName={null}>
+          {history.move.cardIds.map((cardId, index) => {
+            const card = history.move.cards[cardId];
+            const hasHighlight = history.move.highlighted.has(cardId) && !history.move.gameOver;
 
-          let back;
-          let flipped = false;
+            let back;
+            let flipped = false;
 
-          if (card.type === 'matchable') {
-            const isMatch = history.move.matched.has(card.cardId);
-            back = isMatch ? (
-              <MatchedCard lang={card.language} highlight={hasHighlight}>
-                {card.text}
-              </MatchedCard>
-            ) : (
-              <RevealedCard lang={card.language} highlight={hasHighlight}>
-                {card.text}
-              </RevealedCard>
-            );
+            if (card.type === 'matchable') {
+              const isMatch = history.move.matched.has(card.cardId);
+              back = isMatch ? (
+                <MatchedCard lang={card.language} highlight={hasHighlight}>
+                  {card.text}
+                </MatchedCard>
+              ) : (
+                <RevealedCard lang={card.language} highlight={hasHighlight}>
+                  {card.text}
+                </RevealedCard>
+              );
 
-            const isCardRevealed = [history.move.choice1, history.move.choice2].includes(card.cardId);
-            const isHintCard = history.move.hinted.has(card.cardId);
-            if (isCardRevealed || isHintCard || isMatch || history.move.gameOver) {
-              flipped = true;
-            }
-          } else if (card.type === 'effect') {
-            back = (
-              <EffectCard key={card.cardId} highlight={hasHighlight}>
-                {card.text}
-              </EffectCard>
-            );
-            if (history.move.foundEffects.has(card.cardId) || history.move.gameOver) {
-              flipped = true;
-            }
-          }
-
-          return (
-            <Card3D
-              key={card.cardId}
-              flipped={flipped}
-              front={
-                <HiddenCard
-                  key={card.cardId}
-                  disabled={flipped}
-                  onClick={() => game.revealCard(index)}
-                  highlight={hasHighlight}
-                />
+              const isCardRevealed = [history.move.choice1, history.move.choice2].includes(card.cardId);
+              const isHintCard = history.move.hinted.has(card.cardId);
+              if (isCardRevealed || isHintCard || isMatch || history.move.gameOver) {
+                flipped = true;
               }
-              back={back}
-            />
-          );
-        })}
+            } else if (card.type === 'effect') {
+              back = (
+                <EffectCard key={card.cardId} highlight={hasHighlight}>
+                  {card.text}
+                </EffectCard>
+              );
+              if (history.move.foundEffects.has(card.cardId) || history.move.gameOver) {
+                flipped = true;
+              }
+            }
+
+            return (
+              <div key={card.cardId}>
+                <Card3D
+                  flipped={flipped}
+                  front={
+                    <HiddenCard
+                      key={card.cardId}
+                      disabled={flipped}
+                      onClick={() => game.revealCard(index)}
+                      highlight={hasHighlight}
+                    />
+                  }
+                  back={back}
+                />
+              </div>
+            );
+          })}
+        </FlipMove>
       </StyledMain>
     </StyledDiv>
   );
