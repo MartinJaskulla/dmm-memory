@@ -14,6 +14,7 @@ const StyledButton = styled.button<BaseCardProps>`
   padding: 0;
   background: var(--color-white);
   border: 5px solid var(--color-text);
+  box-shadow: 0 14px 18px rgba(0, 0, 0, 0.25);
 
   &:focus-visible {
     outline: 5px solid var(--color-focus-ring);

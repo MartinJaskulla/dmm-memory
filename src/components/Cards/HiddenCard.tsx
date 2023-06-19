@@ -6,7 +6,6 @@ import styled from 'styled-components';
 const StyledBaseCard = styled(BaseCard)`
   border-color: var(--color-flipped);
   background: var(--color-flipped);
-  box-shadow: 0 14px 18px rgba(0, 0, 0, 0.25);
 
   div {
     width: 50%;
