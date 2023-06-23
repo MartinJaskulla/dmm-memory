@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { deepFreeze } from '../../utils/deepFreeze';
 import { GameOver } from '../../config/gameOver';
 import { Language } from '../../api/fetchGoal';
-import { merge } from '../../utils/merge';
 
 export const NO_COUNTDOWN = Infinity;
 
@@ -81,7 +80,7 @@ export function useHistoryValue(initialMove = defaultMove): History {
   const move = moves[moveIndex];
 
   function addMove(nextMove: Partial<Move>) {
-    nextMove = merge(structuredClone(move), nextMove);
+    nextMove = { ...structuredClone(move), ...nextMove };
     setMoves(deepFreeze([...moves.slice(0, moveIndex + 1), nextMove]));
     setMoveIndex(moveIndex + 1);
   }
