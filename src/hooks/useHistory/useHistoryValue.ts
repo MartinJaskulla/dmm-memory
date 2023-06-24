@@ -80,8 +80,8 @@ export function useHistoryValue(initialMove = defaultMove): History {
   const move = moves[moveIndex];
 
   function addMove(nextMove: Partial<Move>) {
-    nextMove = { ...structuredClone(move), ...nextMove };
-    setMoves(deepFreeze([...moves.slice(0, moveIndex + 1), nextMove]));
+    const nextMoveFull: Move = { ...structuredClone(move), ...nextMove };
+    setMoves(deepFreeze([...moves.slice(0, moveIndex + 1), nextMoveFull]));
     setMoveIndex(moveIndex + 1);
   }
 
