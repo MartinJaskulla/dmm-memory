@@ -27,7 +27,7 @@ export interface GameCardEffect {
 export type GameCard = GameCardMatchable | GameCardEffect;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface Move<T = any> {
+export interface Move<DataValue = any> {
   cards: Record<CardId, GameCard>;
   cardIds: CardId[];
   choice1: CardId;
@@ -41,7 +41,7 @@ export interface Move<T = any> {
   msPlayed: number;
   msPerMove: number;
   effects: {
-    data: Record<CardId, T>;
+    data: Record<CardId, DataValue>;
     queue: [CardId, EffectId][];
   };
 }
