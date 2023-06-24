@@ -18,7 +18,12 @@
     "baseUrl": "./",
     "paths": {
       "src/*": ["./src/*"]
-    }
+    },
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUnusedParameters": true
   },
   "include": ["src"]
 }
