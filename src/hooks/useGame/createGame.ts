@@ -2,7 +2,7 @@ import { shuffle } from '../../utils/shuffle';
 import { CardId, Move } from '../useHistory/useHistoryValue';
 import { GETGoal } from '../../api/fetchGoal';
 import { v4 } from 'uuid';
-import { effectRegistry } from '../../effects/effectRegistry';
+import { effectList } from '../../effects/effectRegistry';
 import { pickRandom } from '../../utils/pickRandom';
 import { CONFIG } from '../../config/config';
 
@@ -12,7 +12,7 @@ export function createGame(goalItems: GETGoal['goal_items']): Pick<Move, 'cards'
 
   // Allow duplicate effects
   for (let i = 0; i < CONFIG.EFFECTS; i++) {
-    const effect = pickRandom(effectRegistry);
+    const effect = pickRandom(effectList);
     const cardId = v4();
     cards[cardId] = {
       type: 'effect',
