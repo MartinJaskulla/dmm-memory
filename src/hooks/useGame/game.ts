@@ -2,8 +2,8 @@ import { GameCard, Move, NO_COUNTDOWN } from '../useHistory/useHistoryValue';
 import { oneChoice, twoChoices, zeroChoices } from '../../utils/choices';
 import { GAME_OVER } from '../../config/gameOver';
 import { CONFIG } from '../../config/config';
-import { effectMiddleWare } from '../../effects/effectMiddleware';
-import { effectExplanation } from '../../effects/effectExplanation';
+import { applyEffects } from '../../effects/applyEffects';
+import { explainEffect } from '../../effects/explainEffect';
 
 export class Game {
   static revealCard(cardIndex: number, currentMove: Move, msPlayed: number): Move {
@@ -21,8 +21,8 @@ export class Game {
 
     Game.startCountdown(nextMove);
 
-    effectExplanation(nextMove);
-    effectMiddleWare(nextMove);
+    explainEffect(nextMove);
+    applyEffects(nextMove);
     Game.winIfAllPairsFound(nextMove);
     return nextMove;
   }

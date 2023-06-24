@@ -1,4 +1,4 @@
-import { Effect } from '../effectMiddleware';
+import { Effect } from '../applyEffects';
 import { Move } from '../../hooks/useHistory/useHistoryValue';
 import { shuffle } from '../../utils/shuffle';
 

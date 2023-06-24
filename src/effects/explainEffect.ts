@@ -2,7 +2,7 @@ import { Move } from '../hooks/useHistory/useHistoryValue';
 import { effectLookup } from './effectRegistry';
 
 const SEEN = 'seen';
-export function effectExplanation(nextMove: Move) {
+export function explainEffect(nextMove: Move) {
   const card = nextMove.cards[nextMove.latestCard];
   if (card.type === 'effect') {
     const seen = localStorage.getItem(card.effectId) === SEEN;

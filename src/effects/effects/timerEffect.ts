@@ -1,4 +1,4 @@
-import { Effect } from '../effectMiddleware';
+import { Effect } from '../applyEffects';
 import { Move, NO_COUNTDOWN } from '../../hooks/useHistory/useHistoryValue';
 
 const EFFECT = 'timer';

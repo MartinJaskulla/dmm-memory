@@ -1,4 +1,4 @@
-import { Effect } from '../effectMiddleware';
+import { Effect } from '../applyEffects';
 import { pickRandom } from '../../utils/pickRandom';
 import { GameCardMatchable, Move } from '../../hooks/useHistory/useHistoryValue';
 

@@ -1,4 +1,4 @@
-import { Effect } from '../effectMiddleware';
+import { Effect } from '../applyEffects';
 import { twoChoices } from '../../utils/choices';
 import { Move } from '../../hooks/useHistory/useHistoryValue';
 import { Game } from '../../hooks/useGame/game';

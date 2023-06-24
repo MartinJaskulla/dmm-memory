@@ -14,7 +14,7 @@ export interface Effect {
   };
   description: string;
 }
-export function effectMiddleWare(nextMove: Move) {
+export function applyEffects(nextMove: Move) {
   const card = nextMove.cards[nextMove.latestCard];
 
   // Call onQueue before onClick, because onClicks queue onQueues for the *next* move
