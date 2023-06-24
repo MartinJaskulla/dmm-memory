@@ -6,7 +6,15 @@ import { applyEffects } from '../../effects/applyEffects';
 import { explainEffect } from '../../effects/explainEffect';
 
 export class Game {
-  static nextMove(cardIndex: number, currentMove: Move, msPlayed: number): Move {
+  static nextMove({
+    cardIndex,
+    currentMove,
+    msPlayed,
+  }: {
+    cardIndex: number;
+    currentMove: Move;
+    msPlayed: number;
+  }): Move {
     const nextMove: Move = structuredClone(currentMove);
 
     const cardId = nextMove.cardIds[cardIndex];

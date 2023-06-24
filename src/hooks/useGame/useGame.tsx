@@ -49,7 +49,7 @@ const GameProvider = ({ children }: GameProps) => {
   }, [history.move]);
 
   function revealCard(cardIndex: number) {
-    history.addMove(Game.nextMove(cardIndex, history.move, clock.getMs()));
+    history.addMove(Game.nextMove({ cardIndex, currentMove: history.move, msPlayed: clock.getMs() }));
   }
 
   return (
