@@ -23,6 +23,8 @@ const GameProvider = ({ children }: GameProps) => {
   // React 18 calls useEffect twice in StrictMode, which means we call newGame() twice on mount. Some solutions to prevent making two api calls:
   // Jack Herrington: https://jherr2020.medium.com/react-18-useeffect-double-call-for-apis-emergency-fix-724b7ee6a646
   // Dan Abramov: https://github.com/facebook/react/issues/24502#issuecomment-1118867879
+  // Best option would be to not use useEffect for data fetching, but to bind this to an event handler:
+  //  David Khourshid: https://www.youtube.com/watch?v=HPoC-k7Rxwo
   useEffect(() => {
     newGame();
   }, []);
