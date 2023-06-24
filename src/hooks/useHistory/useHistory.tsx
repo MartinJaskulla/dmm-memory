@@ -1,5 +1,5 @@
 import React from 'react';
-import { useHistoryValue, History } from './useHistoryValue';
+import { useHistoryValue, History } from 'src/hooks/useHistory/useHistoryValue';
 
 const HistoryContext = React.createContext<History>({} as History);
 

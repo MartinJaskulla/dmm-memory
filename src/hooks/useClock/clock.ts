@@ -1,4 +1,4 @@
-import { interval } from '../../utils/interval';
+import { interval } from 'src/utils/interval';
 
 type ClockCallback = (ms: number) => void;
 

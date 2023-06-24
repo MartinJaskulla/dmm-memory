@@ -1,5 +1,5 @@
-import { Effect } from '../applyEffects';
-import { Move, NO_COUNTDOWN } from '../../hooks/useHistory/useHistoryValue';
+import { Effect } from 'src/effects/applyEffects';
+import { Move, NO_COUNTDOWN } from 'src/hooks/useHistory/useHistoryValue';
 
 const EFFECT = 'timer';
 const TIME_INCREASE = 15_000;

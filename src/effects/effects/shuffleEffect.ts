@@ -1,6 +1,6 @@
-import { Effect } from '../applyEffects';
-import { Move } from '../../hooks/useHistory/useHistoryValue';
-import { shuffle } from '../../utils/shuffle';
+import { Effect } from 'src/effects/applyEffects';
+import { Move } from 'src/hooks/useHistory/useHistoryValue';
+import { shuffle } from 'src/utils/shuffle';
 
 const EFFECT = 'shuffle';
 

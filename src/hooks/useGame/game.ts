@@ -1,9 +1,9 @@
-import { GameCard, Move, NO_COUNTDOWN } from '../useHistory/useHistoryValue';
-import { oneChoice, twoChoices, zeroChoices } from '../../utils/choices';
-import { GAME_OVER } from '../../config/gameOver';
-import { CONFIG } from '../../config/config';
-import { applyEffects } from '../../effects/applyEffects';
-import { explainEffect } from '../../effects/explainEffect';
+import { GameCard, Move, NO_COUNTDOWN } from 'src/hooks/useHistory/useHistoryValue';
+import { oneChoice, twoChoices, zeroChoices } from 'src/utils/choices';
+import { GAME_OVER } from 'src/config/gameOver';
+import { CONFIG } from 'src/config/config';
+import { applyEffects } from 'src/effects/applyEffects';
+import { explainEffect } from 'src/effects/explainEffect';
 
 export class Game {
   static nextMove({

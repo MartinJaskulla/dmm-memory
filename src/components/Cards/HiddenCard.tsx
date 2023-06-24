@@ -1,6 +1,6 @@
 import React from 'react';
-import { BaseCard, BaseCardProps } from './BaseCard';
-import owlImgSrc from '../../images/owl.svg';
+import { BaseCard, BaseCardProps } from 'src/components/Cards/BaseCard';
+import owlImgSrc from 'src/images/owl.svg';
 import styled from 'styled-components';
 
 const StyledBaseCard = styled(BaseCard)`

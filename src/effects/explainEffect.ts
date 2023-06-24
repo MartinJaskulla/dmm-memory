@@ -1,5 +1,5 @@
-import { Move } from '../hooks/useHistory/useHistoryValue';
-import { effectLookup } from './effectRegistry';
+import { Move } from 'src/hooks/useHistory/useHistoryValue';
+import { effectLookup } from 'src/effects/effectRegistry';
 
 const SEEN = 'seen';
 export function explainEffect(nextMove: Move) {

@@ -1,6 +1,6 @@
 import React, { ButtonHTMLAttributes } from 'react';
 import styled, { css } from 'styled-components';
-import { Language } from '../../api/fetchGoal';
+import { Language } from 'src/api/fetchGoal';
 
 const StyledButton = styled.button<BaseCardProps>`
   color: var(--color-text);

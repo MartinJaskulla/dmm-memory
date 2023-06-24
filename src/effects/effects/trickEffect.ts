@@ -1,6 +1,6 @@
-import { Effect } from '../applyEffects';
-import { pickRandom } from '../../utils/pickRandom';
-import { GameCardMatchable, Move } from '../../hooks/useHistory/useHistoryValue';
+import { Effect } from 'src/effects/applyEffects';
+import { pickRandom } from 'src/utils/pickRandom';
+import { GameCardMatchable, Move } from 'src/hooks/useHistory/useHistoryValue';
 
 const EFFECT = 'trick';
 

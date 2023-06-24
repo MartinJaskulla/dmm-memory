@@ -1,12 +1,12 @@
 import React from 'react';
-import { HiddenCard } from './Cards/HiddenCard';
-import { RevealedCard } from './Cards/RevealedCard';
-import { EffectCard } from './Cards/EffectCard';
-import { MatchedCard } from './Cards/MatchedCard';
+import { HiddenCard } from 'src/components/Cards/HiddenCard';
+import { RevealedCard } from 'src/components/Cards/RevealedCard';
+import { EffectCard } from 'src/components/Cards/EffectCard';
+import { MatchedCard } from 'src/components/Cards/MatchedCard';
 import styled from 'styled-components';
-import { useHistory } from '../hooks/useHistory/useHistory';
-import { useGame } from '../hooks/useGame/useGame';
-import { Card3D } from './Card3D';
+import { useHistory } from 'src/hooks/useHistory/useHistory';
+import { useGame } from 'src/hooks/useGame/useGame';
+import { Card3D } from 'src/components/Card3D';
 import FlipMove from 'react-flip-move';
 
 const StyledDiv = styled.div`

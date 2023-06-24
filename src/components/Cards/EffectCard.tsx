@@ -1,6 +1,6 @@
 import React from 'react';
-import { BaseCard, BaseCardProps } from './BaseCard';
-import rocketImgSrc from '../../images/rocket.svg';
+import { BaseCard, BaseCardProps } from 'src/components/Cards/BaseCard';
+import rocketImgSrc from 'src/images/rocket.svg';
 import styled from 'styled-components';
 
 const StyledBaseCard = styled(BaseCard)`

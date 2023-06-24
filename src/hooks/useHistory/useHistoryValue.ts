@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { deepFreeze } from '../../utils/deepFreeze';
-import { GameOver } from '../../config/gameOver';
-import { Language } from '../../api/fetchGoal';
+import { deepFreeze } from 'src/utils/deepFreeze';
+import { GameOver } from 'src/config/gameOver';
+import { Language } from 'src/api/fetchGoal';
 
 export const NO_COUNTDOWN = Infinity;
 

@@ -1,10 +1,10 @@
-import { shuffle } from '../../utils/shuffle';
-import { CardId, Move } from '../useHistory/useHistoryValue';
-import { GETGoal } from '../../api/fetchGoal';
+import { shuffle } from 'src/utils/shuffle';
+import { CardId, Move } from 'src/hooks/useHistory/useHistoryValue';
+import { GETGoal } from 'src/api/fetchGoal';
 import { v4 } from 'uuid';
-import { effectList } from '../../effects/effectRegistry';
-import { pickRandom } from '../../utils/pickRandom';
-import { CONFIG } from '../../config/config';
+import { effectList } from 'src/effects/effectRegistry';
+import { pickRandom } from 'src/utils/pickRandom';
+import { CONFIG } from 'src/config/config';
 
 export function createGame(goalItems: GETGoal['goal_items']): Pick<Move, 'cards' | 'cardIds' | 'hinted'> {
   const cards: Move['cards'] = {};

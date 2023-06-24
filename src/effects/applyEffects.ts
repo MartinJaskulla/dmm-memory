@@ -1,5 +1,5 @@
-import { CardId, EffectId, Move } from '../hooks/useHistory/useHistoryValue';
-import { effectLookup } from './effectRegistry';
+import { CardId, EffectId, Move } from 'src/hooks/useHistory/useHistoryValue';
+import { effectLookup } from 'src/effects/effectRegistry';
 
 export type Middleware = (nextMove: Move, cardIdOfEffect: CardId) => void;
 

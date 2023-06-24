@@ -1,4 +1,4 @@
-import { cachedFetch } from '../utils/cachedFetch';
+import { cachedFetch } from 'src/utils/cachedFetch';
 
 export interface Transliterations {
   Hira?: string;

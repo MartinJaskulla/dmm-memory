@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Clock } from './clock';
+import { Clock } from 'src/hooks/useClock/clock';
 
 const ClockContext = React.createContext<Clock | null>(null);
 

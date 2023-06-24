@@ -1,5 +1,5 @@
 import React from 'react';
-import { BaseCard, BaseCardProps } from './BaseCard';
+import { BaseCard, BaseCardProps } from 'src/components/Cards/BaseCard';
 import styled from 'styled-components';
 
 const StyledBaseCard = styled(BaseCard)`

@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
-import { fetchGoal } from '../../api/fetchGoal';
-import { createGame } from './createGame';
-import { useClock } from '../useClock/useClock';
-import { MESSAGES } from '../../config/messages';
-import { useHistory } from '../useHistory/useHistory';
-import { Game } from './game';
+import { fetchGoal } from 'src/api/fetchGoal';
+import { createGame } from 'src/hooks/useGame/createGame';
+import { useClock } from 'src/hooks/useClock/useClock';
+import { MESSAGES } from 'src/config/messages';
+import { useHistory } from 'src/hooks/useHistory/useHistory';
+import { Game } from 'src/hooks/useGame/game';
 
 export interface GameValue {
   revealCard: (index: number) => void;

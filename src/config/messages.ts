@@ -1,4 +1,4 @@
-import { GameOverId } from './gameOver';
+import { GameOverId } from 'src/config/gameOver';
 
 // Don't store message in useHistory as gameOver.id, because messages might change
 // and if a user loads a game from 3 years ago they get an old message. Also messages

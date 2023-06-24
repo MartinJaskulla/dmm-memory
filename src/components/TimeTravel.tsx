@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { useHistory } from '../hooks/useHistory/useHistory';
+import { useHistory } from 'src/hooks/useHistory/useHistory';
 
 const StyledInput = styled.input`
   margin-right: 1rem;

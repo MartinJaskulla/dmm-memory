@@ -1,9 +1,9 @@
 import React from 'react';
-import { Header } from './components/Header';
-import { Board } from './components/Board';
-import { GameProvider } from './hooks/useGame/useGame';
-import { ClockProvider } from './hooks/useClock/useClock';
-import { HistoryProvider } from './hooks/useHistory/useHistory';
+import { Header } from 'src/components/Header';
+import { Board } from 'src/components/Board';
+import { GameProvider } from 'src/hooks/useGame/useGame';
+import { ClockProvider } from 'src/hooks/useClock/useClock';
+import { HistoryProvider } from 'src/hooks/useHistory/useHistory';
 
 function App() {
   return (

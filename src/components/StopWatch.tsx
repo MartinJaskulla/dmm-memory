@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { formatMs } from '../utils/formatMs';
-import { useClock } from '../hooks/useClock/useClock';
-import { useHistory } from '../hooks/useHistory/useHistory';
+import { formatMs } from 'src/utils/formatMs';
+import { useClock } from 'src/hooks/useClock/useClock';
+import { useHistory } from 'src/hooks/useHistory/useHistory';
 
 export function StopWatch() {
   const history = useHistory();

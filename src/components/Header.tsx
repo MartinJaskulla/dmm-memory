@@ -1,9 +1,9 @@
 import React from 'react';
-import owlImgSrc from '../images/owl.svg';
+import owlImgSrc from 'src/images/owl.svg';
 import styled from 'styled-components';
-import { Countdown } from './Countdown';
-import { StopWatch } from './StopWatch';
-import { TimeTravel } from './TimeTravel';
+import { Countdown } from 'src/components/Countdown';
+import { StopWatch } from 'src/components/StopWatch';
+import { TimeTravel } from 'src/components/TimeTravel';
 
 const StyledHeader = styled.header`
   height: var(--header-height);

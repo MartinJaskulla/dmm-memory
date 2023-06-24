@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { formatMs } from '../utils/formatMs';
-import { CONFIG } from '../config/config';
-import { GAME_OVER } from '../config/gameOver';
-import { History, NO_COUNTDOWN } from '../hooks/useHistory/useHistoryValue';
-import { useHistory } from '../hooks/useHistory/useHistory';
-import { useClock } from '../hooks/useClock/useClock';
+import { formatMs } from 'src/utils/formatMs';
+import { CONFIG } from 'src/config/config';
+import { GAME_OVER } from 'src/config/gameOver';
+import { History, NO_COUNTDOWN } from 'src/hooks/useHistory/useHistoryValue';
+import { useHistory } from 'src/hooks/useHistory/useHistory';
+import { useClock } from 'src/hooks/useClock/useClock';
 
 export function Countdown() {
   const history = useHistory();
