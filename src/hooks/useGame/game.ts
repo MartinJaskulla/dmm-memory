@@ -1,5 +1,5 @@
 import { GameCard, Move, NO_COUNTDOWN } from 'src/hooks/useHistory/useHistoryValue';
-import { oneChoice, twoChoices, zeroChoices } from 'src/utils/choices';
+import { hasOneCardSelected, hasTwoCardsSelected, hasNoCardSelected } from 'src/utils/choices';
 import { GAME_OVER } from 'src/config/gameOver';
 import { CONFIG } from 'src/config/config';
 import { applyEffects } from 'src/effects/applyEffects';
@@ -36,16 +36,16 @@ export class Game {
   }
 
   static flipCards(nextMove: Move, card: GameCard): void {
-    if (twoChoices(nextMove)) {
+    if (hasTwoCardsSelected(nextMove)) {
       nextMove.choice1 = '';
       nextMove.choice2 = '';
     }
     switch (card.type) {
       case 'matchable': {
         // Flip one card
-        if (zeroChoices(nextMove)) {
+        if (hasNoCardSelected(nextMove)) {
           nextMove.choice1 = card.cardId;
-        } else if (oneChoice(nextMove)) {
+        } else if (hasOneCardSelected(nextMove)) {
           nextMove.choice2 = card.cardId;
         }
         break;
@@ -71,7 +71,7 @@ export class Game {
   }
 
   static startCountdown(nextMove: Move): void {
-    if (nextMove.msPerMove === NO_COUNTDOWN && oneChoice(nextMove)) {
+    if (nextMove.msPerMove === NO_COUNTDOWN && hasOneCardSelected(nextMove)) {
       nextMove.msPerMove = CONFIG.TIME_PER_MOVE;
     }
   }

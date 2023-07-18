@@ -1,5 +1,5 @@
 import { Effect } from 'src/effects/applyEffects';
-import { twoChoices } from 'src/utils/choices';
+import { hasTwoCardsSelected } from 'src/utils/choices';
 import { Move } from 'src/hooks/useHistory/useHistoryValue';
 import { Game } from 'src/hooks/useGame/game';
 
@@ -32,7 +32,7 @@ export const retryEffect: Effect = {
       const beforeRetryMove = nextMove.effects.data[cardIdOfEffect].choice1 === '';
       if (beforeRetryMove) {
         const isMatch = nextMove.matched.has(nextMove.latestCard);
-        if (!isMatch && twoChoices(nextMove)) {
+        if (!isMatch && hasTwoCardsSelected(nextMove)) {
           // C1 -> C2 (User has just chosen wrong 2nd card)
           nextMove.highlighted.add(nextMove.choice2);
           nextMove.highlighted.add(cardIdOfEffect);
